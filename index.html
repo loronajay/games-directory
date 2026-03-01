@@ -121,6 +121,17 @@ body {
   to { text-shadow:-2px 0 red,2px 0 cyan,0 0 35px #ff00ff; }
 }
 
+/* ===== VISITOR COUNTER ===== */
+.visitor-box {
+  margin-top:20px;
+  font-size:0.8rem;
+  color:#00ffff;
+  text-shadow:
+    0 0 6px #00ffff,
+    0 0 12px #00ffff,
+    0 0 20px #ff00ff;
+}
+
 /* ===== GRID ===== */
 .game-grid {
   margin:80px auto;
@@ -132,17 +143,7 @@ body {
   position:relative;
 }
 
-.game-grid::before {
-  content:"";
-  position:absolute;
-  inset:-40px;
-  background:radial-gradient(circle at center,
-    rgba(255,0,255,0.15),
-    transparent 70%);
-  z-index:-1;
-}
-
-/* ===== INTERACTIVE HOVER ===== */
+/* ===== GAME CARDS ===== */
 .game-card {
   position:relative;
   background:rgba(0,0,0,0.85);
@@ -158,8 +159,7 @@ body {
   box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
 }
 
-.game-card video,
-.game-card img {
+.game-card video {
   width:100%;
   height:180px;
   object-fit:cover;
@@ -197,7 +197,6 @@ body {
 <div class="scanlines"></div>
 <div class="crt-overlay"></div>
 
-<!-- AUDIO -->
 <audio id="bgMusic" loop preload="auto">
   <source src="music/background.mp3" type="audio/mpeg">
 </audio>
@@ -214,11 +213,13 @@ body {
 
   <div class="title-box">
     <h1>Jay's Retro Arcade</h1>
+    <div class="visitor-box">
+      VISITORS: <span id="visitorCount">Loading...</span>
+    </div>
   </div>
 
   <div class="game-grid">
 
-    <!-- Example Game Card w/ Video Preview -->
     <div class="game-card" onclick="openGame('apple-catcher/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
       <video muted loop>
         <source src="previews/apple-catcher.mp4" type="video/mp4">
@@ -262,10 +263,21 @@ body {
     </div>
 
   </div>
-
 </div>
 
 <script>
+
+/* VISITOR COUNTER */
+fetch("https://api.countapi.xyz/hit/jays-retro-arcade/visits")
+.then(res=>res.json())
+.then(data=>{
+  document.getElementById("visitorCount").textContent=data.value;
+})
+.catch(()=>{
+  document.getElementById("visitorCount").textContent="Error";
+});
+
+/* REST OF YOUR ORIGINAL JS */
 const bootText = `
 JAY SYSTEMS BIOS v2.3
 Initializing Arcade Hardware...
@@ -327,6 +339,7 @@ function stopPreview(card){
     video.currentTime=0;
   }
 }
+
 </script>
 
 </body>

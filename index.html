@@ -140,7 +140,6 @@ body {
   grid-template-columns:repeat(3,1fr);
   gap:40px;
   padding:20px;
-  position:relative;
 }
 
 /* ===== GAME CARDS ===== */
@@ -182,7 +181,6 @@ body {
   80%{opacity:.3;}
   100%{opacity:0;}
 }
-
 </style>
 </head>
 <body>
@@ -214,71 +212,48 @@ body {
   <div class="title-box">
     <h1>Jay's Retro Arcade</h1>
     <div class="visitor-box">
-      VISITORS: <span id="visitorCount">Loading...</span>
+      VISITORS: <span id="visitorCount">000000</span>
     </div>
   </div>
 
   <div class="game-grid">
 
     <div class="game-card" onclick="openGame('apple-catcher/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop>
-        <source src="previews/apple-catcher.mp4" type="video/mp4">
-      </video>
+      <video muted loop><source src="previews/apple-catcher.mp4" type="video/mp4"></video>
       <div class="game-title">Apple Catcher</div>
     </div>
 
     <div class="game-card" onclick="openGame('art-of-war/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop>
-        <source src="previews/art-of-war.mp4" type="video/mp4">
-      </video>
+      <video muted loop><source src="previews/art-of-war.mp4" type="video/mp4"></video>
       <div class="game-title">Art Of War</div>
     </div>
 
     <div class="game-card" onclick="openGame('bird-duty/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop>
-        <source src="previews/bird-duty.mp4" type="video/mp4">
-      </video>
+      <video muted loop><source src="previews/bird-duty.mp4" type="video/mp4"></video>
       <div class="game-title">Bird Duty</div>
     </div>
 
     <div class="game-card" onclick="openGame('dodgeballs/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop>
-        <source src="previews/dodgeballs.mp4" type="video/mp4">
-      </video>
+      <video muted loop><source src="previews/dodgeballs.mp4" type="video/mp4"></video>
       <div class="game-title">Dodgeballs!</div>
     </div>
 
     <div class="game-card" onclick="openGame('sumorai/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop>
-        <source src="previews/sumorai.mp4" type="video/mp4">
-      </video>
+      <video muted loop><source src="previews/sumorai.mp4" type="video/mp4"></video>
       <div class="game-title">Sumorai</div>
     </div>
 
     <div class="game-card" onclick="openGame('x-pong/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop>
-        <source src="previews/x-pong.mp4" type="video/mp4">
-      </video>
+      <video muted loop><source src="previews/x-pong.mp4" type="video/mp4"></video>
       <div class="game-title">X-Pong</div>
     </div>
 
   </div>
 </div>
 
+<!-- ORIGINAL JS RESTORED -->
 <script>
 
-/* VISITOR COUNTER */
-
-fetch("https://api.countapi.xyz/hit/games-directory/visits")
-.then(res => res.json())
-.then(data => {
-  document.getElementById("visitorCount").textContent = data.value;
-})
-.catch(() => {
-  document.getElementById("visitorCount").textContent = "Error";
-});
-
-/* REST OF YOUR ORIGINAL JS */
 const bootText = `
 JAY SYSTEMS BIOS v2.3
 Initializing Arcade Hardware...
@@ -328,7 +303,6 @@ function playHover(card){
   s.currentTime=0;
   s.volume=0.4;
   s.play();
-
   const video=card.querySelector("video");
   if(video) video.play();
 }
@@ -341,6 +315,26 @@ function stopPreview(card){
   }
 }
 
+</script>
+
+<!-- GOATCOUNTER -->
+<script data-goatcounter="https://loronajay.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+
+<script>
+function formatArcadeNumber(num){
+  return num.toString().padStart(6,'0');
+}
+
+fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
+.then(res=>res.json())
+.then(data=>{
+  document.getElementById("visitorCount").textContent=
+    formatArcadeNumber(data.count || 0);
+})
+.catch(()=>{
+  document.getElementById("visitorCount").textContent="000000";
+});
 </script>
 
 </body>

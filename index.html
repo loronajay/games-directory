@@ -268,13 +268,14 @@ body {
 <script>
 
 /* VISITOR COUNTER */
-fetch("https://api.countapi.xyz/hit/jays-retro-arcade/visits")
-.then(res=>res.json())
-.then(data=>{
-  document.getElementById("visitorCount").textContent=data.value;
+
+fetch("https://api.countapi.xyz/hit/games-directory/visits")
+.then(res => res.json())
+.then(data => {
+  document.getElementById("visitorCount").textContent = data.value;
 })
-.catch(()=>{
-  document.getElementById("visitorCount").textContent="Error";
+.catch(() => {
+  document.getElementById("visitorCount").textContent = "Error";
 });
 
 /* REST OF YOUR ORIGINAL JS */

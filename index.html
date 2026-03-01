@@ -1,110 +1,333 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Jay's TurboWarp Arcade</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jay's Retro Arcade</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      color: white;
-      text-align: center;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
-    h1 {
-      padding: 30px 0;
-      font-size: 2.5rem;
-    }
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
 
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 25px;
-      padding: 40px;
-      max-width: 1200px;
-      margin: auto;
-    }
+body {
+  font-family: 'Press Start 2P', cursive;
+  background: url('images/background.png') no-repeat center center fixed;
+  background-size: 100%;
+  color: white;
+  text-align: center;
+  overflow-x: hidden;
+  animation: crtFlicker 6s infinite, bgZoom 20s infinite alternate ease-in-out;
+}
 
-    .game-card {
-      background: #1f2a40;
-      border-radius: 15px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+@keyframes crtFlicker {
+  0%,100% { opacity:1; }
+  50% { opacity:0.985; }
+}
 
-    .game-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
+@keyframes bgZoom {
+  from { background-size:100%; }
+  to { background-size:105%; }
+}
 
-    .game-card img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-    }
+/* ===== BOOT ===== */
+#loadingScreen {
+  position:fixed;
+  inset:0;
+  background:black;
+  color:#00ff66;
+  font-family:monospace;
+  padding:40px;
+  font-size:14px;
+  white-space:pre-line;
+  z-index:3000;
+}
 
-    .game-card h2 {
-      padding: 15px;
-      margin: 0;
-      font-size: 1.2rem;
-    }
+/* ===== START ===== */
+#startScreen {
+  position:fixed;
+  inset:0;
+  background:black;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  cursor:pointer;
+  z-index:2500;
+}
 
-    footer {
-      padding: 20px;
-      opacity: 0.6;
-    }
-  </style>
+.arcade-title {
+  font-size:1.8rem;
+  color:#ff00ff;
+  text-shadow:0 0 25px #ff00ff;
+}
+
+.press-start {
+  margin-top:60px;
+  color:#00ffff;
+  animation:blink 1s infinite;
+  text-shadow:0 0 20px #00ffff;
+}
+
+@keyframes blink {
+  50% { opacity:0; }
+}
+
+/* ===== CRT ===== */
+.scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1000;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.25) 0px,
+    rgba(0,0,0,0.25) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.crt-overlay {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999;
+  background:radial-gradient(circle at center,
+    rgba(0,0,0,0) 60%,
+    rgba(0,0,0,0.45) 100%);
+}
+
+/* ===== MAIN ===== */
+#mainContent { display:none; }
+
+.title-box {
+  margin-top:80px;
+  padding:30px;
+  background:rgba(0,0,0,0.75);
+  display:inline-block;
+  border:3px solid #00ffff;
+  box-shadow:0 0 40px #00ffff;
+}
+
+.title-box h1 {
+  color:#ff00ff;
+  animation:neonPulse 3s infinite alternate;
+  text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
+}
+
+@keyframes neonPulse {
+  from { text-shadow:-2px 0 red,2px 0 cyan,0 0 15px #ff00ff; }
+  to { text-shadow:-2px 0 red,2px 0 cyan,0 0 35px #ff00ff; }
+}
+
+/* ===== GRID ===== */
+.game-grid {
+  margin:80px auto;
+  max-width:1100px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:40px;
+  padding:20px;
+  position:relative;
+}
+
+.game-grid::before {
+  content:"";
+  position:absolute;
+  inset:-40px;
+  background:radial-gradient(circle at center,
+    rgba(255,0,255,0.15),
+    transparent 70%);
+  z-index:-1;
+}
+
+/* ===== INTERACTIVE HOVER ===== */
+.game-card {
+  position:relative;
+  background:rgba(0,0,0,0.85);
+  border:3px solid #ff00ff;
+  padding:15px;
+  cursor:pointer;
+  transition:transform .25s ease, box-shadow .25s ease;
+  overflow:hidden;
+}
+
+.game-card:hover {
+  transform:perspective(800px) rotateX(6deg) scale(1.08);
+  box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
+}
+
+.game-card video,
+.game-card img {
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border:2px solid #00ffff;
+}
+
+.game-title {
+  margin-top:15px;
+  font-size:.8rem;
+  color:#00ffff;
+  text-shadow:0 0 12px #00ffff;
+}
+
+.fade-out {
+  animation:powerDown .4s forwards;
+}
+
+@keyframes powerDown {
+  0%{opacity:1;}
+  80%{opacity:.3;}
+  100%{opacity:0;}
+}
+
+</style>
 </head>
-
 <body>
 
-  <h1>🎮 Jay's TurboWarp Arcade</h1>
+<div id="loadingScreen"></div>
+
+<div id="startScreen">
+  <div class="arcade-title">JAY'S RETRO ARCADE</div>
+  <div class="press-start">PRESS START</div>
+</div>
+
+<div class="scanlines"></div>
+<div class="crt-overlay"></div>
+
+<!-- AUDIO -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="music/background.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="hoverSound" preload="auto">
+  <source src="music/hovered.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="ambientNoise" loop preload="auto">
+  <source src="music/arcade-ambient.mp3" type="audio/mpeg">
+</audio>
+
+<div id="mainContent">
+
+  <div class="title-box">
+    <h1>Jay's Retro Arcade</h1>
+  </div>
 
   <div class="game-grid">
 
-    <div class="game-card" onclick="openGame('apple-catcher/index.html')">
-      <img src="thumbnails/apple-catcher.png" alt="Apple Catcher">
-      <h2>Apple Catcher</h2>
+    <!-- Example Game Card w/ Video Preview -->
+    <div class="game-card" onclick="openGame('apple-catcher/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
+      <video muted loop>
+        <source src="previews/apple-catcher.mp4" type="video/mp4">
+      </video>
+      <div class="game-title">Apple Catcher</div>
     </div>
 
-    <div class="game-card" onclick="openGame('art-of-war/index.html')">
-      <img src="thumbnails/art-of-war.png" alt="Art of War">
-      <h2>Art of War</h2>
+    <div class="game-card" onclick="openGame('art-of-war/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
+      <video muted loop>
+        <source src="previews/art-of-war.mp4" type="video/mp4">
+      </video>
+      <div class="game-title">Art Of War</div>
     </div>
 
-    <div class="game-card" onclick="openGame('bird-duty/index.html')">
-      <img src="thumbnails/bird-duty.png" alt="Bird Duty">
-      <h2>Bird Duty</h2>
+    <div class="game-card" onclick="openGame('bird-duty/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
+      <video muted loop>
+        <source src="previews/bird-duty.mp4" type="video/mp4">
+      </video>
+      <div class="game-title">Bird Duty</div>
     </div>
 
-    <div class="game-card" onclick="openGame('dodgeballs/index.html')">
-      <img src="thumbnails/dodgeballs.png" alt="Dodgeballs!">
-      <h2>Dodgeballs!</h2>
+    <div class="game-card" onclick="openGame('dodgeballs/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
+      <video muted loop>
+        <source src="previews/dodgeballs.mp4" type="video/mp4">
+      </video>
+      <div class="game-title">Dodgeballs!</div>
     </div>
 
-    <div class="game-card" onclick="openGame('sumorai/index.html')">
-      <img src="thumbnails/sumorai.png" alt="Don't Get Hit!">
-      <h2>Don't Get Hit!</h2>
+    <div class="game-card" onclick="openGame('sumorai/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
+      <video muted loop>
+        <source src="previews/sumorai.mp4" type="video/mp4">
+      </video>
+      <div class="game-title">Sumorai</div>
     </div>
 
-    <div class="game-card" onclick="openGame('x-pong/index.html')">
-      <img src="thumbnails/x-pong.png" alt="X-Pong">
-      <h2>X-Pong</h2>
+    <div class="game-card" onclick="openGame('x-pong/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
+      <video muted loop>
+        <source src="previews/x-pong.mp4" type="video/mp4">
+      </video>
+      <div class="game-title">X-Pong</div>
     </div>
 
   </div>
 
-  <footer>
-    Built with TurboWarp 🚀
-  </footer>
+</div>
 
-  <script>
-    function openGame(url) {
-      window.location.href = url;
+<script>
+const bootText = `
+JAY SYSTEMS BIOS v2.3
+Initializing Arcade Hardware...
+Loading Game Engine...
+System Ready.
+`;
+
+window.addEventListener("load", ()=>{
+  const loader = document.getElementById("loadingScreen");
+  let i=0;
+  const typing=setInterval(()=>{
+    loader.textContent+=bootText[i];
+    i++;
+    if(i>=bootText.length){
+      clearInterval(typing);
+      setTimeout(()=>{
+        loader.style.display="none";
+        document.getElementById("startScreen").style.display="flex";
+      },600);
     }
-  </script>
+  },18);
+});
+
+document.getElementById("startScreen").addEventListener("click", startArcade);
+
+function startArcade(){
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("mainContent").style.display="block";
+
+  const music=document.getElementById("bgMusic");
+  const ambient=document.getElementById("ambientNoise");
+
+  music.volume=0.6;
+  ambient.volume=0.25;
+
+  music.play();
+  ambient.play();
+}
+
+function openGame(url){
+  document.body.classList.add("fade-out");
+  setTimeout(()=>{window.location.href=url;},400);
+}
+
+function playHover(card){
+  const s=document.getElementById("hoverSound");
+  s.currentTime=0;
+  s.volume=0.4;
+  s.play();
+
+  const video=card.querySelector("video");
+  if(video) video.play();
+}
+
+function stopPreview(card){
+  const video=card.querySelector("video");
+  if(video){
+    video.pause();
+    video.currentTime=0;
+  }
+}
+</script>
 
 </body>
 </html>

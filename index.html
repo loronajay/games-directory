@@ -1,59 +1,245 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jay's Retro Arcade</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
 body{
   font-family:'Press Start 2P',cursive;
   background:black;
-  color:#00ffff;
-  text-align:center;
+  color:white;
+  overflow:hidden;
+}
+
+/* CRT FX */
+.scanlines{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1000;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,.25) 0px,
+    rgba(0,0,0,.25) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.crt-overlay{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999;
+  background:radial-gradient(circle at center,
+    rgba(0,0,0,0) 55%,
+    rgba(0,0,0,.6) 100%);
+}
+
+/* CRT collapse animation */
+.crt-collapse{
+  animation:crtCollapse .6s forwards;
+  transform-origin:center;
+}
+
+@keyframes crtCollapse{
+  0%{transform:scaleY(1);opacity:1;}
+  60%{transform:scaleY(.05);opacity:.9;}
+  100%{transform:scaleY(0);opacity:0;}
+}
+
+/* ===== CRT FLASH LINE ===== */
+#crtFlash{
+  position:fixed;
+  left:0;
+  width:100%;
+  height:4px;
+  background:white;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:0;
+  z-index:10000;
+  pointer-events:none;
+}
+
+.flash-active{
+  animation:flashLine .15s ease-out forwards;
+}
+
+@keyframes flashLine{
+  0%{opacity:1;height:6px;}
+  100%{opacity:0;height:2px;}
+}
+
+/* Layout */
+.container{
+  height:100vh;
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
-  height:100vh;
-  flex-direction:column;
+  text-align:center;
 }
 
 h1{
   color:#ff00ff;
   text-shadow:0 0 25px #ff00ff;
   margin-bottom:60px;
+  font-size:1.5rem;
 }
 
-.mode-btn{
-  display:block;
-  margin:20px;
-  padding:20px 40px;
-  font-size:14px;
-  background:black;
+.mode-wrapper{
+  display:flex;
+  gap:60px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.mode-card{
+  width:360px;
+  background:rgba(0,0,0,.85);
   border:3px solid #00ffff;
-  color:#00ffff;
+  box-shadow:0 0 30px #00ffff;
   cursor:pointer;
-  transition:.2s;
+  transition:.3s;
+  text-decoration:none;
+  color:inherit;
+  overflow:hidden;
 }
 
-.mode-btn:hover{
-  background:#00ffff;
-  color:black;
+.mode-card:hover{
+  transform:perspective(1000px) rotateX(6deg) scale(1.05);
+  box-shadow:0 0 40px #ff00ff,0 0 30px #00ffff inset;
+}
+
+.preview-video{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+  border-bottom:3px solid #00ffff;
+}
+
+.mode-title{
+  padding:20px;
+  font-size:.8rem;
+  color:#00ffff;
+  text-shadow:0 0 15px #00ffff;
+}
+
+.mode-desc{
+  padding:0 20px 20px;
+  font-size:.6rem;
+  opacity:.8;
 }
 </style>
 </head>
 
 <body>
 
-<h1>SELECT MODE</h1>
+<div class="scanlines"></div>
+<div class="crt-overlay"></div>
+<div id="crtFlash"></div>
 
-<button class="mode-btn" onclick="location.href='grid.html'">
-  QUICK SELECT
-</button>
+<!-- Sounds -->
+<audio id="hoverSound" preload="auto">
+  <source src="music/hovered.mp3" type="audio/mpeg">
+</audio>
 
-<button class="mode-btn" onclick="location.href='mini-arcade/index.html'">
-  ENTER ARCADE
-</button>
+<audio id="shutdownSound" preload="auto">
+  <source src="music/crt-shutdown.mp3" type="audio/mpeg">
+</audio>
+
+<div class="container">
+  <h1>SELECT YOUR MODE</h1>
+
+  <div class="mode-wrapper">
+
+    <!-- QUICK SELECT -->
+    <a href="grid.html" class="mode-card mode-link">
+      <video class="preview-video" autoplay muted loop playsinline>
+        <source src="previews/grid-preview.mp4" type="video/mp4">
+      </video>
+      <div class="mode-title">QUICK SELECT</div>
+      <div class="mode-desc">
+        Jump straight into any game instantly.
+      </div>
+    </a>
+
+    <!-- ARCADE MODE -->
+    <a href="mini-arcade/index.html" class="mode-card mode-link">
+      <video class="preview-video" autoplay muted loop playsinline>
+        <source src="previews/arcade-preview.mp4" type="video/mp4">
+      </video>
+      <div class="mode-title">ENTER ARCADE</div>
+      <div class="mode-desc">
+        Walk the lobby. Choose a cabinet.
+        Future social hub.
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<script>
+const hoverSound = document.getElementById("hoverSound");
+const shutdownSound = document.getElementById("shutdownSound");
+
+let audioUnlocked = false;
+
+/* Unlock audio on first real user interaction */
+function unlockAudio(){
+  if(audioUnlocked) return;
+
+  hoverSound.volume = 0;
+  hoverSound.play().then(()=>{
+    hoverSound.pause();
+    hoverSound.currentTime = 0;
+    hoverSound.volume = 1;
+    audioUnlocked = true;
+  }).catch(()=>{});
+}
+
+["click","keydown","touchstart"].forEach(evt=>{
+  document.addEventListener(evt, unlockAudio, { once:true });
+});
+
+/* Hover Sound */
+document.querySelectorAll(".mode-card").forEach(card=>{
+  card.addEventListener("mouseenter",()=>{
+    if(!audioUnlocked) return;
+    hoverSound.currentTime = 0;
+    hoverSound.play().catch(()=>{});
+  });
+});
+
+/* Click Transition */
+document.querySelectorAll(".mode-link").forEach(link=>{
+  link.addEventListener("click",e=>{
+    e.preventDefault();
+
+    // Pause preview videos
+    document.querySelectorAll(".preview-video").forEach(v=>v.pause());
+
+    // Play CRT shutdown sound
+    if(audioUnlocked){
+      shutdownSound.currentTime = 0;
+      shutdownSound.play().catch(()=>{});
+    }
+
+    document.body.classList.add("crt-collapse");
+
+    setTimeout(()=>{
+      window.location.href = link.href;
+    },650); // Adjust if you want longer shutdown feel
+  });
+});
+</script>
 
 </body>
 </html>

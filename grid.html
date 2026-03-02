@@ -32,15 +32,47 @@ body{
 }
 
 /* ===== CRT COLLAPSE ===== */
-.crt-collapse{
-  animation:crtCollapse .45s forwards;
-  transform-origin:center;
+.crt-collapse {
+  animation: crtCollapse 0.6s forwards;
 }
 
-@keyframes crtCollapse{
-  0%{transform:scaleY(1);opacity:1;}
-  60%{transform:scaleY(.08);opacity:.9;}
-  100%{transform:scaleY(0);opacity:0;}
+@keyframes crtCollapse {
+  0% {
+    transform: scaleY(1);
+    filter: brightness(1);
+  }
+  60% {
+    transform: scaleY(0.02);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scaleY(0);
+    filter: brightness(0);
+    background: black;
+  }
+}
+
+/* ===== CRT FLASH LINE ===== */
+#crtFlash{
+  position:fixed;
+  left:0;
+  width:100%;
+  height:4px;
+  background:white;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:0;
+  z-index:10000;
+  pointer-events:none;
+}
+
+.flash-active{
+  animation:flashLine .15s ease-out forwards;
+}
+
+@keyframes flashLine{
+  0%{opacity:1;height:6px;}
+  100%{opacity:0;height:2px;}
 }
 
 @keyframes crtFlicker{
@@ -198,6 +230,7 @@ body{
 <body>
 
 <div id="arcadeOverlay"></div>
+<div id="crtFlash"></div>
 <div id="loadingScreen"></div>
 
 <div id="startScreen">
@@ -217,7 +250,7 @@ body{
 </audio>
 
 <audio id="shutdownSound" preload="auto">
-  <source src="music/powerdown.mp3" type="audio/mpeg">
+  <source src="music/crt-shutdown.mp3" type="audio/mpeg">
 </audio>
 
 <div id="mainContent">
@@ -354,13 +387,24 @@ document.querySelectorAll(".arcade-link").forEach(link=>{
     if(vid){vid.pause();vid.currentTime=0;}
   });
 
-  link.addEventListener("click",e=>{
-    e.preventDefault();
-    document.body.classList.add("crt-collapse");
-    shutdownSound.play().catch(()=>{});
-    setTimeout(()=>{overlay.style.opacity="1";},250);
-    setTimeout(()=>{window.location.href=link.href;},450);
-  });
+  link.addEventListener("click", e => {
+  e.preventDefault();
+
+  shutdownSound.currentTime = 0;
+  shutdownSound.play().catch(() => {});
+
+  // Start collapse
+  document.body.classList.add("crt-collapse");
+
+  // Fade overlay to black immediately
+  overlay.style.transition = "opacity 0.3s ease";
+  overlay.style.opacity = "1";
+
+  // Redirect after animation completes
+  setTimeout(() => {
+    window.location.href = link.href;
+  }, 650);
+});
 });
 
 /* Counters */

@@ -1,346 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jay's Retro Arcade</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-
-body {
-  font-family: 'Press Start 2P', cursive;
-  background: url('images/background.png') no-repeat center center fixed;
-  background-size: 100%;
-  color: white;
-  text-align: center;
-  overflow-x: hidden;
-  animation: crtFlicker 6s infinite, bgZoom 20s infinite alternate ease-in-out;
-  transition: transform .35s ease, opacity .35s ease;
-}
-
-@keyframes crtFlicker {
-  0%,100% { opacity:1; }
-  50% { opacity:0.985; }
-}
-
-@keyframes bgZoom {
-  from { background-size:100%; }
-  to { background-size:105%; }
-}
-
-/* ===== BOOT ===== */
-#loadingScreen {
-  position:fixed;
-  inset:0;
+body{
+  font-family:'Press Start 2P',cursive;
   background:black;
-  color:#00ff66;
-  font-family:monospace;
-  padding:40px;
-  font-size:14px;
-  white-space:pre-line;
-  z-index:3000;
-}
-
-/* ===== START ===== */
-#startScreen {
-  position:fixed;
-  inset:0;
-  background:black;
-  display:none;
-  align-items:center;
+  color:#00ffff;
+  text-align:center;
+  display:flex;
   justify-content:center;
+  align-items:center;
+  height:100vh;
   flex-direction:column;
-  cursor:pointer;
-  z-index:2500;
 }
 
-.arcade-title {
-  font-size:1.8rem;
+h1{
   color:#ff00ff;
   text-shadow:0 0 25px #ff00ff;
+  margin-bottom:60px;
 }
 
-.press-start {
-  margin-top:60px;
-  color:#00ffff;
-  animation:blink 1s infinite;
-  text-shadow:0 0 20px #00ffff;
-}
-
-@keyframes blink {
-  50% { opacity:0; }
-}
-
-/* ===== CRT ===== */
-.scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:1000;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.25) 0px,
-    rgba(0,0,0,0.25) 1px,
-    transparent 1px,
-    transparent 4px
-  );
-}
-
-.crt-overlay {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:999;
-  background:radial-gradient(circle at center,
-    rgba(0,0,0,0) 60%,
-    rgba(0,0,0,0.45) 100%);
-}
-
-/* ===== MAIN ===== */
-#mainContent { display:none; }
-
-.title-box {
-  margin-top:80px;
-  padding:30px;
-  background:rgba(0,0,0,0.75);
-  display:inline-block;
+.mode-btn{
+  display:block;
+  margin:20px;
+  padding:20px 40px;
+  font-size:14px;
+  background:black;
   border:3px solid #00ffff;
-  box-shadow:0 0 40px #00ffff;
-}
-
-.title-box h1 {
-  color:#ff00ff;
-  animation:neonPulse 3s infinite alternate;
-  text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
-}
-
-@keyframes neonPulse {
-  from { text-shadow:-2px 0 red,2px 0 cyan,0 0 15px #ff00ff; }
-  to { text-shadow:-2px 0 red,2px 0 cyan,0 0 35px #ff00ff; }
-}
-
-/* ===== VISITOR COUNTER ===== */
-.visitor-box {
-  margin-top:20px;
-  font-size:0.8rem;
   color:#00ffff;
-  text-shadow:
-    0 0 6px #00ffff,
-    0 0 12px #00ffff,
-    0 0 20px #ff00ff;
-}
-
-/* ===== GRID ===== */
-.game-grid {
-  margin:80px auto;
-  max-width:1100px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:40px;
-  padding:20px;
-}
-
-/* ===== GAME CARDS ===== */
-.game-card {
-  position:relative;
-  background:rgba(0,0,0,0.85);
-  border:3px solid #ff00ff;
-  padding:15px;
   cursor:pointer;
-  transition:transform .25s ease, box-shadow .25s ease;
-  overflow:hidden;
+  transition:.2s;
 }
 
-.game-card:hover {
-  transform:perspective(800px) rotateX(6deg) scale(1.08);
-  box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
-}
-
-.game-card video {
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  border:2px solid #00ffff;
-}
-
-.game-title {
-  margin-top:15px;
-  font-size:.8rem;
-  color:#00ffff;
-  text-shadow:0 0 12px #00ffff;
-}
-
-/* POWER DOWN */
-.fade-out {
-  animation:powerDown .4s forwards;
-}
-
-@keyframes powerDown {
-  0%{opacity:1; transform:scale(1);}
-  70%{opacity:.4; transform:scale(.97);}
-  100%{opacity:0; transform:scale(.95);}
+.mode-btn:hover{
+  background:#00ffff;
+  color:black;
 }
 </style>
 </head>
+
 <body>
 
-<div id="loadingScreen"></div>
+<h1>SELECT MODE</h1>
 
-<div id="startScreen">
-  <div class="arcade-title">JAY'S RETRO ARCADE</div>
-  <div class="press-start">PRESS START</div>
-</div>
+<button class="mode-btn" onclick="location.href='grid.html'">
+  QUICK SELECT
+</button>
 
-<div class="scanlines"></div>
-<div class="crt-overlay"></div>
-
-<audio id="bgMusic" loop preload="auto">
-  <source src="music/background.mp3" type="audio/mpeg">
-</audio>
-
-<audio id="hoverSound" preload="auto">
-  <source src="music/hovered.mp3" type="audio/mpeg">
-</audio>
-
-<audio id="ambientNoise" loop preload="auto">
-  <source src="music/arcade-ambient.mp3" type="audio/mpeg">
-</audio>
-
-<div id="mainContent">
-
-  <div class="title-box">
-    <h1>Jay's Retro Arcade</h1>
-    <div class="visitor-box">
-      VISITORS: <span id="visitorCount">000000</span>
-    </div>
-  </div>
-
-  <div class="game-grid">
-
-    <div class="game-card" onclick="openGame('apple-catcher/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop><source src="previews/apple-catcher.mp4" type="video/mp4"></video>
-      <div class="game-title">Apple Catcher</div>
-    </div>
-
-    <div class="game-card" onclick="openGame('art-of-war/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop><source src="previews/art-of-war.mp4" type="video/mp4"></video>
-      <div class="game-title">Art Of War</div>
-    </div>
-
-    <div class="game-card" onclick="openGame('bird-duty/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop><source src="previews/bird-duty.mp4" type="video/mp4"></video>
-      <div class="game-title">Bird Duty</div>
-    </div>
-
-    <div class="game-card" onclick="openGame('dodgeballs/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop><source src="previews/dodgeballs.mp4" type="video/mp4"></video>
-      <div class="game-title">Dodgeballs!</div>
-    </div>
-
-    <div class="game-card" onclick="openGame('sumorai/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop><source src="previews/sumorai.mp4" type="video/mp4"></video>
-      <div class="game-title">Sumorai</div>
-    </div>
-
-    <div class="game-card" onclick="openGame('x-pong/index.html')" onmouseenter="playHover(this)" onmouseleave="stopPreview(this)">
-      <video muted loop><source src="previews/x-pong.mp4" type="video/mp4"></video>
-      <div class="game-title">X-Pong</div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-const bootText = `
-JAY SYSTEMS BIOS v2.3
-Initializing Arcade Hardware...
-Loading Game Engine...
-System Ready.
-`;
-
-window.addEventListener("load", ()=>{
-  const loader = document.getElementById("loadingScreen");
-  let i=0;
-  const typing=setInterval(()=>{
-    loader.textContent+=bootText[i];
-    i++;
-    if(i>=bootText.length){
-      clearInterval(typing);
-      setTimeout(()=>{
-        loader.style.display="none";
-        document.getElementById("startScreen").style.display="flex";
-      },600);
-    }
-  },18);
-});
-
-document.getElementById("startScreen").addEventListener("click", startArcade);
-
-function startArcade(){
-  document.getElementById("startScreen").style.display="none";
-  document.getElementById("mainContent").style.display="block";
-
-  const music=document.getElementById("bgMusic");
-  const ambient=document.getElementById("ambientNoise");
-
-  music.volume=0.6;
-  ambient.volume=0.25;
-
-  music.play();
-  ambient.play();
-}
-
-function openGame(url){
-  document.body.classList.add("fade-out");
-  setTimeout(()=>{window.location.href=url;},400);
-}
-
-function playHover(card){
-  const s=document.getElementById("hoverSound");
-  s.currentTime=0;
-  s.volume=0.4;
-  s.play();
-  const video=card.querySelector("video");
-  if(video) video.play();
-}
-
-function stopPreview(card){
-  const video=card.querySelector("video");
-  if(video){
-    video.pause();
-    video.currentTime=0;
-  }
-}
-
-/* FORCE HARD RELOAD WHEN RETURNING VIA BACK BUTTON */
-window.addEventListener("pageshow", function(event) {
-  if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
-    window.location.reload();
-  }
-});
-</script>
-
-<script data-goatcounter="https://loronajay.goatcounter.com/count"
-        async src="https://gc.zgo.at/count.js"></script>
-
-<script>
-function formatArcadeNumber(num){
-  return num.toString().padStart(6,'0');
-}
-
-fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
-.then(res=>res.json())
-.then(data=>{
-  document.getElementById("visitorCount").textContent=
-    formatArcadeNumber(data.count || 0);
-})
-.catch(()=>{
-  document.getElementById("visitorCount").textContent="000000";
-});
-</script>
+<button class="mode-btn" onclick="location.href='mini-arcade/index.html'">
+  ENTER ARCADE
+</button>
 
 </body>
 </html>

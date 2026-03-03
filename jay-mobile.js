@@ -1,197 +1,252 @@
-// ==============================
-// JAY MOBILE CONTROLLER SYSTEM v16
-// TRUE TOUCH REGION ENGINE
-// ==============================
+/* ==========================================
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v11
+   - Direct TurboWarp VM key injection
+   - True controller behavior
+   - True multi-touch
+   - Slide between buttons
+   - Overlay restored
+   - Per-game overrides supported
+   ========================================== */
 
-(function () {
+const JAY_MOBILE_VERSION = "v11"; // <-- change manually per deploy
 
-  const VERSION = "v16";
+function isMobileDevice() {
+  return (
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.matchMedia("(pointer: coarse)").matches
+  );
+}
 
-  const pressedKeys = new Set();
-  const fingerMap = new Map(); // pointerId → key
-  const buttons = [];
+function enterFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
 
-  // ------------------------------
-  // DEFAULT KEY MAP
-  // ------------------------------
+async function lockLandscape() {
+  if (screen.orientation?.lock) {
+    try { await screen.orientation.lock("landscape"); } catch {}
+  }
+}
+
+if (isMobileDevice()) {
+
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+
+  /* =============================
+     VERSION BADGE
+     ============================= */
+
+  const versionBadge = document.createElement("div");
+  versionBadge.innerText = JAY_MOBILE_VERSION;
+  Object.assign(versionBadge.style, {
+    position: "fixed",
+    top: "8px",
+    right: "12px",
+    color: "#00ffff",
+    fontFamily: "monospace",
+    fontSize: "14px",
+    opacity: "0.6",
+    zIndex: "999999"
+  });
+  document.body.appendChild(versionBadge);
+
+  /* =============================
+     START OVERLAY
+     ============================= */
+
+  const startOverlay = document.createElement("div");
+  Object.assign(startOverlay.style, {
+    position: "fixed",
+    inset: "0",
+    background: "black",
+    color: "#00ffff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "column",
+    fontFamily: "monospace",
+    zIndex: "999998"
+  });
+
+  startOverlay.innerHTML = `
+    <h2 style="margin:0 0 20px 0;">INSERT COIN</h2>
+    <p style="margin:0;">TAP TO START</p>
+  `;
+
+  document.body.appendChild(startOverlay);
+
+  /* =============================
+     CONTROLS LAYER
+     ============================= */
+
+  const controls = document.createElement("div");
+  Object.assign(controls.style, {
+    position: "fixed",
+    inset: "0",
+    display: "none",
+    zIndex: "999997",
+    pointerEvents: "none"
+  });
+
+  document.body.appendChild(controls);
+
+  function createButton(name, label, bottom, left, right, size = 70) {
+    const btn = document.createElement("div");
+    btn.dataset.name = name;
+    btn.innerText = label;
+
+    Object.assign(btn.style, {
+      position: "absolute",
+      width: size + "px",
+      height: size + "px",
+      borderRadius: "50%",
+      background: "rgba(0,255,255,0.12)",
+      border: "2px solid #00ffff",
+      color: "#00ffff",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "20px",
+      touchAction: "none",
+      userSelect: "none",
+      boxShadow: "0 0 12px rgba(0,255,255,0.6)",
+      backdropFilter: "blur(4px)",
+      pointerEvents: "auto"
+    });
+
+    btn.style.bottom = bottom;
+    if (left) btn.style.left = left;
+    if (right) btn.style.right = right;
+
+    controls.appendChild(btn);
+  }
+
+  /* D-PAD */
+  createButton("left",  "◀", "100px", "40px");
+  createButton("right", "▶", "100px", "160px");
+  createButton("up",    "▲", "170px", "100px");
+  createButton("down",  "▼", "30px",  "100px");
+
+  /* FACE BUTTONS */
+  createButton("y", "Y", "170px", null, "100px");
+  createButton("b", "B", "100px", null, "160px");
+  createButton("x", "X", "100px", null, "40px");
+  createButton("a", "A", "30px",  null, "100px");
+
+  /* =============================
+     KEY MAP
+     ============================= */
 
   let keyMap = {
     left: "a",
     right: "d",
     up: "w",
     down: "s",
-    a: "z",
-    b: "x",
-    x: "c",
-    y: "v"
+    a: "c",
+    b: "v",
+    x: "b",
+    y: "f"
   };
 
   if (window.JAY_GAME_CONFIG?.keyOverrides) {
     keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
   }
 
-  // ------------------------------
-  // KEY SIMULATION
-  // ------------------------------
+  /* =============================
+     TURBOWARP KEY INJECTION
+     ============================= */
 
-  function simulateKey(key, type) {
-    let code = key;
-
-    if (key.length === 1 && key.match(/[a-z]/i)) {
-      code = "Key" + key.toUpperCase();
-    }
-
-    const event = new KeyboardEvent(type, {
-      key: key,
-      code: code,
-      bubbles: true
-    });
-
-    window.dispatchEvent(event);
-    document.dispatchEvent(event);
-  }
+  const keyboard = window.vm.runtime.ioDevices.keyboard;
+  const pressedKeys = keyboard._keysPressed;
 
   function pressKey(key) {
-    if (!pressedKeys.has(key)) {
-      pressedKeys.add(key);
-      simulateKey(key, "keydown");
+    if (!pressedKeys.includes(key)) {
+      pressedKeys.push(key);
     }
   }
 
   function releaseKey(key) {
-    if (pressedKeys.has(key)) {
-      pressedKeys.delete(key);
-      simulateKey(key, "keyup");
+    const index = pressedKeys.indexOf(key);
+    if (index !== -1) {
+      pressedKeys.splice(index, 1);
     }
   }
 
-  // ------------------------------
-  // BUTTON CREATION
-  // ------------------------------
+  /* =============================
+     MULTI-TOUCH ENGINE
+     ============================= */
 
-  function createButton(id, label, key, styles) {
+  const activePointers = new Map();
+  const buttonPressCounts = {};
 
-    const btn = document.createElement("div");
-    btn.innerText = label;
-    btn.dataset.key = key;
+  function updateButtonVisual(name, pressed) {
+    const btn = [...controls.children].find(b => b.dataset.name === name);
+    if (!btn) return;
 
-    Object.assign(btn.style, {
-      position: "fixed",
-      background: "rgba(255,255,255,0.15)",
-      border: "2px solid white",
-      borderRadius: "50%",
-      color: "white",
-      fontSize: "20px",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      userSelect: "none",
-      pointerEvents: "none",
-      ...styles
-    });
-
-    document.body.appendChild(btn);
-    buttons.push(btn);
+    btn.style.background = pressed
+      ? "rgba(0,255,255,0.35)"
+      : "rgba(0,255,255,0.12)";
   }
 
-  // ------------------------------
-  // HIT TEST
-  // ------------------------------
+  function pressButton(pointerId, name) {
+    if (!name) return;
 
-  function getButtonAt(x, y) {
-    for (let btn of buttons) {
-      const rect = btn.getBoundingClientRect();
-      if (
-        x >= rect.left &&
-        x <= rect.right &&
-        y >= rect.top &&
-        y <= rect.bottom
-      ) {
-        return btn.dataset.key;
-      }
-    }
-    return null;
-  }
+    const current = activePointers.get(pointerId);
+    if (current === name) return;
 
-  // ------------------------------
-  // GLOBAL TOUCH ENGINE
-  // ------------------------------
+    releaseButton(pointerId);
 
-  function handlePointer(e) {
+    activePointers.set(pointerId, name);
+    buttonPressCounts[name] = (buttonPressCounts[name] || 0) + 1;
 
-    const keyUnderFinger = getButtonAt(e.clientX, e.clientY);
-    const previousKey = fingerMap.get(e.pointerId);
-
-    if (keyUnderFinger !== previousKey) {
-
-      if (previousKey) {
-        releaseKey(keyMap[previousKey]);
-      }
-
-      if (keyUnderFinger) {
-        pressKey(keyMap[keyUnderFinger]);
-      }
-
-      if (keyUnderFinger) {
-        fingerMap.set(e.pointerId, keyUnderFinger);
-      } else {
-        fingerMap.delete(e.pointerId);
-      }
+    if (buttonPressCounts[name] === 1) {
+      pressKey(keyMap[name]);
+      updateButtonVisual(name, true);
     }
   }
 
-  function handlePointerUp(e) {
-    const key = fingerMap.get(e.pointerId);
-    if (key) {
-      releaseKey(keyMap[key]);
-      fingerMap.delete(e.pointerId);
+  function releaseButton(pointerId) {
+    const name = activePointers.get(pointerId);
+    if (!name) return;
+
+    buttonPressCounts[name]--;
+
+    if (buttonPressCounts[name] <= 0) {
+      releaseKey(keyMap[name]);
+      updateButtonVisual(name, false);
+      buttonPressCounts[name] = 0;
     }
+
+    activePointers.delete(pointerId);
   }
 
-  // ------------------------------
-  // VERSION BADGE
-  // ------------------------------
-
-  function createVersionBadge() {
-    const badge = document.createElement("div");
-    badge.innerText = VERSION;
-    badge.style.position = "fixed";
-    badge.style.top = "8px";
-    badge.style.right = "12px";
-    badge.style.color = "white";
-    badge.style.fontSize = "14px";
-    badge.style.fontFamily = "monospace";
-    badge.style.zIndex = "9999";
-    badge.style.opacity = "0.6";
-    document.body.appendChild(badge);
-  }
-
-  // ------------------------------
-  // INIT
-  // ------------------------------
-
-  window.addEventListener("DOMContentLoaded", () => {
-
-    createVersionBadge();
-
-    // LEFT D-PAD
-    createButton("left", "◀", "left", { bottom: "80px", left: "40px", width: "60px", height: "60px" });
-    createButton("right", "▶", "right", { bottom: "80px", left: "140px", width: "60px", height: "60px" });
-    createButton("up", "▲", "up", { bottom: "140px", left: "90px", width: "60px", height: "60px" });
-    createButton("down", "▼", "down", { bottom: "20px", left: "90px", width: "60px", height: "60px" });
-
-    // RIGHT ACTION PAD (diamond mirror)
-    createButton("y", "Y", "y", { bottom: "140px", right: "90px", width: "60px", height: "60px" });
-    createButton("b", "B", "b", { bottom: "80px", right: "140px", width: "60px", height: "60px" });
-    createButton("x", "X", "x", { bottom: "80px", right: "40px", width: "60px", height: "60px" });
-    createButton("a", "A", "a", { bottom: "20px", right: "90px", width: "60px", height: "60px" });
-
-    // Global listeners
-    window.addEventListener("pointerdown", handlePointer);
-    window.addEventListener("pointermove", handlePointer);
-    window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("pointercancel", handlePointerUp);
-
+  controls.addEventListener("pointerdown", (e) => {
+    if (!e.target.dataset.name) return;
+    e.target.setPointerCapture(e.pointerId);
+    pressButton(e.pointerId, e.target.dataset.name);
   });
 
-})();
+  controls.addEventListener("pointermove", (e) => {
+    const element = document.elementFromPoint(e.clientX, e.clientY);
+    const name = element?.dataset?.name;
+    pressButton(e.pointerId, name);
+  });
+
+  controls.addEventListener("pointerup", (e) => {
+    releaseButton(e.pointerId);
+  });
+
+  controls.addEventListener("pointercancel", (e) => {
+    releaseButton(e.pointerId);
+  });
+
+  startOverlay.addEventListener("click", async () => {
+    enterFullscreen();
+    await lockLandscape();
+    startOverlay.remove();
+    controls.style.display = "block";
+  }, { once: true });
+
+}

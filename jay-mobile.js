@@ -1,15 +1,11 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v11
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v9
    - True multi-touch
-   - Multi-button per finger
-   - Proper hold logic
-   - Slide support
-   - Diagonals supported
-   - Version stamp (dev)
+   - Proper hold logic (no accidental releases)
+   - Slide between buttons
+   - Diagonal support
+   - Per-game key overrides supported
    ========================================== */
-
-const DEV_MODE = true;
-const JAY_MOBILE_VERSION = "v11-" + new Date().toISOString();
 
 function isMobileDevice() {
   return (
@@ -84,33 +80,6 @@ if (isMobileDevice()) {
 
   document.body.appendChild(controls);
 
-  /* =============================
-     VERSION DISPLAY (DEV ONLY)
-     ============================= */
-
-  if (DEV_MODE) {
-    const versionLabel = document.createElement("div");
-    versionLabel.innerText = JAY_MOBILE_VERSION;
-
-    Object.assign(versionLabel.style, {
-      position: "fixed",
-      top: "8px",
-      right: "10px",
-      color: "#00ffff",
-      fontFamily: "monospace",
-      fontSize: "12px",
-      background: "rgba(0,0,0,0.7)",
-      padding: "4px 8px",
-      border: "1px solid #00ffff",
-      borderRadius: "6px",
-      zIndex: "99999999",
-      pointerEvents: "none",
-      boxShadow: "0 0 8px rgba(0,255,255,0.6)"
-    });
-
-    document.body.appendChild(versionLabel);
-  }
-
   function createButton(name, label, bottom, left, right, size = 70) {
     const btn = document.createElement("div");
     btn.dataset.name = name;
@@ -154,6 +123,10 @@ if (isMobileDevice()) {
   createButton("x", "X", "100px", null, "40px");
   createButton("a", "A", "30px",  null, "100px");
 
+  /* =============================
+     KEY MAP
+     ============================= */
+
   let keyMap = {
     left: "a",
     right: "d",
@@ -173,8 +146,8 @@ if (isMobileDevice()) {
      TRUE MULTI-HOLD ENGINE
      ============================= */
 
-  const activePointers = new Map();
-  const buttonPressCounts = {};
+  const activePointers = new Map();     // pointerId → buttonName
+  const buttonPressCounts = {};        // buttonName → number of fingers
 
   function updateButtonVisual(name, pressed) {
     const btn = [...controls.children].find(b => b.dataset.name === name);
@@ -188,14 +161,12 @@ if (isMobileDevice()) {
   function pressButton(pointerId, name) {
     if (!name) return;
 
-    if (!activePointers.has(pointerId)) {
-      activePointers.set(pointerId, new Set());
-    }
+    const current = activePointers.get(pointerId);
+    if (current === name) return;
 
-    const pressedSet = activePointers.get(pointerId);
-    if (pressedSet.has(name)) return;
+    releaseButton(pointerId);
 
-    pressedSet.add(name);
+    activePointers.set(pointerId, name);
 
     buttonPressCounts[name] = (buttonPressCounts[name] || 0) + 1;
 
@@ -205,19 +176,17 @@ if (isMobileDevice()) {
     }
   }
 
-  function releaseAllFromPointer(pointerId) {
-    const pressedSet = activePointers.get(pointerId);
-    if (!pressedSet) return;
+  function releaseButton(pointerId) {
+    const name = activePointers.get(pointerId);
+    if (!name) return;
 
-    pressedSet.forEach(name => {
-      buttonPressCounts[name]--;
+    buttonPressCounts[name]--;
 
-      if (buttonPressCounts[name] <= 0) {
-        simulateKey(keyMap[name], "keyup");
-        updateButtonVisual(name, false);
-        buttonPressCounts[name] = 0;
-      }
-    });
+    if (buttonPressCounts[name] <= 0) {
+      simulateKey(keyMap[name], "keyup");
+      updateButtonVisual(name, false);
+      buttonPressCounts[name] = 0;
+    }
 
     activePointers.delete(pointerId);
   }
@@ -231,21 +200,15 @@ if (isMobileDevice()) {
   controls.addEventListener("pointermove", (e) => {
     const element = document.elementFromPoint(e.clientX, e.clientY);
     const name = element?.dataset?.name;
-
-    if (!name) {
-      releaseAllFromPointer(e.pointerId);
-      return;
-    }
-
     pressButton(e.pointerId, name);
   });
 
   controls.addEventListener("pointerup", (e) => {
-    releaseAllFromPointer(e.pointerId);
+    releaseButton(e.pointerId);
   });
 
   controls.addEventListener("pointercancel", (e) => {
-    releaseAllFromPointer(e.pointerId);
+    releaseButton(e.pointerId);
   });
 
   startOverlay.addEventListener("click", async () => {

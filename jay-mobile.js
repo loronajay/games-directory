@@ -1,10 +1,10 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v4
-   - Improved visuals
-   - Grid layout buttons
-   - True diagonal support
-   - Safe top RESET button
-   - Per-game overrides supported
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v5
+   - True multi-touch
+   - Slide between buttons
+   - Diagonal support
+   - Safe reset button
+   - Per-game overrides
    ========================================== */
 
 function isMobileDevice() {
@@ -28,7 +28,7 @@ async function lockLandscape() {
 
 function simulateKey(key, type) {
   const event = new KeyboardEvent(type, {
-    key: key,
+    key,
     code: key,
     bubbles: true
   });
@@ -41,7 +41,7 @@ if (isMobileDevice()) {
   document.body.style.overflow = "hidden";
 
   /* =============================
-     INSERT COIN SCREEN
+     INSERT COIN
      ============================= */
 
   const startOverlay = document.createElement("div");
@@ -66,37 +66,36 @@ if (isMobileDevice()) {
   document.body.appendChild(startOverlay);
 
   /* =============================
-     CONTROLS CONTAINER
+     CONTROLS LAYER
      ============================= */
 
   const controls = document.createElement("div");
   Object.assign(controls.style, {
     position: "fixed",
     inset: "0",
-    pointerEvents: "none",
     display: "none",
     zIndex: "999998"
   });
 
   document.body.appendChild(controls);
 
-  function createButton(label, bottom, left, right, size = 70, isRect = false) {
+  function createButton(name, label, bottom, left, right, size = 70, rect = false) {
     const btn = document.createElement("div");
+    btn.dataset.name = name;
     btn.innerText = label;
 
     Object.assign(btn.style, {
       position: "absolute",
-      width: isRect ? "110px" : size + "px",
-      height: isRect ? "40px" : size + "px",
-      borderRadius: isRect ? "8px" : "50%",
+      width: rect ? "110px" : size + "px",
+      height: rect ? "40px" : size + "px",
+      borderRadius: rect ? "8px" : "50%",
       background: "rgba(0,255,255,0.12)",
       border: "2px solid #00ffff",
       color: "#00ffff",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontSize: isRect ? "14px" : "20px",
-      pointerEvents: "auto",
+      fontSize: rect ? "14px" : "20px",
       touchAction: "none",
       userSelect: "none",
       boxShadow: "0 0 12px rgba(0,255,255,0.6)",
@@ -111,40 +110,28 @@ if (isMobileDevice()) {
     return btn;
   }
 
-  /* =============================
-     D-PAD (3x3 GRID STYLE)
-     ============================= */
+  /* D-PAD */
+  createButton("left",  "◀", "100px", "40px");
+  createButton("right", "▶", "100px", "160px");
+  createButton("up",    "▲", "170px", "100px");
+  createButton("down",  "▼", "30px",  "100px");
 
-  const btnLeft  = createButton("◀", "100px", "40px");
-  const btnRight = createButton("▶", "100px", "160px");
-  const btnUp    = createButton("▲", "170px", "100px");
-  const btnDown  = createButton("▼", "30px",  "100px");
+  /* FACE BUTTONS */
+  createButton("y", "Y", "170px", null, "100px");
+  createButton("b", "B", "100px", null, "160px");
+  createButton("x", "X", "100px", null, "40px");
+  createButton("a", "A", "30px",  null, "100px");
 
-  /* =============================
-     FACE BUTTONS (MIRRORED GRID)
-     ============================= */
+  /* RESET */
+  const resetBtn = createButton("reset", "RESET", null, "50%", null, 0, true);
+  resetBtn.style.top = "15px";
+  resetBtn.style.left = "50%";
+  resetBtn.style.transform = "translateX(-50%)";
+  resetBtn.style.background = "rgba(255,0,0,0.15)";
+  resetBtn.style.borderColor = "#ff4444";
+  resetBtn.style.color = "#ff4444";
 
-  const btnY = createButton("Y", "170px", null, "100px");
-  const btnB = createButton("B", "100px", null, "160px");
-  const btnX = createButton("X", "100px", null, "40px");
-  const btnA = createButton("A", "30px",  null, "100px");
-
-  /* =============================
-     SAFE TOP RESET BUTTON
-     ============================= */
-
-  const btnReset = createButton("RESET", null, "50%", null, 0, true);
-  btnReset.style.top = "15px";
-  btnReset.style.left = "50%";
-  btnReset.style.transform = "translateX(-50%)";
-  btnReset.style.background = "rgba(255,0,0,0.15)";
-  btnReset.style.borderColor = "#ff4444";
-  btnReset.style.color = "#ff4444";
-  btnReset.style.boxShadow = "0 0 10px rgba(255,0,0,0.6)";
-
-  /* =============================
-     DEFAULT KEY MAP
-     ============================= */
+  /* KEY MAP */
 
   let keyMap = {
     left: "a",
@@ -162,52 +149,55 @@ if (isMobileDevice()) {
     keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
   }
 
-  const buttonMap = {
-    left: btnLeft,
-    right: btnRight,
-    up: btnUp,
-    down: btnDown,
-    a: btnA,
-    b: btnB,
-    x: btnX,
-    y: btnY,
-    reset: btnReset
-  };
+  const activePointers = new Map();
+  const activeKeys = new Set();
 
-  /* =============================
-     MULTI-TOUCH SUPPORT
-     ============================= */
+  function updateButtonState(name, pressed) {
+    const btn = [...controls.children].find(b => b.dataset.name === name);
+    if (!btn) return;
 
-  Object.keys(buttonMap).forEach(name => {
-    const btn = buttonMap[name];
-    const key = keyMap[name];
+    btn.style.background = pressed
+      ? "rgba(0,255,255,0.35)"
+      : "rgba(0,255,255,0.12)";
+  }
 
-    btn.addEventListener("pointerdown", e => {
-      e.preventDefault();
-      btn.style.background = "rgba(0,255,255,0.35)";
-      simulateKey(key, "keydown");
-    });
+  function handlePointer(e) {
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const name = target?.dataset?.name;
 
-    btn.addEventListener("pointerup", e => {
-      e.preventDefault();
-      btn.style.background = "rgba(0,255,255,0.12)";
-      simulateKey(key, "keyup");
-    });
+    const pointerId = e.pointerId;
+    const previous = activePointers.get(pointerId);
 
-    btn.addEventListener("pointerleave", () => {
-      btn.style.background = "rgba(0,255,255,0.12)";
-      simulateKey(key, "keyup");
-    });
+    if (previous && previous !== name) {
+      simulateKey(keyMap[previous], "keyup");
+      updateButtonState(previous, false);
+      activeKeys.delete(previous);
+    }
 
-    btn.addEventListener("pointercancel", () => {
-      btn.style.background = "rgba(0,255,255,0.12)";
-      simulateKey(key, "keyup");
-    });
-  });
+    if (name && !activeKeys.has(name)) {
+      simulateKey(keyMap[name], "keydown");
+      updateButtonState(name, true);
+      activeKeys.add(name);
+    }
 
-  /* =============================
-     START GAME
-     ============================= */
+    activePointers.set(pointerId, name);
+  }
+
+  function releasePointer(e) {
+    const pointerId = e.pointerId;
+    const name = activePointers.get(pointerId);
+    if (!name) return;
+
+    simulateKey(keyMap[name], "keyup");
+    updateButtonState(name, false);
+    activeKeys.delete(name);
+    activePointers.delete(pointerId);
+  }
+
+  controls.addEventListener("pointerdown", handlePointer);
+  controls.addEventListener("pointermove", handlePointer);
+  controls.addEventListener("pointerup", releasePointer);
+  controls.addEventListener("pointercancel", releasePointer);
 
   startOverlay.addEventListener("click", async () => {
     enterFullscreen();

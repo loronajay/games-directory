@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <!-- We only include this to explicitly loosen the CSP of various packager environments. It does not provide any security. -->
   <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
+
+  <meta name="screen-orientation" content="landscape">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
   <title>apple catcher</title>
   <style>
     body {
@@ -145,8 +150,7 @@
   <meta name="theme-color" content="#000000">
   
   <style>
-/* ===== Jay Arcade Mobile Mode ===== */
-#jayMobileStart {
+  #jayMobileStart {
   position: fixed;
   inset: 0;
   background: black;
@@ -154,24 +158,33 @@
   display: none;
   align-items: center;
   justify-content: center;
-  font-family: monospace;
-  font-size: 18px;
+  font-family: 'Press Start 2P', monospace;
   text-align: center;
   z-index: 999999;
   cursor: pointer;
-  text-shadow: 0 0 15px #00ffff;
-}
+  flex-direction: column;
+  animation: jayFlicker 2s infinite;
+    }
 
-/* Prevent mobile scroll issues */
-.jay-mobile html,
-.jay-mobile body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
-  touch-action: manipulation;
-}
+#jayMobileStart h1 {
+  font-size: 16px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 15px #00ffff;
+    }   
+
+#jayMobileStart p {
+  font-size: 12px;
+  animation: jayBlink 1s infinite;
+    }
+
+@keyframes jayBlink {
+  50% { opacity: 0; }
+    }
+
+@keyframes jayFlicker {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.97; }
+    }
 </style>
 
 </head>
@@ -355,8 +368,6 @@
   </script>
 
   <script>
-/* ===== Jay Arcade Mobile Template ===== */
-
 function isMobileDevice() {
   return (
     /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
@@ -374,18 +385,32 @@ function enterFullscreen() {
   }
 }
 
+async function lockLandscape() {
+  if (screen.orientation && screen.orientation.lock) {
+    try {
+      await screen.orientation.lock("landscape");
+    } catch (err) {
+      // iOS will silently fail — that's normal
+    }
+  }
+}
+
 if (isMobileDevice()) {
 
   document.documentElement.classList.add("jay-mobile");
 
   const overlay = document.createElement("div");
   overlay.id = "jayMobileStart";
-  overlay.innerHTML = "TAP TO POWER ON";
+  overlay.innerHTML = `
+  <h1>APPLE CATCHER</h1>
+  <p>TAP TO INSERT COIN</p>
+`;
   overlay.style.display = "flex";
   document.body.appendChild(overlay);
 
-  overlay.addEventListener("click", () => {
+  overlay.addEventListener("click", async () => {
     enterFullscreen();
+    await lockLandscape();
     overlay.remove();
   }, { once: true });
 

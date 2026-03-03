@@ -1,5 +1,6 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v2
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v3
+   Supports Per-Game Overrides
    ========================================== */
 
 function isMobileDevice() {
@@ -17,9 +18,7 @@ function enterFullscreen() {
 
 async function lockLandscape() {
   if (screen.orientation?.lock) {
-    try {
-      await screen.orientation.lock("landscape");
-    } catch {}
+    try { await screen.orientation.lock("landscape"); } catch {}
   }
 }
 
@@ -34,7 +33,6 @@ function simulateKey(key, type) {
 
 if (isMobileDevice()) {
 
-  /* Prevent scrolling */
   document.documentElement.style.overflow = "hidden";
   document.body.style.overflow = "hidden";
 
@@ -73,7 +71,7 @@ if (isMobileDevice()) {
   controls.style.zIndex = "999998";
   document.body.appendChild(controls);
 
-  function createButton(name, label, bottom, left, right) {
+  function createButton(label, bottom, left, right) {
     const btn = document.createElement("div");
     btn.innerText = label;
 
@@ -87,7 +85,7 @@ if (isMobileDevice()) {
     btn.style.display = "flex";
     btn.style.alignItems = "center";
     btn.style.justifyContent = "center";
-    btn.style.fontSize = "20px";
+    btn.style.fontSize = "16px";
     btn.style.pointerEvents = "auto";
     btn.style.touchAction = "none";
     btn.style.userSelect = "none";
@@ -101,32 +99,31 @@ if (isMobileDevice()) {
   }
 
   /* =============================
-     D-PAD (WASD)
+     D-PAD (WASD Default)
      ============================= */
 
-  const btnLeft  = createButton("left",  "◀", "90px", "30px");
-  const btnRight = createButton("right", "▶", "90px", "150px");
-  const btnUp    = createButton("up",    "▲", "160px", "90px");
-  const btnDown  = createButton("down",  "▼", "20px",  "90px");
+  const btnLeft  = createButton("◀", "90px", "30px");
+  const btnRight = createButton("▶", "90px", "150px");
+  const btnUp    = createButton("▲", "160px", "90px");
+  const btnDown  = createButton("▼", "20px",  "90px");
 
   /* =============================
-     FACE BUTTONS (Diamond Layout)
-     
-            Y
-       B         X
-            A
+     FACE BUTTONS
      ============================= */
 
-  const btnY = createButton("y", "Y", "170px", null, "100px");   // Top
-  const btnB = createButton("b", "B", "100px", null, "170px");   // Left
-  const btnX = createButton("x", "X", "100px", null, "30px");    // Right
-  const btnA = createButton("a", "A", "30px",  null, "100px");   // Bottom
+  const btnY = createButton("Y", "170px", null, "100px");
+  const btnB = createButton("B", "100px", null, "170px");
+  const btnX = createButton("X", "100px", null, "30px");
+  const btnA = createButton("A", "30px",  null, "100px");
+
+  /* RESET BUTTON */
+  const btnReset = createButton("RESET", "20px", null, "20px");
 
   /* =============================
-     KEY MAP
+     DEFAULT KEY MAP
      ============================= */
 
-  const keyMap = {
+  let keyMap = {
     left: "a",
     right: "d",
     up: "w",
@@ -134,8 +131,17 @@ if (isMobileDevice()) {
     a: "c",
     b: "v",
     x: "b",
-    y: "f"
+    y: "f",
+    reset: " "
   };
+
+  /* =============================
+     PER-GAME OVERRIDES
+     ============================= */
+
+  if (window.JAY_GAME_CONFIG?.keyOverrides) {
+    keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
+  }
 
   const buttonMap = {
     left: btnLeft,
@@ -145,12 +151,9 @@ if (isMobileDevice()) {
     a: btnA,
     b: btnB,
     x: btnX,
-    y: btnY
+    y: btnY,
+    reset: btnReset
   };
-
-  /* =============================
-     BUTTON INPUT HANDLING
-     ============================= */
 
   Object.keys(buttonMap).forEach(name => {
     const btn = buttonMap[name];
@@ -170,10 +173,6 @@ if (isMobileDevice()) {
       simulateKey(key, "keyup");
     });
   });
-
-  /* =============================
-     START GAME
-     ============================= */
 
   startOverlay.addEventListener("click", async () => {
     enterFullscreen();

@@ -119,15 +119,115 @@ function createButton(name, label, bottom, left, right, size = 70) {
   controls.appendChild(btn);
 }
 
-createButton("left",  "◀", "100px", "70px");
-createButton("right", "▶", "100px", "130px");
-createButton("up",    "▲", "150px", "100px");
-createButton("down",  "▼", "50px",  "100px");
+/* =============================
+   8-DIRECTION D-PAD (SINGLE SURFACE)
+   ============================= */
 
-createButton("y", "Y", "150px", null, "100px");
-createButton("b", "B", "100px", null, "130px");
-createButton("x", "X", "100px", null, "70px");
-createButton("a", "A", "50px",  null, "100px");
+const dpad = document.createElement("div");
+
+Object.assign(dpad.style, {
+  position: "absolute",
+  bottom: "40px",
+  left: "40px",
+  width: "160px",
+  height: "160px",
+  borderRadius: "50%",
+  border: "2px solid #00ffff",
+  boxShadow: "0 0 15px rgba(0,255,255,0.5)",
+  background: "rgba(0,255,255,0.08)",
+  touchAction: "none",
+  pointerEvents: "auto"
+});
+
+controls.appendChild(dpad);
+
+let currentDirections = new Set();
+
+function updateDpadDirection(x, y) {
+  const rect = dpad.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  const dx = x - cx;
+  const dy = y - cy;
+
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Dead zone in center
+  if (distance < 20) {
+    clearDirections();
+    return;
+  }
+
+  const angle = Math.atan2(dy, dx); // radians
+
+  const directions = new Set();
+
+  // Right
+  if (angle > -Math.PI/4 && angle <= Math.PI/4) {
+    directions.add("right");
+  }
+
+  // Down
+  if (angle > Math.PI/4 && angle <= 3*Math.PI/4) {
+    directions.add("down");
+  }
+
+  // Left
+  if (angle > 3*Math.PI/4 || angle <= -3*Math.PI/4) {
+    directions.add("left");
+  }
+
+  // Up
+  if (angle > -3*Math.PI/4 && angle <= -Math.PI/4) {
+    directions.add("up");
+  }
+
+  applyDirections(directions);
+}
+
+function applyDirections(newDirections) {
+  // Release removed directions
+  for (const dir of currentDirections) {
+    if (!newDirections.has(dir)) {
+      releaseKey(keyMap[dir]);
+    }
+  }
+
+  // Press new directions
+  for (const dir of newDirections) {
+    if (!currentDirections.has(dir)) {
+      pressKey(keyMap[dir]);
+    }
+  }
+
+  currentDirections = newDirections;
+}
+
+function clearDirections() {
+  for (const dir of currentDirections) {
+    releaseKey(keyMap[dir]);
+  }
+  currentDirections.clear();
+}
+
+dpad.addEventListener("pointerdown", e => {
+  dpad.setPointerCapture(e.pointerId);
+  updateDpadDirection(e.clientX, e.clientY);
+});
+
+dpad.addEventListener("pointermove", e => {
+  updateDpadDirection(e.clientX, e.clientY);
+});
+
+dpad.addEventListener("pointerup", clearDirections);
+dpad.addEventListener("pointercancel", clearDirections);
+
+/* FACE BUTTONS (mirrored tighter cluster) */
+createButton("y", "Y", "160px", null, "100px");
+createButton("b", "B", "100px", null, "140px");
+createButton("x", "X", "100px", null, "60px");
+createButton("a", "A", "40px",  null, "100px");
 
 /* =============================
    KEY MAP

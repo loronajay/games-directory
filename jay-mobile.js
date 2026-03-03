@@ -1,15 +1,11 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v12
-   - Direct TurboWarp VM injection (postData)
-   - True multi-touch
-   - True hold behavior
-   - Slide between buttons
-   - Per-game overrides supported
-   - Touch-to-start overlay
-   - Version badge
+   JAY ARCADE MOBILE CONTROLLER v13
+   - Safe VM wait
+   - Direct TurboWarp postData injection
+   - True controller behavior
    ========================================== */
 
-const JAY_MOBILE_VERSION = "v12"; // <-- change manually each deploy
+const JAY_MOBILE_VERSION = "v13"; // change manually per deploy
 
 function isMobile() {
   return (
@@ -19,6 +15,19 @@ function isMobile() {
 }
 
 if (!isMobile()) return;
+
+function waitForVM(callback) {
+  const interval = setInterval(() => {
+    if (window.vm?.runtime?.ioDevices?.keyboard) {
+      clearInterval(interval);
+      callback();
+    }
+  }, 50);
+}
+
+waitForVM(initController);
+
+function initController() {
 
 /* =============================
    VERSION BADGE
@@ -55,12 +64,10 @@ Object.assign(startOverlay.style, {
   fontFamily: "monospace",
   zIndex: "999998"
 });
-
 startOverlay.innerHTML = `
   <h2 style="margin:0 0 20px 0;">INSERT COIN</h2>
   <p style="margin:0;">TAP TO START</p>
 `;
-
 document.body.appendChild(startOverlay);
 
 /* =============================
@@ -108,13 +115,13 @@ function createButton(name, label, bottom, left, right, size = 70) {
   controls.appendChild(btn);
 }
 
-/* D-PAD (left side) */
+/* D-PAD */
 createButton("left",  "◀", "100px", "40px");
 createButton("right", "▶", "100px", "160px");
 createButton("up",    "▲", "170px", "100px");
 createButton("down",  "▼", "30px",  "100px");
 
-/* FACE BUTTONS (right side, mirrored like D-pad) */
+/* FACE BUTTONS */
 createButton("y", "Y", "170px", null, "100px");
 createButton("b", "B", "100px", null, "160px");
 createButton("x", "X", "100px", null, "40px");
@@ -135,13 +142,12 @@ let keyMap = {
   y: "f"
 };
 
-/* Per-game override support */
 if (window.JAY_GAME_CONFIG?.keyOverrides) {
   keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
 }
 
 /* =============================
-   TURBOWARP VM INPUT
+   VM INPUT
    ============================= */
 
 const keyboard = window.vm.runtime.ioDevices.keyboard;
@@ -155,12 +161,11 @@ function releaseKey(key) {
 }
 
 /* =============================
-   TRUE CONTROLLER ENGINE
+   CONTROLLER ENGINE
    ============================= */
 
 const activePointers = new Map();
 const buttonCounts = {};
-const physicallyHeldKeys = new Set();
 
 function updateVisual(name, pressed) {
   const btn = [...controls.children].find(b => b.dataset.name === name);
@@ -183,9 +188,7 @@ function pressButton(pointerId, name) {
   buttonCounts[name] = (buttonCounts[name] || 0) + 1;
 
   if (buttonCounts[name] === 1) {
-    const key = keyMap[name];
-    physicallyHeldKeys.add(key);
-    pressKey(key);
+    pressKey(keyMap[name]);
     updateVisual(name, true);
   }
 }
@@ -197,9 +200,7 @@ function releaseButton(pointerId) {
   buttonCounts[name]--;
 
   if (buttonCounts[name] <= 0) {
-    const key = keyMap[name];
-    physicallyHeldKeys.delete(key);
-    releaseKey(key);
+    releaseKey(keyMap[name]);
     updateVisual(name, false);
     buttonCounts[name] = 0;
   }
@@ -207,9 +208,7 @@ function releaseButton(pointerId) {
   activePointers.delete(pointerId);
 }
 
-/* =============================
-   POINTER EVENTS (MULTI-TOUCH)
-   ============================= */
+/* POINTER EVENTS */
 
 controls.addEventListener("pointerdown", e => {
   if (!e.target.dataset.name) return;
@@ -231,9 +230,7 @@ controls.addEventListener("pointercancel", e => {
   releaseButton(e.pointerId);
 });
 
-/* =============================
-   START GAME
-   ============================= */
+/* START */
 
 startOverlay.addEventListener("click", async () => {
   if (document.documentElement.requestFullscreen)
@@ -246,3 +243,5 @@ startOverlay.addEventListener("click", async () => {
   startOverlay.remove();
   controls.style.display = "block";
 }, { once: true });
+
+}

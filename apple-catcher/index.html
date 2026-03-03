@@ -144,6 +144,36 @@
   </style>
   <meta name="theme-color" content="#000000">
   
+  <style>
+/* ===== Jay Arcade Mobile Mode ===== */
+#jayMobileStart {
+  position: fixed;
+  inset: 0;
+  background: black;
+  color: #00ffff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 18px;
+  text-align: center;
+  z-index: 999999;
+  cursor: pointer;
+  text-shadow: 0 0 15px #00ffff;
+}
+
+/* Prevent mobile scroll issues */
+.jay-mobile html,
+.jay-mobile body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+</style>
+
 </head>
 <body>
   <div id="app"></div>
@@ -323,5 +353,44 @@
     };
     run().catch(handleError);
   </script>
+
+  <script>
+/* ===== Jay Arcade Mobile Template ===== */
+
+function isMobileDevice() {
+  return (
+    /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
+    || window.matchMedia("(pointer: coarse)").matches
+  );
+}
+
+function enterFullscreen() {
+  const el = document.documentElement;
+
+  if (el.requestFullscreen) {
+    el.requestFullscreen();
+  } else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen();
+  }
+}
+
+if (isMobileDevice()) {
+
+  document.documentElement.classList.add("jay-mobile");
+
+  const overlay = document.createElement("div");
+  overlay.id = "jayMobileStart";
+  overlay.innerHTML = "TAP TO POWER ON";
+  overlay.style.display = "flex";
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", () => {
+    enterFullscreen();
+    overlay.remove();
+  }, { once: true });
+
+}
+</script>
+
 </body>
 </html>

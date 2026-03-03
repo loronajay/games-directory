@@ -1,6 +1,10 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v3
-   Supports Per-Game Overrides
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v4
+   - Improved visuals
+   - Grid layout buttons
+   - True diagonal support
+   - Safe top RESET button
+   - Per-game overrides supported
    ========================================== */
 
 function isMobileDevice() {
@@ -37,26 +41,28 @@ if (isMobileDevice()) {
   document.body.style.overflow = "hidden";
 
   /* =============================
-     INSERT COIN OVERLAY
+     INSERT COIN SCREEN
      ============================= */
 
   const startOverlay = document.createElement("div");
-  startOverlay.style.position = "fixed";
-  startOverlay.style.inset = "0";
-  startOverlay.style.background = "black";
-  startOverlay.style.color = "#00ffff";
-  startOverlay.style.display = "flex";
-  startOverlay.style.alignItems = "center";
-  startOverlay.style.justifyContent = "center";
-  startOverlay.style.flexDirection = "column";
-  startOverlay.style.fontFamily = "monospace";
-  startOverlay.style.zIndex = "999999";
+  Object.assign(startOverlay.style, {
+    position: "fixed",
+    inset: "0",
+    background: "black",
+    color: "#00ffff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "column",
+    fontFamily: "monospace",
+    zIndex: "999999"
+  });
+
   startOverlay.innerHTML = `
-    <div style="text-align:center">
-      <h2 style="margin:0 0 20px 0;">INSERT COIN</h2>
-      <p style="margin:0;">TAP TO START</p>
-    </div>
+    <h2 style="margin:0 0 20px 0;">INSERT COIN</h2>
+    <p style="margin:0;">TAP TO START</p>
   `;
+
   document.body.appendChild(startOverlay);
 
   /* =============================
@@ -64,31 +70,38 @@ if (isMobileDevice()) {
      ============================= */
 
   const controls = document.createElement("div");
-  controls.style.position = "fixed";
-  controls.style.inset = "0";
-  controls.style.pointerEvents = "none";
-  controls.style.display = "none";
-  controls.style.zIndex = "999998";
+  Object.assign(controls.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    display: "none",
+    zIndex: "999998"
+  });
+
   document.body.appendChild(controls);
 
-  function createButton(label, bottom, left, right) {
+  function createButton(label, bottom, left, right, size = 70, isRect = false) {
     const btn = document.createElement("div");
     btn.innerText = label;
 
-    btn.style.position = "absolute";
-    btn.style.width = "70px";
-    btn.style.height = "70px";
-    btn.style.borderRadius = "50%";
-    btn.style.background = "rgba(0,255,255,0.15)";
-    btn.style.border = "2px solid #00ffff";
-    btn.style.color = "#00ffff";
-    btn.style.display = "flex";
-    btn.style.alignItems = "center";
-    btn.style.justifyContent = "center";
-    btn.style.fontSize = "16px";
-    btn.style.pointerEvents = "auto";
-    btn.style.touchAction = "none";
-    btn.style.userSelect = "none";
+    Object.assign(btn.style, {
+      position: "absolute",
+      width: isRect ? "110px" : size + "px",
+      height: isRect ? "40px" : size + "px",
+      borderRadius: isRect ? "8px" : "50%",
+      background: "rgba(0,255,255,0.12)",
+      border: "2px solid #00ffff",
+      color: "#00ffff",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: isRect ? "14px" : "20px",
+      pointerEvents: "auto",
+      touchAction: "none",
+      userSelect: "none",
+      boxShadow: "0 0 12px rgba(0,255,255,0.6)",
+      backdropFilter: "blur(4px)"
+    });
 
     btn.style.bottom = bottom;
     if (left) btn.style.left = left;
@@ -99,25 +112,35 @@ if (isMobileDevice()) {
   }
 
   /* =============================
-     D-PAD (WASD Default)
+     D-PAD (3x3 GRID STYLE)
      ============================= */
 
-  const btnLeft  = createButton("◀", "90px", "30px");
-  const btnRight = createButton("▶", "90px", "150px");
-  const btnUp    = createButton("▲", "160px", "90px");
-  const btnDown  = createButton("▼", "20px",  "90px");
+  const btnLeft  = createButton("◀", "100px", "40px");
+  const btnRight = createButton("▶", "100px", "160px");
+  const btnUp    = createButton("▲", "170px", "100px");
+  const btnDown  = createButton("▼", "30px",  "100px");
 
   /* =============================
-     FACE BUTTONS
+     FACE BUTTONS (MIRRORED GRID)
      ============================= */
 
   const btnY = createButton("Y", "170px", null, "100px");
-  const btnB = createButton("B", "100px", null, "170px");
-  const btnX = createButton("X", "100px", null, "30px");
+  const btnB = createButton("B", "100px", null, "160px");
+  const btnX = createButton("X", "100px", null, "40px");
   const btnA = createButton("A", "30px",  null, "100px");
 
-  /* RESET BUTTON */
-  const btnReset = createButton("RESET", "20px", null, "20px");
+  /* =============================
+     SAFE TOP RESET BUTTON
+     ============================= */
+
+  const btnReset = createButton("RESET", null, "50%", null, 0, true);
+  btnReset.style.top = "15px";
+  btnReset.style.left = "50%";
+  btnReset.style.transform = "translateX(-50%)";
+  btnReset.style.background = "rgba(255,0,0,0.15)";
+  btnReset.style.borderColor = "#ff4444";
+  btnReset.style.color = "#ff4444";
+  btnReset.style.boxShadow = "0 0 10px rgba(255,0,0,0.6)";
 
   /* =============================
      DEFAULT KEY MAP
@@ -135,10 +158,6 @@ if (isMobileDevice()) {
     reset: " "
   };
 
-  /* =============================
-     PER-GAME OVERRIDES
-     ============================= */
-
   if (window.JAY_GAME_CONFIG?.keyOverrides) {
     keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
   }
@@ -155,24 +174,40 @@ if (isMobileDevice()) {
     reset: btnReset
   };
 
+  /* =============================
+     MULTI-TOUCH SUPPORT
+     ============================= */
+
   Object.keys(buttonMap).forEach(name => {
     const btn = buttonMap[name];
     const key = keyMap[name];
 
     btn.addEventListener("pointerdown", e => {
       e.preventDefault();
+      btn.style.background = "rgba(0,255,255,0.35)";
       simulateKey(key, "keydown");
     });
 
     btn.addEventListener("pointerup", e => {
       e.preventDefault();
+      btn.style.background = "rgba(0,255,255,0.12)";
+      simulateKey(key, "keyup");
+    });
+
+    btn.addEventListener("pointerleave", () => {
+      btn.style.background = "rgba(0,255,255,0.12)";
       simulateKey(key, "keyup");
     });
 
     btn.addEventListener("pointercancel", () => {
+      btn.style.background = "rgba(0,255,255,0.12)";
       simulateKey(key, "keyup");
     });
   });
+
+  /* =============================
+     START GAME
+     ============================= */
 
   startOverlay.addEventListener("click", async () => {
     enterFullscreen();

@@ -1,32 +1,30 @@
 // ==============================
-// JAY MOBILE CONTROLLER SYSTEM v14
+// JAY MOBILE CONTROLLER SYSTEM v15
 // ==============================
 
 (function () {
 
-  const VERSION = "v14";
+  const VERSION = "v15";
   const activeTouches = new Map();
   const pressedKeys = new Set();
 
   // ------------------------------
-  // Default key layout
+  // DEFAULT KEY MAP
   // ------------------------------
 
   let keyMap = {
-    left: "ArrowLeft",
-    right: "ArrowRight",
-    up: "ArrowUp",
-    down: "ArrowDown",
+    left: "a",        // D-pad left calls "a"
+    right: "d",       // D-pad right calls "d"
+    up: "w",
+    down: "s",
     a: "z",
     b: "x",
     x: "c",
-    y: "v",
-    l: "a",
-    r: "s"
+    y: "v"
   };
 
   // ------------------------------
-  // Apply per-game overrides
+  // APPLY PER-GAME OVERRIDES
   // ------------------------------
 
   if (window.JAY_GAME_CONFIG?.keyOverrides) {
@@ -34,14 +32,14 @@
   }
 
   // ------------------------------
-  // Proper key simulation
+  // KEY SIMULATION (Proper Mapping)
   // ------------------------------
 
   function simulateKey(key, type) {
 
     let code = key;
 
-    // Proper code mapping for letters
+    // Proper letter handling
     if (key.length === 1 && key.match(/[a-z]/i)) {
       code = "Key" + key.toUpperCase();
     }
@@ -71,7 +69,7 @@
   }
 
   // ------------------------------
-  // Create Version Display
+  // VERSION BADGE
   // ------------------------------
 
   function createVersionBadge() {
@@ -89,7 +87,7 @@
   }
 
   // ------------------------------
-  // Button Creation
+  // BUTTON CREATION
   // ------------------------------
 
   function createButton(id, label, key, styles) {
@@ -116,14 +114,14 @@
     btn.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       activeTouches.set(e.pointerId, key);
-      pressKey(keyMap[key] || key);
+      pressKey(keyMap[key]);
     });
 
     btn.addEventListener("pointerup", (e) => {
       e.preventDefault();
       const mapped = activeTouches.get(e.pointerId);
       if (mapped) {
-        releaseKey(keyMap[mapped] || mapped);
+        releaseKey(keyMap[mapped]);
         activeTouches.delete(e.pointerId);
       }
     });
@@ -131,7 +129,7 @@
     btn.addEventListener("pointercancel", (e) => {
       const mapped = activeTouches.get(e.pointerId);
       if (mapped) {
-        releaseKey(keyMap[mapped] || mapped);
+        releaseKey(keyMap[mapped]);
         activeTouches.delete(e.pointerId);
       }
     });
@@ -140,14 +138,17 @@
   }
 
   // ------------------------------
-  // Initialize Controller
+  // INIT CONTROLLER
   // ------------------------------
 
   window.addEventListener("DOMContentLoaded", () => {
 
     createVersionBadge();
 
-    // D-Pad
+    // ------------------
+    // LEFT SIDE D-PAD
+    // ------------------
+
     createButton("btn-left", "◀", "left", {
       bottom: "80px",
       left: "40px",
@@ -176,31 +177,35 @@
       height: "60px"
     });
 
-    // Action Buttons
-    createButton("btn-a", "A", "a", {
-      bottom: "80px",
-      right: "140px",
-      width: "60px",
-      height: "60px"
-    });
+    // ------------------
+    // RIGHT SIDE ACTION PAD
+    // Mirrored Diamond Layout
+    // ------------------
 
-    createButton("btn-b", "B", "b", {
+    createButton("btn-y", "Y", "y", {
       bottom: "140px",
       right: "90px",
       width: "60px",
       height: "60px"
     });
 
-    createButton("btn-x", "X", "x", {
-      bottom: "20px",
-      right: "90px",
+    createButton("btn-b", "B", "b", {
+      bottom: "80px",
+      right: "140px",
       width: "60px",
       height: "60px"
     });
 
-    createButton("btn-y", "Y", "y", {
+    createButton("btn-x", "X", "x", {
       bottom: "80px",
       right: "40px",
+      width: "60px",
+      height: "60px"
+    });
+
+    createButton("btn-a", "A", "a", {
+      bottom: "20px",
+      right: "90px",
       width: "60px",
       height: "60px"
     });

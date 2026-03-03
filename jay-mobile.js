@@ -114,13 +114,11 @@ if (window.JAY_GAME_CONFIG?.keyOverrides) {
 const keyboard = window.vm.runtime.ioDevices.keyboard;
 
 function pressKey(key) {
-  const normalized = key === " " ? "space" : key;
-  keyboard.postData({ key: normalized, isDown: true });
+  keyboard.postData({ key, isDown: true });
 }
 
 function releaseKey(key) {
-  const normalized = key === " " ? "space" : key;
-  keyboard.postData({ key: normalized, isDown: false });
+  keyboard.postData({ key, isDown: false });
 }
 
 /* =============================

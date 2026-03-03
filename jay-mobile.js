@@ -1,11 +1,11 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v7
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v8
    - True multi-touch
    - Slide between buttons
    - Diagonal support
    - No reset button
    - Per-game overrides supported
-   - Canvas touch passthrough fixed
+   - Canvas passthrough safe
    ========================================== */
 
 function isMobileDevice() {
@@ -29,7 +29,7 @@ async function lockLandscape() {
 
 function simulateKey(key, type) {
   const event = new KeyboardEvent(type, {
-    key,
+    key: key,
     code: key,
     bubbles: true
   });
@@ -76,7 +76,7 @@ if (isMobileDevice()) {
     inset: "0",
     display: "none",
     zIndex: "999998",
-    pointerEvents: "none" // 👈 CRITICAL FIX (allows game UI to work)
+    pointerEvents: "none" // allow game UI clicks through empty space
   });
 
   document.body.appendChild(controls);
@@ -102,7 +102,7 @@ if (isMobileDevice()) {
       userSelect: "none",
       boxShadow: "0 0 12px rgba(0,255,255,0.6)",
       backdropFilter: "blur(4px)",
-      pointerEvents: "auto" // buttons still receive touches
+      pointerEvents: "auto"
     });
 
     btn.style.bottom = bottom;
@@ -114,7 +114,7 @@ if (isMobileDevice()) {
   }
 
   /* =============================
-     D-PAD (GRID STYLE)
+     D-PAD (Grid Layout)
      ============================= */
 
   createButton("left",  "◀", "100px", "40px");
@@ -123,7 +123,7 @@ if (isMobileDevice()) {
   createButton("down",  "▼", "30px",  "100px");
 
   /* =============================
-     FACE BUTTONS (MIRRORED GRID)
+     FACE BUTTONS (Mirrored Grid)
      ============================= */
 
   createButton("y", "Y", "170px", null, "100px");
@@ -132,7 +132,7 @@ if (isMobileDevice()) {
   createButton("a", "A", "30px",  null, "100px");
 
   /* =============================
-     KEY MAP (Default)
+     DEFAULT KEY MAP
      ============================= */
 
   let keyMap = {
@@ -150,8 +150,11 @@ if (isMobileDevice()) {
     keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
   }
 
-  const activePointers = new Map();
-  const activeKeys = new Set();
+  /* =============================
+     MULTI-TOUCH ENGINE
+     ============================= */
+
+  const activePointers = new Map(); // pointerId -> buttonName
 
   function updateButtonState(name, pressed) {
     const btn = [...controls.children].find(b => b.dataset.name === name);
@@ -162,43 +165,54 @@ if (isMobileDevice()) {
       : "rgba(0,255,255,0.12)";
   }
 
-  function handlePointer(e) {
-    const target = document.elementFromPoint(e.clientX, e.clientY);
-    const name = target?.dataset?.name;
+  function pressButton(pointerId, name) {
+    if (!name) return;
 
-    const pointerId = e.pointerId;
-    const previous = activePointers.get(pointerId);
-
-    if (previous && previous !== name) {
-      simulateKey(keyMap[previous], "keyup");
-      updateButtonState(previous, false);
-      activeKeys.delete(previous);
-    }
-
-    if (name && !activeKeys.has(name)) {
-      simulateKey(keyMap[name], "keydown");
-      updateButtonState(name, true);
-      activeKeys.add(name);
-    }
-
+    simulateKey(keyMap[name], "keydown");
+    updateButtonState(name, true);
     activePointers.set(pointerId, name);
   }
 
-  function releasePointer(e) {
-    const pointerId = e.pointerId;
+  function releaseButton(pointerId) {
     const name = activePointers.get(pointerId);
     if (!name) return;
 
     simulateKey(keyMap[name], "keyup");
     updateButtonState(name, false);
-    activeKeys.delete(name);
     activePointers.delete(pointerId);
   }
 
-  controls.addEventListener("pointerdown", handlePointer);
-  controls.addEventListener("pointermove", handlePointer);
-  controls.addEventListener("pointerup", releasePointer);
-  controls.addEventListener("pointercancel", releasePointer);
+  controls.addEventListener("pointerdown", (e) => {
+    if (!e.target.dataset.name) return;
+
+    e.target.setPointerCapture(e.pointerId); // critical for multi-touch
+    pressButton(e.pointerId, e.target.dataset.name);
+  });
+
+  controls.addEventListener("pointermove", (e) => {
+    const element = document.elementFromPoint(e.clientX, e.clientY);
+    const newName = element?.dataset?.name;
+    const oldName = activePointers.get(e.pointerId);
+
+    if (newName !== oldName) {
+      releaseButton(e.pointerId);
+      if (newName) {
+        pressButton(e.pointerId, newName);
+      }
+    }
+  });
+
+  controls.addEventListener("pointerup", (e) => {
+    releaseButton(e.pointerId);
+  });
+
+  controls.addEventListener("pointercancel", (e) => {
+    releaseButton(e.pointerId);
+  });
+
+  /* =============================
+     START GAME
+     ============================= */
 
   startOverlay.addEventListener("click", async () => {
     enterFullscreen();

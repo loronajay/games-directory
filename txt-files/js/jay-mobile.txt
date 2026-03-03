@@ -1,17 +1,18 @@
+jay-mobile.js
+
+
+
+
+
+
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM
-   - True independent multi-touch
-   - Proper hold logic
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v9
+   - True multi-touch
+   - Proper hold logic (no accidental releases)
    - Slide between buttons
    - Diagonal support
    - Per-game key overrides supported
    ========================================== */
-
-/* =============================
-   🔢 MANUAL VERSION CONTROL
-   Change this each update
-   ============================= */
-const JAY_MOBILE_VERSION = "v10.0";
 
 function isMobileDevice() {
   return (
@@ -45,27 +46,6 @@ if (isMobileDevice()) {
 
   document.documentElement.style.overflow = "hidden";
   document.body.style.overflow = "hidden";
-
-  /* =============================
-     VERSION DISPLAY (TOP RIGHT)
-     ============================= */
-
-  const versionBadge = document.createElement("div");
-  versionBadge.innerText = JAY_MOBILE_VERSION;
-
-  Object.assign(versionBadge.style, {
-    position: "fixed",
-    top: "8px",
-    right: "12px",
-    color: "#00ffff",
-    fontFamily: "monospace",
-    fontSize: "12px",
-    opacity: "0.7",
-    zIndex: "1000000",
-    pointerEvents: "none"
-  });
-
-  document.body.appendChild(versionBadge);
 
   /* =============================
      START OVERLAY
@@ -173,8 +153,8 @@ if (isMobileDevice()) {
      TRUE MULTI-HOLD ENGINE
      ============================= */
 
-  const activePointers = new Map();
-  const buttonPressCounts = {};
+  const activePointers = new Map();     // pointerId → buttonName
+  const buttonPressCounts = {};        // buttonName → number of fingers
 
   function updateButtonVisual(name, pressed) {
     const btn = [...controls.children].find(b => b.dataset.name === name);
@@ -190,6 +170,8 @@ if (isMobileDevice()) {
 
     const current = activePointers.get(pointerId);
     if (current === name) return;
+
+    releaseButton(pointerId);
 
     activePointers.set(pointerId, name);
 
@@ -224,18 +206,8 @@ if (isMobileDevice()) {
 
   controls.addEventListener("pointermove", (e) => {
     const element = document.elementFromPoint(e.clientX, e.clientY);
-    const newName = element?.dataset?.name;
-    const currentName = activePointers.get(e.pointerId);
-
-    if (!newName) {
-      releaseButton(e.pointerId);
-      return;
-    }
-
-    if (newName !== currentName) {
-      releaseButton(e.pointerId);
-      pressButton(e.pointerId, newName);
-    }
+    const name = element?.dataset?.name;
+    pressButton(e.pointerId, name);
   });
 
   controls.addEventListener("pointerup", (e) => {

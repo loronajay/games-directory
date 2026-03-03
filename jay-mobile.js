@@ -1,17 +1,15 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM
-   - True independent multi-touch
-   - Proper hold logic
-   - Slide between buttons
-   - Diagonal support
-   - Per-game key overrides supported
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v11
+   - True controller behavior
+   - Independent multi-touch
+   - No accidental releases
+   - TurboWarp compatible
    ========================================== */
 
 /* =============================
    🔢 MANUAL VERSION CONTROL
-   Change this each update
    ============================= */
-const JAY_MOBILE_VERSION = "v10.0";
+const JAY_MOBILE_VERSION = "v11.0";
 
 function isMobileDevice() {
   return (
@@ -38,6 +36,9 @@ function simulateKey(key, type) {
     code: key,
     bubbles: true
   });
+
+  // Dispatch to both for maximum compatibility
+  window.dispatchEvent(event);
   document.dispatchEvent(event);
 }
 
@@ -47,7 +48,7 @@ if (isMobileDevice()) {
   document.body.style.overflow = "hidden";
 
   /* =============================
-     VERSION DISPLAY (TOP RIGHT)
+     VERSION BADGE
      ============================= */
 
   const versionBadge = document.createElement("div");
@@ -170,10 +171,10 @@ if (isMobileDevice()) {
   }
 
   /* =============================
-     TRUE MULTI-HOLD ENGINE
+     TRUE CONTROLLER ENGINE v11
      ============================= */
 
-  const activePointers = new Map();
+  const activePointers = new Map();   // pointerId → buttonName
   const buttonPressCounts = {};
 
   function updateButtonVisual(name, pressed) {
@@ -190,6 +191,10 @@ if (isMobileDevice()) {
 
     const current = activePointers.get(pointerId);
     if (current === name) return;
+
+    if (current) {
+      releaseButton(pointerId);
+    }
 
     activePointers.set(pointerId, name);
 
@@ -225,15 +230,9 @@ if (isMobileDevice()) {
   controls.addEventListener("pointermove", (e) => {
     const element = document.elementFromPoint(e.clientX, e.clientY);
     const newName = element?.dataset?.name;
-    const currentName = activePointers.get(e.pointerId);
+    const current = activePointers.get(e.pointerId);
 
-    if (!newName) {
-      releaseButton(e.pointerId);
-      return;
-    }
-
-    if (newName !== currentName) {
-      releaseButton(e.pointerId);
+    if (newName && newName !== current) {
       pressButton(e.pointerId, newName);
     }
   });

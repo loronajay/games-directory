@@ -1,10 +1,11 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v5
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v7
    - True multi-touch
    - Slide between buttons
    - Diagonal support
-   - Safe reset button
-   - Per-game overrides
+   - No reset button
+   - Per-game overrides supported
+   - Canvas touch passthrough fixed
    ========================================== */
 
 function isMobileDevice() {
@@ -41,7 +42,7 @@ if (isMobileDevice()) {
   document.body.style.overflow = "hidden";
 
   /* =============================
-     INSERT COIN
+     INSERT COIN SCREEN
      ============================= */
 
   const startOverlay = document.createElement("div");
@@ -74,32 +75,34 @@ if (isMobileDevice()) {
     position: "fixed",
     inset: "0",
     display: "none",
-    zIndex: "999998"
+    zIndex: "999998",
+    pointerEvents: "none" // 👈 CRITICAL FIX (allows game UI to work)
   });
 
   document.body.appendChild(controls);
 
-  function createButton(name, label, bottom, left, right, size = 70, rect = false) {
+  function createButton(name, label, bottom, left, right, size = 70) {
     const btn = document.createElement("div");
     btn.dataset.name = name;
     btn.innerText = label;
 
     Object.assign(btn.style, {
       position: "absolute",
-      width: rect ? "110px" : size + "px",
-      height: rect ? "40px" : size + "px",
-      borderRadius: rect ? "8px" : "50%",
+      width: size + "px",
+      height: size + "px",
+      borderRadius: "50%",
       background: "rgba(0,255,255,0.12)",
       border: "2px solid #00ffff",
       color: "#00ffff",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontSize: rect ? "14px" : "20px",
+      fontSize: "20px",
       touchAction: "none",
       userSelect: "none",
       boxShadow: "0 0 12px rgba(0,255,255,0.6)",
-      backdropFilter: "blur(4px)"
+      backdropFilter: "blur(4px)",
+      pointerEvents: "auto" // buttons still receive touches
     });
 
     btn.style.bottom = bottom;
@@ -110,28 +113,27 @@ if (isMobileDevice()) {
     return btn;
   }
 
-  /* D-PAD */
+  /* =============================
+     D-PAD (GRID STYLE)
+     ============================= */
+
   createButton("left",  "◀", "100px", "40px");
   createButton("right", "▶", "100px", "160px");
   createButton("up",    "▲", "170px", "100px");
   createButton("down",  "▼", "30px",  "100px");
 
-  /* FACE BUTTONS */
+  /* =============================
+     FACE BUTTONS (MIRRORED GRID)
+     ============================= */
+
   createButton("y", "Y", "170px", null, "100px");
   createButton("b", "B", "100px", null, "160px");
   createButton("x", "X", "100px", null, "40px");
   createButton("a", "A", "30px",  null, "100px");
 
-  /* RESET */
-  const resetBtn = createButton("reset", "RESET", null, "50%", null, 0, true);
-  resetBtn.style.top = "15px";
-  resetBtn.style.left = "50%";
-  resetBtn.style.transform = "translateX(-50%)";
-  resetBtn.style.background = "rgba(255,0,0,0.15)";
-  resetBtn.style.borderColor = "#ff4444";
-  resetBtn.style.color = "#ff4444";
-
-  /* KEY MAP */
+  /* =============================
+     KEY MAP (Default)
+     ============================= */
 
   let keyMap = {
     left: "a",
@@ -141,8 +143,7 @@ if (isMobileDevice()) {
     a: "c",
     b: "v",
     x: "b",
-    y: "f",
-    reset: " "
+    y: "f"
   };
 
   if (window.JAY_GAME_CONFIG?.keyOverrides) {

@@ -1,11 +1,10 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v8
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v9
    - True multi-touch
+   - Proper hold logic (no accidental releases)
    - Slide between buttons
    - Diagonal support
-   - No reset button
-   - Per-game overrides supported
-   - Canvas passthrough safe
+   - Per-game key overrides supported
    ========================================== */
 
 function isMobileDevice() {
@@ -42,7 +41,7 @@ if (isMobileDevice()) {
   document.body.style.overflow = "hidden";
 
   /* =============================
-     INSERT COIN SCREEN
+     START OVERLAY
      ============================= */
 
   const startOverlay = document.createElement("div");
@@ -76,7 +75,7 @@ if (isMobileDevice()) {
     inset: "0",
     display: "none",
     zIndex: "999998",
-    pointerEvents: "none" // allow game UI clicks through empty space
+    pointerEvents: "none"
   });
 
   document.body.appendChild(controls);
@@ -110,29 +109,22 @@ if (isMobileDevice()) {
     if (right) btn.style.right = right;
 
     controls.appendChild(btn);
-    return btn;
   }
 
-  /* =============================
-     D-PAD (Grid Layout)
-     ============================= */
-
+  /* D-PAD */
   createButton("left",  "◀", "100px", "40px");
   createButton("right", "▶", "100px", "160px");
   createButton("up",    "▲", "170px", "100px");
   createButton("down",  "▼", "30px",  "100px");
 
-  /* =============================
-     FACE BUTTONS (Mirrored Grid)
-     ============================= */
-
+  /* FACE BUTTONS */
   createButton("y", "Y", "170px", null, "100px");
   createButton("b", "B", "100px", null, "160px");
   createButton("x", "X", "100px", null, "40px");
   createButton("a", "A", "30px",  null, "100px");
 
   /* =============================
-     DEFAULT KEY MAP
+     KEY MAP
      ============================= */
 
   let keyMap = {
@@ -151,12 +143,13 @@ if (isMobileDevice()) {
   }
 
   /* =============================
-     MULTI-TOUCH ENGINE
+     TRUE MULTI-HOLD ENGINE
      ============================= */
 
-  const activePointers = new Map(); // pointerId -> buttonName
+  const activePointers = new Map();     // pointerId → buttonName
+  const buttonPressCounts = {};        // buttonName → number of fingers
 
-  function updateButtonState(name, pressed) {
+  function updateButtonVisual(name, pressed) {
     const btn = [...controls.children].find(b => b.dataset.name === name);
     if (!btn) return;
 
@@ -168,38 +161,46 @@ if (isMobileDevice()) {
   function pressButton(pointerId, name) {
     if (!name) return;
 
-    simulateKey(keyMap[name], "keydown");
-    updateButtonState(name, true);
+    const current = activePointers.get(pointerId);
+    if (current === name) return;
+
+    releaseButton(pointerId);
+
     activePointers.set(pointerId, name);
+
+    buttonPressCounts[name] = (buttonPressCounts[name] || 0) + 1;
+
+    if (buttonPressCounts[name] === 1) {
+      simulateKey(keyMap[name], "keydown");
+      updateButtonVisual(name, true);
+    }
   }
 
   function releaseButton(pointerId) {
     const name = activePointers.get(pointerId);
     if (!name) return;
 
-    simulateKey(keyMap[name], "keyup");
-    updateButtonState(name, false);
+    buttonPressCounts[name]--;
+
+    if (buttonPressCounts[name] <= 0) {
+      simulateKey(keyMap[name], "keyup");
+      updateButtonVisual(name, false);
+      buttonPressCounts[name] = 0;
+    }
+
     activePointers.delete(pointerId);
   }
 
   controls.addEventListener("pointerdown", (e) => {
     if (!e.target.dataset.name) return;
-
-    e.target.setPointerCapture(e.pointerId); // critical for multi-touch
+    e.target.setPointerCapture(e.pointerId);
     pressButton(e.pointerId, e.target.dataset.name);
   });
 
   controls.addEventListener("pointermove", (e) => {
     const element = document.elementFromPoint(e.clientX, e.clientY);
-    const newName = element?.dataset?.name;
-    const oldName = activePointers.get(e.pointerId);
-
-    if (newName !== oldName) {
-      releaseButton(e.pointerId);
-      if (newName) {
-        pressButton(e.pointerId, newName);
-      }
-    }
+    const name = element?.dataset?.name;
+    pressButton(e.pointerId, name);
   });
 
   controls.addEventListener("pointerup", (e) => {
@@ -209,10 +210,6 @@ if (isMobileDevice()) {
   controls.addEventListener("pointercancel", (e) => {
     releaseButton(e.pointerId);
   });
-
-  /* =============================
-     START GAME
-     ============================= */
 
   startOverlay.addEventListener("click", async () => {
     enterFullscreen();

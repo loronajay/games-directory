@@ -119,17 +119,15 @@ function createButton(name, label, bottom, left, right, size = 70) {
   controls.appendChild(btn);
 }
 
-/* D-PAD */
-createButton("left",  "◀", "100px", "40px");
-createButton("right", "▶", "100px", "160px");
-createButton("up",    "▲", "170px", "100px");
-createButton("down",  "▼", "30px",  "100px");
+createButton("left",  "◀", "100px", "70px");
+createButton("right", "▶", "100px", "130px");
+createButton("up",    "▲", "150px", "100px");
+createButton("down",  "▼", "50px",  "100px");
 
-/* FACE BUTTONS (mirrored layout preserved) */
-createButton("y", "Y", "170px", null, "100px");
-createButton("b", "B", "100px", null, "160px");
-createButton("x", "X", "100px", null, "40px");
-createButton("a", "A", "30px",  null, "100px");
+createButton("y", "Y", "150px", null, "100px");
+createButton("b", "B", "100px", null, "130px");
+createButton("x", "X", "100px", null, "70px");
+createButton("a", "A", "50px",  null, "100px");
 
 /* =============================
    KEY MAP

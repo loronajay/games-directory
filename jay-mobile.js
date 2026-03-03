@@ -1,12 +1,15 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v10
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v11
    - True multi-touch
    - Multi-button per finger
    - Proper hold logic
    - Slide support
    - Diagonals supported
-   - Per-game key overrides
+   - Version stamp (dev)
    ========================================== */
+
+const DEV_MODE = true;
+const JAY_MOBILE_VERSION = "v11-" + new Date().toISOString();
 
 function isMobileDevice() {
   return (
@@ -81,6 +84,33 @@ if (isMobileDevice()) {
 
   document.body.appendChild(controls);
 
+  /* =============================
+     VERSION DISPLAY (DEV ONLY)
+     ============================= */
+
+  if (DEV_MODE) {
+    const versionLabel = document.createElement("div");
+    versionLabel.innerText = JAY_MOBILE_VERSION;
+
+    Object.assign(versionLabel.style, {
+      position: "fixed",
+      top: "8px",
+      right: "10px",
+      color: "#00ffff",
+      fontFamily: "monospace",
+      fontSize: "12px",
+      background: "rgba(0,0,0,0.7)",
+      padding: "4px 8px",
+      border: "1px solid #00ffff",
+      borderRadius: "6px",
+      zIndex: "99999999",
+      pointerEvents: "none",
+      boxShadow: "0 0 8px rgba(0,255,255,0.6)"
+    });
+
+    document.body.appendChild(versionLabel);
+  }
+
   function createButton(name, label, bottom, left, right, size = 70) {
     const btn = document.createElement("div");
     btn.dataset.name = name;
@@ -124,10 +154,6 @@ if (isMobileDevice()) {
   createButton("x", "X", "100px", null, "40px");
   createButton("a", "A", "30px",  null, "100px");
 
-  /* =============================
-     KEY MAP
-     ============================= */
-
   let keyMap = {
     left: "a",
     right: "d",
@@ -147,10 +173,7 @@ if (isMobileDevice()) {
      TRUE MULTI-HOLD ENGINE
      ============================= */
 
-  // pointerId → Set of buttonNames
   const activePointers = new Map();
-
-  // buttonName → total number of presses
   const buttonPressCounts = {};
 
   function updateButtonVisual(name, pressed) {
@@ -170,7 +193,6 @@ if (isMobileDevice()) {
     }
 
     const pressedSet = activePointers.get(pointerId);
-
     if (pressedSet.has(name)) return;
 
     pressedSet.add(name);
@@ -202,7 +224,6 @@ if (isMobileDevice()) {
 
   controls.addEventListener("pointerdown", (e) => {
     if (!e.target.dataset.name) return;
-
     e.target.setPointerCapture(e.pointerId);
     pressButton(e.pointerId, e.target.dataset.name);
   });

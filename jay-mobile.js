@@ -1,11 +1,13 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v13
+   JAY ARCADE MOBILE CONTROLLER v14
    - Safe VM wait
    - Direct TurboWarp postData injection
-   - True controller behavior
+   - True multi-touch controller behavior
    ========================================== */
 
-const JAY_MOBILE_VERSION = "v13"; // change manually per deploy
+(function () {
+
+const JAY_MOBILE_VERSION = "v14"; // change manually per deploy
 
 function isMobile() {
   return (
@@ -14,7 +16,9 @@ function isMobile() {
   );
 }
 
-if (!isMobile()) return;
+if (!isMobile()) {
+  return; // now legal because we're inside a function
+}
 
 function waitForVM(callback) {
   const interval = setInterval(() => {
@@ -121,7 +125,7 @@ createButton("right", "▶", "100px", "160px");
 createButton("up",    "▲", "170px", "100px");
 createButton("down",  "▼", "30px",  "100px");
 
-/* FACE BUTTONS */
+/* FACE BUTTONS (mirrored layout preserved) */
 createButton("y", "Y", "170px", null, "100px");
 createButton("b", "B", "100px", null, "160px");
 createButton("x", "X", "100px", null, "40px");
@@ -245,3 +249,5 @@ startOverlay.addEventListener("click", async () => {
 }, { once: true });
 
 }
+
+})();

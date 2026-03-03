@@ -1,10 +1,11 @@
 /* ==========================================
-   JAY ARCADE UNIVERSAL MOBILE SYSTEM v9
+   JAY ARCADE UNIVERSAL MOBILE SYSTEM v10
    - True multi-touch
-   - Proper hold logic (no accidental releases)
-   - Slide between buttons
-   - Diagonal support
-   - Per-game key overrides supported
+   - Multi-button per finger
+   - Proper hold logic
+   - Slide support
+   - Diagonals supported
+   - Per-game key overrides
    ========================================== */
 
 function isMobileDevice() {
@@ -146,8 +147,11 @@ if (isMobileDevice()) {
      TRUE MULTI-HOLD ENGINE
      ============================= */
 
-  const activePointers = new Map();     // pointerId → buttonName
-  const buttonPressCounts = {};        // buttonName → number of fingers
+  // pointerId → Set of buttonNames
+  const activePointers = new Map();
+
+  // buttonName → total number of presses
+  const buttonPressCounts = {};
 
   function updateButtonVisual(name, pressed) {
     const btn = [...controls.children].find(b => b.dataset.name === name);
@@ -161,12 +165,15 @@ if (isMobileDevice()) {
   function pressButton(pointerId, name) {
     if (!name) return;
 
-    const current = activePointers.get(pointerId);
-    if (current === name) return;
+    if (!activePointers.has(pointerId)) {
+      activePointers.set(pointerId, new Set());
+    }
 
-    releaseButton(pointerId);
+    const pressedSet = activePointers.get(pointerId);
 
-    activePointers.set(pointerId, name);
+    if (pressedSet.has(name)) return;
+
+    pressedSet.add(name);
 
     buttonPressCounts[name] = (buttonPressCounts[name] || 0) + 1;
 
@@ -176,23 +183,26 @@ if (isMobileDevice()) {
     }
   }
 
-  function releaseButton(pointerId) {
-    const name = activePointers.get(pointerId);
-    if (!name) return;
+  function releaseAllFromPointer(pointerId) {
+    const pressedSet = activePointers.get(pointerId);
+    if (!pressedSet) return;
 
-    buttonPressCounts[name]--;
+    pressedSet.forEach(name => {
+      buttonPressCounts[name]--;
 
-    if (buttonPressCounts[name] <= 0) {
-      simulateKey(keyMap[name], "keyup");
-      updateButtonVisual(name, false);
-      buttonPressCounts[name] = 0;
-    }
+      if (buttonPressCounts[name] <= 0) {
+        simulateKey(keyMap[name], "keyup");
+        updateButtonVisual(name, false);
+        buttonPressCounts[name] = 0;
+      }
+    });
 
     activePointers.delete(pointerId);
   }
 
   controls.addEventListener("pointerdown", (e) => {
     if (!e.target.dataset.name) return;
+
     e.target.setPointerCapture(e.pointerId);
     pressButton(e.pointerId, e.target.dataset.name);
   });
@@ -200,15 +210,21 @@ if (isMobileDevice()) {
   controls.addEventListener("pointermove", (e) => {
     const element = document.elementFromPoint(e.clientX, e.clientY);
     const name = element?.dataset?.name;
+
+    if (!name) {
+      releaseAllFromPointer(e.pointerId);
+      return;
+    }
+
     pressButton(e.pointerId, name);
   });
 
   controls.addEventListener("pointerup", (e) => {
-    releaseButton(e.pointerId);
+    releaseAllFromPointer(e.pointerId);
   });
 
   controls.addEventListener("pointercancel", (e) => {
-    releaseButton(e.pointerId);
+    releaseAllFromPointer(e.pointerId);
   });
 
   startOverlay.addEventListener("click", async () => {

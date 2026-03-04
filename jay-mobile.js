@@ -142,7 +142,8 @@ Object.assign(dpad.style, {
   borderRadius: "50%",
   border: "2px solid #00ffff",
   boxShadow: "0 0 15px rgba(0,255,255,0.5)",
-  background: "rgba(0,255,255,0.08)",
+  background: "rgba(0,255,255,0.15)",
+  backdropFilter: "blur(3px)",
   touchAction: "none",
   pointerEvents: "auto"
 });
@@ -221,30 +222,27 @@ function createButton(name, label, bottom, left, right) {
   btn.innerText = label;
 
   Object.assign(btn.style, {
-  position: "absolute",
-  bottom: bottom,
-  left: left,
-  right: right,
-  width: "74px",
-  height: "74px",
-  borderRadius: "50%",
-  background: "radial-gradient(circle at 30% 30%, #00ffff, #008b8b)",
-  border: "3px solid #00ffff",
-  color: "#001f1f",
-  fontWeight: "bold",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "22px",
-  touchAction: "none",
-  pointerEvents: "auto",
-  boxShadow: `
-    0 4px 0 #004f4f,
-    0 6px 15px rgba(0,255,255,0.6),
-    inset 0 2px 6px rgba(255,255,255,0.4)
-  `,
-  transition: "transform 0.05s ease"
-});
+    position: "absolute",
+    bottom: bottom,
+    left: left,
+    right: right,
+    width: "74px",
+    height: "74px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle at 30% 30%, rgba(0,255,255,0.45), rgba(0,139,139,0.35))",
+    border: "2px solid rgba(0,255,255,0.7)",
+    color: "rgba(0,255,255,0.9)",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "22px",
+    touchAction: "none",
+    pointerEvents: "auto",
+    backdropFilter: "blur(2px)",
+    boxShadow: "0 0 12px rgba(0,255,255,0.4)",
+    transition: "transform 0.05s ease, background 0.1s ease"
+  });
 
 btn.addEventListener("pointerdown", () => {
   btn.style.transform = "translateY(4px)";
@@ -298,24 +296,9 @@ function positionScanlineButton() {
 
   const rect = canvas.getBoundingClientRect();
 
-  const leftBorderWidth = rect.left;
-  const topBorderHeight = rect.top;
-
-  // If there is left border space, anchor inside it
-  if (leftBorderWidth > 0) {
-    scanlineBtn.style.left = "0px";
-    scanlineBtn.style.top = "0px";
-  } 
-  // If no left border but there is top border, anchor there
-  else if (topBorderHeight > 0) {
-    scanlineBtn.style.left = "0px";
-    scanlineBtn.style.top = "0px";
-  } 
-  // If truly full-bleed (rare), tuck slightly inward
-  else {
-    scanlineBtn.style.left = "8px";
-    scanlineBtn.style.top = "8px";
-  }
+  // Snap directly to the canvas' top-left corner
+  scanlineBtn.style.left = rect.left + "px";
+  scanlineBtn.style.top = rect.top + "px";
 }
 
 // Initial positioning

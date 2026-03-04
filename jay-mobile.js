@@ -150,6 +150,49 @@ Object.assign(dpad.style, {
 
 controls.appendChild(dpad);
 
+/* =============================
+   8-DIRECTION VISUAL ARROWS
+   ============================= */
+
+const arrowLayer = document.createElement("div");
+Object.assign(arrowLayer.style, {
+  position: "absolute",
+  inset: "0",
+  pointerEvents: "none"
+});
+
+dpad.appendChild(arrowLayer);
+
+function createArrow(symbol, left, top) {
+  const arrow = document.createElement("div");
+  arrow.innerText = symbol;
+
+  Object.assign(arrow.style, {
+    position: "absolute",
+    left: left,
+    top: top,
+    transform: "translate(-50%, -50%)",
+    fontSize: "20px",
+    fontFamily: "monospace",
+    color: "rgba(0,255,255,0.85)",
+    userSelect: "none"
+  });
+
+  arrowLayer.appendChild(arrow);
+}
+
+/* Cardinal */
+createArrow("↑", "50%", "15%");
+createArrow("↓", "50%", "85%");
+createArrow("←", "15%", "50%");
+createArrow("→", "85%", "50%");
+
+/* Diagonal */
+createArrow("↖", "20%", "20%");
+createArrow("↗", "80%", "20%");
+createArrow("↙", "20%", "80%");
+createArrow("↘", "80%", "80%");
+
 let currentDirections = new Set();
 const DEAD_ZONE = 20;
 const AXIS_THRESHOLD = 25;

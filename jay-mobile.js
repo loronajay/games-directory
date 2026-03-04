@@ -94,7 +94,7 @@ Object.assign(controls.style, {
   userSelect: "none",
   webkitUserSelect: "none",
   webkitTouchCallout: "none"
-  
+
 });
 document.body.appendChild(controls);
 
@@ -156,12 +156,32 @@ Object.assign(dpad.style, {
   border: "2px solid rgba(0,255,255,0.7)",
   boxShadow: "none",
   background: "transparent",
-  backdropFilter: "blur(3px)",
+  backdropFilter: "blur(1px)",
   touchAction: "none",
   pointerEvents: "auto"
 });
 
 controls.appendChild(dpad);
+
+/* =============================
+   DPAD THUMB INDICATOR
+   ============================= */
+
+const thumb = document.createElement("div");
+
+Object.assign(thumb.style, {
+  position: "absolute",
+  width: "40px",
+  height: "40px",
+  borderRadius: "50%",
+  border: "2px solid rgba(0,255,255,0.9)",
+  boxShadow: "0 0 15px rgba(0,255,255,0.8)",
+  pointerEvents: "none",
+  transform: "translate(-50%, -50%)",
+  display: "none"
+});
+
+dpad.appendChild(thumb);
 
 /* =============================
    8-DIRECTION VISUAL ARROWS
@@ -218,6 +238,24 @@ function updateDpadDirection(x, y) {
   const dx = x - cx;
   const dy = y - cy;
 
+  const radius = rect.width / 2 - 20; // keep inside circle
+
+  let limitedDx = dx;
+  let limitedDy = dy;
+
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance > radius) {
+    const angle = Math.atan2(dy, dx);
+    limitedDx = Math.cos(angle) * radius;
+    limitedDy = Math.sin(angle) * radius;
+  }
+
+  // Move thumb
+  thumb.style.left = (rect.width / 2 + limitedDx) + "px";
+  thumb.style.top = (rect.height / 2 + limitedDy) + "px";
+  thumb.style.display = "block";
+
   const newDirections = new Set();
 
   if (Math.abs(dx) < DEAD_ZONE && Math.abs(dy) < DEAD_ZONE) {
@@ -254,6 +292,7 @@ function clearDirections() {
     releaseKey(keyMap[dir]);
   }
   currentDirections.clear();
+  thumb.style.display = "none";
 }
 
 dpad.addEventListener("pointerdown", e => {
@@ -288,6 +327,7 @@ function createButton(name, label, bottom, left, right) {
   background: "transparent",
   border: "2px solid rgba(0,255,255,0.8)",
   color: "rgba(0,255,255,0.9)",
+  backdropFilter: "blur(1px)",
   fontWeight: "bold",
   display: "flex",
   alignItems: "center",
@@ -300,15 +340,21 @@ function createButton(name, label, bottom, left, right) {
 });
 
 btn.addEventListener("pointerdown", () => {
-  btn.style.transform = "translateY(4px)";
+  btn.style.transform = "scale(0.95)";
+  btn.style.boxShadow = "0 0 18px rgba(0,255,255,0.9)";
+  btn.style.borderColor = "#00ffff";
 });
 
 btn.addEventListener("pointerup", () => {
-  btn.style.transform = "translateY(0)";
+  btn.style.transform = "scale(1)";
+  btn.style.boxShadow = "none";
+  btn.style.borderColor = "rgba(0,255,255,0.8)";
 });
 
 btn.addEventListener("pointercancel", () => {
-  btn.style.transform = "translateY(0)";
+  btn.style.transform = "scale(1)";
+  btn.style.boxShadow = "none";
+  btn.style.borderColor = "rgba(0,255,255,0.8)";
 });
 
   controls.appendChild(btn);

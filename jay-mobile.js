@@ -132,6 +132,8 @@ if (window.JAY_GAME_CONFIG?.keyOverrides) {
 
 const keyboard = window.vm.runtime.ioDevices.keyboard;
 
+let activePointerId = null;
+
 function pressKey(key) {
   keyboard.postData({ key, isDown: true });
 }
@@ -178,7 +180,11 @@ Object.assign(thumb.style, {
   boxShadow: "0 0 15px rgba(0,255,255,0.8)",
   pointerEvents: "none",
   transform: "translate(-50%, -50%)",
-  display: "none"
+  display: "block",
+  left: "50%",
+  top: "50%",
+  transition: "transform 0.15s ease-out"
+
 });
 
 dpad.appendChild(thumb);
@@ -252,9 +258,7 @@ function updateDpadDirection(x, y) {
   }
 
   // Move thumb
-  thumb.style.left = (rect.width / 2 + limitedDx) + "px";
-  thumb.style.top = (rect.height / 2 + limitedDy) + "px";
-  thumb.style.display = "block";
+  thumb.style.transform = `translate(calc(-50% + ${limitedDx}px), calc(-50% + ${limitedDy}px))`;
 
   const newDirections = new Set();
 
@@ -292,7 +296,7 @@ function clearDirections() {
     releaseKey(keyMap[dir]);
   }
   currentDirections.clear();
-  thumb.style.display = "none";
+  thumb.style.transform = "translate(-50%, -50%)";
 }
 
 dpad.addEventListener("pointerdown", e => {
@@ -306,6 +310,18 @@ dpad.addEventListener("pointermove", e => {
 
 dpad.addEventListener("pointerup", clearDirections);
 dpad.addEventListener("pointercancel", clearDirections);
+
+function activateButton(btn) {
+  btn.style.transform = "scale(0.95)";
+  btn.style.boxShadow = "0 0 18px rgba(0,255,255,0.9)";
+  btn.style.borderColor = "#00ffff";
+}
+
+function deactivateButton(btn) {
+  btn.style.transform = "scale(1)";
+  btn.style.boxShadow = "none";
+  btn.style.borderColor = "rgba(0,255,255,0.8)";
+}
 
 /* =============================
    FACE BUTTONS (mirrored tighter cluster)
@@ -337,24 +353,6 @@ function createButton(name, label, bottom, left, right) {
   pointerEvents: "auto",
   boxShadow: "none",
   transition: "transform 0.05s ease"
-});
-
-btn.addEventListener("pointerdown", () => {
-  btn.style.transform = "scale(0.95)";
-  btn.style.boxShadow = "0 0 18px rgba(0,255,255,0.9)";
-  btn.style.borderColor = "#00ffff";
-});
-
-btn.addEventListener("pointerup", () => {
-  btn.style.transform = "scale(1)";
-  btn.style.boxShadow = "none";
-  btn.style.borderColor = "rgba(0,255,255,0.8)";
-});
-
-btn.addEventListener("pointercancel", () => {
-  btn.style.transform = "scale(1)";
-  btn.style.boxShadow = "none";
-  btn.style.borderColor = "rgba(0,255,255,0.8)";
 });
 
   controls.appendChild(btn);
@@ -426,6 +424,9 @@ function pressFace(pointerId, name) {
   activePointers.set(pointerId, name);
   buttonCounts[name] = (buttonCounts[name] || 0) + 1;
 
+  const btn = document.querySelector(`[data-name="${name}"]`);
+  if (btn) activateButton(btn);
+
   if (buttonCounts[name] === 1) {
     pressKey(keyMap[name]);
   }
@@ -440,6 +441,9 @@ function releaseFace(pointerId) {
   if (buttonCounts[name] <= 0) {
     releaseKey(keyMap[name]);
     buttonCounts[name] = 0;
+
+    const btn = document.querySelector(`[data-name="${name}"]`);
+    if (btn) deactivateButton(btn);
   }
 
   activePointers.delete(pointerId);

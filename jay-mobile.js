@@ -140,9 +140,9 @@ Object.assign(dpad.style, {
   width: "160px",
   height: "160px",
   borderRadius: "50%",
-  border: "2px solid #00ffff",
-  boxShadow: "0 0 15px rgba(0,255,255,0.5)",
-  background: "rgba(0,255,255,0.15)",
+  border: "2px solid rgba(0,255,255,0.7)",
+  boxShadow: "none",
+  background: "transparent",
   backdropFilter: "blur(3px)",
   touchAction: "none",
   pointerEvents: "auto"
@@ -222,27 +222,26 @@ function createButton(name, label, bottom, left, right) {
   btn.innerText = label;
 
   Object.assign(btn.style, {
-    position: "absolute",
-    bottom: bottom,
-    left: left,
-    right: right,
-    width: "74px",
-    height: "74px",
-    borderRadius: "50%",
-    background: "radial-gradient(circle at 30% 30%, rgba(0,255,255,0.45), rgba(0,139,139,0.35))",
-    border: "2px solid rgba(0,255,255,0.7)",
-    color: "rgba(0,255,255,0.9)",
-    fontWeight: "bold",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "22px",
-    touchAction: "none",
-    pointerEvents: "auto",
-    backdropFilter: "blur(2px)",
-    boxShadow: "0 0 12px rgba(0,255,255,0.4)",
-    transition: "transform 0.05s ease, background 0.1s ease"
-  });
+  position: "absolute",
+  bottom: bottom,
+  left: left,
+  right: right,
+  width: "74px",
+  height: "74px",
+  borderRadius: "50%",
+  background: "transparent",
+  border: "2px solid rgba(0,255,255,0.8)",
+  color: "rgba(0,255,255,0.9)",
+  fontWeight: "bold",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "22px",
+  touchAction: "none",
+  pointerEvents: "auto",
+  boxShadow: "none",
+  transition: "transform 0.05s ease"
+});
 
 btn.addEventListener("pointerdown", () => {
   btn.style.transform = "translateY(4px)";
@@ -267,61 +266,43 @@ createButton("x", "X", "100px", null, "60px");
 createButton("a", "A", "40px",  null, "100px");
 
 /* =============================
-   TOGGLE SCANLINES BUTTON (Border Corner Anchored)
+   TOGGLE SCANLINES BUTTON (Screen Corner)
    ============================= */
 
 const scanlineBtn = document.createElement("div");
-scanlineBtn.innerText = "Toggle Scanlines";
+scanlineBtn.innerText = "Scanlines";
 
 Object.assign(scanlineBtn.style, {
   position: "fixed",
-  padding: "8px 14px",
-  fontSize: "12px",
+  top: "6px",
+  left: "6px",
+  padding: "4px 8px",
+  fontSize: "11px",
   fontFamily: "monospace",
   color: "#00ffff",
-  background: "rgba(0,0,0,0.75)",
-  border: "2px solid #00ffff",
+  background: "transparent",
+  border: "1px solid rgba(0,255,255,0.7)",
+  borderRadius: "4px",
   pointerEvents: "auto",
   touchAction: "none",
   zIndex: "999999",
-  boxShadow: "0 0 12px rgba(0,255,255,0.6)",
   userSelect: "none"
 });
 
 document.body.appendChild(scanlineBtn);
 
-function positionScanlineButton() {
-  const canvas = document.querySelector("canvas");
-  if (!canvas) return;
-
-  const rect = canvas.getBoundingClientRect();
-
-  // Snap directly to the canvas' top-left corner
-  scanlineBtn.style.left = rect.left + "px";
-  scanlineBtn.style.top = rect.top + "px";
-}
-
-// Initial positioning
-setTimeout(positionScanlineButton, 300);
-
-// Reposition when layout changes
-window.addEventListener("resize", positionScanlineButton);
-document.addEventListener("fullscreenchange", () => {
-  setTimeout(positionScanlineButton, 200);
-});
-
 scanlineBtn.addEventListener("pointerdown", () => {
-  scanlineBtn.style.background = "rgba(0,255,255,0.2)";
+  scanlineBtn.style.borderColor = "#00ffff";
   pressKey("2");
 });
 
 scanlineBtn.addEventListener("pointerup", () => {
-  scanlineBtn.style.background = "rgba(0,0,0,0.75)";
+  scanlineBtn.style.borderColor = "rgba(0,255,255,0.7)";
   releaseKey("2");
 });
 
 scanlineBtn.addEventListener("pointercancel", () => {
-  scanlineBtn.style.background = "rgba(0,0,0,0.75)";
+  scanlineBtn.style.borderColor = "rgba(0,255,255,0.7)";
   releaseKey("2");
 });
 

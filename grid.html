@@ -200,13 +200,13 @@ body{
   .game-grid{grid-template-columns:1fr;}
 }
 
-/* 
+ 
 @media (max-width:900px){
   .desktop-only{
     display:none !important;
   }
 }
-*/
+
 
 /* ===== CARDS ===== */
 .game-card{
@@ -485,16 +485,16 @@ fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
 document.querySelectorAll(".game-card").forEach(card => {
 
   const url = new URL(card.href);
-  const slug = url.pathname.split("/").filter(Boolean)[0];
+  const slug = url.pathname.replace(/\/$/, ""); // remove trailing slash
 
-  fetch(`https://loronajay.goatcounter.com/counter/${slug}/.json`)
+  fetch(`https://loronajay.goatcounter.com/counter${slug}.json`)
     .then(res => res.json())
     .then(data => {
       card.querySelector(".playCount").textContent =
         formatArcadeNumber(data.count || 0);
     })
-    .catch(() => {
-      console.log("Failed to load counter for:", slug);
+    .catch(err => {
+      console.log("Counter error for:", slug);
     });
 
 });

@@ -3,7 +3,7 @@ MOBILE TEMPLATE
 paste in each game's index.html
 
 -----------------------------------------------------------------------------------------------------------------------------
-Add this inside <head>
+Add this inside <head> first, delete current viewport
 -----------------------------------------------------------------------------------------------------------------------------
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -21,16 +21,42 @@ Add this right before </body>
 <script src="../jay-mobile.js"></script>
 
 
+<script>
+  window.goatcounter = {
+    path: function() {
+      return location.pathname;
+    }
+  };
+</script>
+
 
 ------------------------------------------------------------------------------------------------------------------------------
 If needed custom controls, add this above the above script, change keys to liking
 ------------------------------------------------------------------------------------------------------------------------------
+
+FOR APPLE CATCHER
+
 
 <script>
   window.JAY_GAME_CONFIG = {
   keyOverrides: {
     b: "ArrowLeft",
     x: "ArrowRight"
+    }
+  };
+  </script>
+
+
+
+FOR XPONG
+
+
+<script>
+  window.JAY_GAME_CONFIG = {
+  keyOverrides: {
+    y: "k",
+    a: ",",
+    x: "ArrowDown"
     }
   };
   </script>

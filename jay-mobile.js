@@ -67,9 +67,15 @@ Object.assign(startOverlay.style, {
   zIndex: "999998"
 });
 
+const entryTitle =
+  window.JAY_GAME_CONFIG?.entryTitle || "INSERT COIN";
+
+const entrySub =
+  window.JAY_GAME_CONFIG?.entrySub || "TAP TO START";
+
 startOverlay.innerHTML = `
-  <h2 style="margin:0 0 20px 0;">INSERT COIN</h2>
-  <p style="margin:0;">TAP TO START</p>
+  <h2 style="margin:0 0 20px 0;">${entryTitle}</h2>
+  <p style="margin:0;">${entrySub}</p>
 `;
 
 document.body.appendChild(startOverlay);
@@ -214,31 +220,89 @@ function createButton(name, label, bottom, left, right) {
   btn.dataset.name = name;
   btn.innerText = label;
 
+  /* =============================
+   TOGGLE SCANLINES BUTTON
+   ============================= */
+
+const scanlineBtn = document.createElement("div");
+scanlineBtn.innerText = "Toggle Scanlines";
+
+Object.assign(scanlineBtn.style, {
+  position: "absolute",
+  bottom: "20px",
+  left: "20px",
+  padding: "8px 12px",
+  fontSize: "12px",
+  fontFamily: "monospace",
+  color: "#00ffff",
+  border: "1px solid #00ffff",
+  background: "rgba(0,255,255,0.08)",
+  borderRadius: "6px",
+  pointerEvents: "auto",
+  touchAction: "none",
+  boxShadow: "0 0 8px rgba(0,255,255,0.5)",
+  cursor: "pointer"
+});
+
+controls.appendChild(scanlineBtn);
+
+/* simulate pressing keyboard "2" */
+
+scanlineBtn.addEventListener("pointerdown", () => {
+  pressKey("2");
+});
+
+scanlineBtn.addEventListener("pointerup", () => {
+  releaseKey("2");
+});
+
+scanlineBtn.addEventListener("pointercancel", () => {
+  releaseKey("2");
+});
+
   Object.assign(btn.style, {
-    position: "absolute",
-    bottom: bottom,
-    left: left,
-    right: right,
-    width: "70px",
-    height: "70px",
-    borderRadius: "50%",
-    background: "rgba(0,255,255,0.12)",
-    border: "2px solid #00ffff",
-    color: "#00ffff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "20px",
-    touchAction: "none",
-    pointerEvents: "auto",
-    boxShadow: "0 0 12px rgba(0,255,255,0.6)"
-  });
+  position: "absolute",
+  bottom: bottom,
+  left: left,
+  right: right,
+  width: "74px",
+  height: "74px",
+  borderRadius: "50%",
+  background: "radial-gradient(circle at 30% 30%, #00ffff, #008b8b)",
+  border: "3px solid #00ffff",
+  color: "#001f1f",
+  fontWeight: "bold",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "22px",
+  touchAction: "none",
+  pointerEvents: "auto",
+  boxShadow: `
+    0 4px 0 #004f4f,
+    0 6px 15px rgba(0,255,255,0.6),
+    inset 0 2px 6px rgba(255,255,255,0.4)
+  `,
+  transition: "transform 0.05s ease"
+});
+
+btn.addEventListener("pointerdown", () => {
+  btn.style.transform = "translateY(4px)";
+});
+
+btn.addEventListener("pointerup", () => {
+  btn.style.transform = "translateY(0)";
+});
+
+btn.addEventListener("pointercancel", () => {
+  btn.style.transform = "translateY(0)";
+});
 
   controls.appendChild(btn);
   return btn;
 }
 
-/* Your requested margins */
+/*  margins */
 createButton("y", "Y", "160px", null, "100px");
 createButton("b", "B", "100px", null, "140px");
 createButton("x", "X", "100px", null, "60px");

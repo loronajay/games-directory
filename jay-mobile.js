@@ -90,9 +90,22 @@ Object.assign(controls.style, {
   inset: "0",
   display: "none",
   zIndex: "999997",
-  pointerEvents: "none"
+  pointerEvents: "none",
+  userSelect: "none",
+  webkitUserSelect: "none",
+  webkitTouchCallout: "none"
+  
 });
 document.body.appendChild(controls);
+
+/* =============================
+   DISABLE TEXT SELECTION / CALLOUT
+   ============================= */
+
+document.body.style.userSelect = "none";
+document.body.style.webkitUserSelect = "none";
+document.body.style.webkitTouchCallout = "none";
+document.body.style.webkitTapHighlightColor = "transparent";
 
 /* =============================
    KEY MAP

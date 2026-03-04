@@ -142,6 +142,9 @@ function releaseKey(key) {
 
 let currentDirections = new Set();
 const DEAD_ZONE = 20;
+const DPAD_SIZE = 160;
+const OUTER_RADIUS = DPAD_SIZE / 2 - 2; // inside border
+const INNER_RADIUS = DEAD_ZONE;         // dead zone radius
 
 const dpad = document.createElement("div");
 
@@ -161,37 +164,42 @@ Object.assign(dpad.style, {
 controls.appendChild(dpad);
 
 /* =============================
-   WEDGE LAYER (UNDER ARROWS)
+   RING WEDGES (ANNULAR SECTORS)
    ============================= */
-
-const wedgeLayer = document.createElement("div");
-Object.assign(wedgeLayer.style, {
-  position: "absolute",
-  inset: "0",
-  borderRadius: "50%",
-  overflow: "hidden",
-  pointerEvents: "none"
-});
-dpad.appendChild(wedgeLayer);
 
 const wedges = [];
 
 for (let i = 0; i < 8; i++) {
-  const wedge = document.createElement("div");
 
-  const start = (i * 45 - 22.5) * Math.PI / 180;
-  const end   = (i * 45 + 22.5) * Math.PI / 180;
+  const startAngle = (i * 45 - 22.5) * Math.PI / 180;
+  const endAngle   = (i * 45 + 22.5) * Math.PI / 180;
+
+  const x1o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(startAngle);
+  const y1o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(startAngle);
+
+  const x2o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(endAngle);
+  const y2o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(endAngle);
+
+  const x1i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(startAngle);
+  const y1i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(startAngle);
+
+  const x2i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(endAngle);
+  const y2i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(endAngle);
+
+  const wedge = document.createElement("div");
 
   Object.assign(wedge.style, {
     position: "absolute",
-    width: "100%",
-    height: "100%",
+    inset: "0",
     background: "transparent",
-    clipPath: `polygon(
-      50% 50%,
-      ${50 + 100 * Math.cos(start)}% ${50 + 100 * Math.sin(start)}%,
-      ${50 + 100 * Math.cos(end)}% ${50 + 100 * Math.sin(end)}%
-    )`,
+    clipPath: `
+      polygon(
+        ${x1o}% ${y1o}%,
+        ${x2o}% ${y2o}%,
+        ${x2i}% ${y2i}%,
+        ${x1i}% ${y1i}%
+      )
+    `,
     transition: "background 0.08s ease"
   });
 
@@ -199,11 +207,32 @@ for (let i = 0; i < 8; i++) {
   wedges.push(wedge);
 }
 
-function highlightWedge(index) {
-  wedges.forEach((w, i) => {
-    w.style.background =
-      i === index ? "rgba(0,255,255,0.18)" : "transparent";
+/* =============================
+   RADIAL DIVIDER LINES
+   ============================= */
+
+for (let i = 0; i < 8; i++) {
+
+  const angle = i * 45 * Math.PI / 180;
+
+  const line = document.createElement("div");
+
+  Object.assign(line.style, {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    width: `${OUTER_RADIUS - INNER_RADIUS}px`,
+    height: "2px",
+    background: "rgba(0,255,255,0.5)",
+    transformOrigin: "0 50%",
+    transform: `
+      rotate(${i * 45}deg)
+      translate(${INNER_RADIUS}px, -50%)
+    `,
+    pointerEvents: "none"
   });
+
+  dpad.appendChild(line);
 }
 
 /* =============================
@@ -292,7 +321,7 @@ function updateDpadDirection(x, y) {
   const dx = x - cx;
   const dy = y - cy;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  const radius = rect.width / 2 - 20;
+  const radius = OUTER_RADIUS - 20;
 
   let limitedDx = dx;
   let limitedDy = dy;

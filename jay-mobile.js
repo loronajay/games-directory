@@ -220,46 +220,6 @@ function createButton(name, label, bottom, left, right) {
   btn.dataset.name = name;
   btn.innerText = label;
 
-  /* =============================
-   TOGGLE SCANLINES BUTTON
-   ============================= */
-
-const scanlineBtn = document.createElement("div");
-scanlineBtn.innerText = "Toggle Scanlines";
-
-Object.assign(scanlineBtn.style, {
-  position: "absolute",
-  bottom: "20px",
-  left: "20px",
-  padding: "8px 12px",
-  fontSize: "12px",
-  fontFamily: "monospace",
-  color: "#00ffff",
-  border: "1px solid #00ffff",
-  background: "rgba(0,255,255,0.08)",
-  borderRadius: "6px",
-  pointerEvents: "auto",
-  touchAction: "none",
-  boxShadow: "0 0 8px rgba(0,255,255,0.5)",
-  cursor: "pointer"
-});
-
-controls.appendChild(scanlineBtn);
-
-/* simulate pressing keyboard "2" */
-
-scanlineBtn.addEventListener("pointerdown", () => {
-  pressKey("2");
-});
-
-scanlineBtn.addEventListener("pointerup", () => {
-  releaseKey("2");
-});
-
-scanlineBtn.addEventListener("pointercancel", () => {
-  releaseKey("2");
-});
-
   Object.assign(btn.style, {
   position: "absolute",
   bottom: bottom,
@@ -307,6 +267,80 @@ createButton("y", "Y", "160px", null, "100px");
 createButton("b", "B", "100px", null, "140px");
 createButton("x", "X", "100px", null, "60px");
 createButton("a", "A", "40px",  null, "100px");
+
+/* =============================
+   TOGGLE SCANLINES BUTTON (Border Corner Anchored)
+   ============================= */
+
+const scanlineBtn = document.createElement("div");
+scanlineBtn.innerText = "Toggle Scanlines";
+
+Object.assign(scanlineBtn.style, {
+  position: "fixed",
+  padding: "8px 14px",
+  fontSize: "12px",
+  fontFamily: "monospace",
+  color: "#00ffff",
+  background: "rgba(0,0,0,0.75)",
+  border: "2px solid #00ffff",
+  pointerEvents: "auto",
+  touchAction: "none",
+  zIndex: "999999",
+  boxShadow: "0 0 12px rgba(0,255,255,0.6)",
+  userSelect: "none"
+});
+
+document.body.appendChild(scanlineBtn);
+
+function positionScanlineButton() {
+  const canvas = document.querySelector("canvas");
+  if (!canvas) return;
+
+  const rect = canvas.getBoundingClientRect();
+
+  const leftBorderWidth = rect.left;
+  const topBorderHeight = rect.top;
+
+  // If there is left border space, anchor inside it
+  if (leftBorderWidth > 0) {
+    scanlineBtn.style.left = "0px";
+    scanlineBtn.style.top = "0px";
+  } 
+  // If no left border but there is top border, anchor there
+  else if (topBorderHeight > 0) {
+    scanlineBtn.style.left = "0px";
+    scanlineBtn.style.top = "0px";
+  } 
+  // If truly full-bleed (rare), tuck slightly inward
+  else {
+    scanlineBtn.style.left = "8px";
+    scanlineBtn.style.top = "8px";
+  }
+}
+
+// Initial positioning
+setTimeout(positionScanlineButton, 300);
+
+// Reposition when layout changes
+window.addEventListener("resize", positionScanlineButton);
+document.addEventListener("fullscreenchange", () => {
+  setTimeout(positionScanlineButton, 200);
+});
+
+scanlineBtn.addEventListener("pointerdown", () => {
+  scanlineBtn.style.background = "rgba(0,255,255,0.2)";
+  pressKey("2");
+});
+
+scanlineBtn.addEventListener("pointerup", () => {
+  scanlineBtn.style.background = "rgba(0,0,0,0.75)";
+  releaseKey("2");
+});
+
+scanlineBtn.addEventListener("pointercancel", () => {
+  scanlineBtn.style.background = "rgba(0,0,0,0.75)";
+  releaseKey("2");
+});
 
 /* =============================
    MULTI-TOUCH LOGIC

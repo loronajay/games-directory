@@ -482,18 +482,21 @@ fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
 .catch(()=>{});
 
 /* Per game */
-/* Per game */
-document.querySelectorAll(".game-card").forEach(card=>{
+document.querySelectorAll(".game-card").forEach(card => {
+
   const url = new URL(card.href);
   const slug = url.pathname.split("/").filter(Boolean)[0];
 
   fetch(`https://loronajay.goatcounter.com/counter/${slug}/.json`)
-  .then(res=>res.json())
-  .then(data=>{
-    card.querySelector(".playCount").textContent =
-      formatArcadeNumber(data.count||0);
-  })
-  .catch(()=>{});
+    .then(res => res.json())
+    .then(data => {
+      card.querySelector(".playCount").textContent =
+        formatArcadeNumber(data.count || 0);
+    })
+    .catch(() => {
+      console.log("Failed to load counter for:", slug);
+    });
+
 });
 
 /* Force hard reload when returning via back button */

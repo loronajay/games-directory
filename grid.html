@@ -485,9 +485,10 @@ fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
 document.querySelectorAll(".game-card").forEach(card => {
 
   const url = new URL(card.href);
-  const slug = url.pathname.replace(/\/$/, ""); // remove trailing slash
+  const slug = url.pathname.replace(/\/$/, "");
+  const timestamp = Date.now();
 
-  fetch(`https://loronajay.goatcounter.com/counter${slug}.json`)
+  fetch(`https://loronajay.goatcounter.com/counter${slug}.json?t=${timestamp}`)
     .then(res => res.json())
     .then(data => {
       card.querySelector(".playCount").textContent =

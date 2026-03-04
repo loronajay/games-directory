@@ -1,13 +1,15 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v17
-   - VM postData injection
-   - True 8-direction radial D-pad (exact wedges)
-   - Mirrored tighter face buttons
+   JAY ARCADE MOBILE CONTROLLER v18
+   - True radial ring wedges
+   - Thin divider lines
+   - Arrow glow synced to wedge
+   - Edge-based thumb limit
+   - Face buttons restored
    ========================================== */
 
 (function () {
 
-const JAY_MOBILE_VERSION = "v17";
+const JAY_MOBILE_VERSION = "v18";
 
 function isMobile() {
   return (
@@ -31,40 +33,40 @@ waitForVM(initController);
 
 function initController() {
 
-/* =============================
-   VERSION BADGE
-   ============================= */
+/* ============================= */
+/* VERSION BADGE */
+/* ============================= */
 
-const versionBadge = document.createElement("div");
-versionBadge.innerText = JAY_MOBILE_VERSION;
-Object.assign(versionBadge.style, {
-  position: "fixed",
-  top: "8px",
-  right: "12px",
-  color: "#00ffff",
-  fontFamily: "monospace",
-  fontSize: "14px",
-  opacity: "0.6",
-  zIndex: "999999"
+const badge = document.createElement("div");
+badge.innerText = JAY_MOBILE_VERSION;
+Object.assign(badge.style,{
+  position:"fixed",
+  top:"8px",
+  right:"12px",
+  color:"#00ffff",
+  fontFamily:"monospace",
+  fontSize:"14px",
+  opacity:"0.6",
+  zIndex:"999999"
 });
-document.body.appendChild(versionBadge);
+document.body.appendChild(badge);
 
-/* =============================
-   START OVERLAY
-   ============================= */
+/* ============================= */
+/* START OVERLAY */
+/* ============================= */
 
 const startOverlay = document.createElement("div");
-Object.assign(startOverlay.style, {
-  position: "fixed",
-  inset: "0",
-  background: "black",
-  color: "#00ffff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexDirection: "column",
-  fontFamily: "monospace",
-  zIndex: "999998"
+Object.assign(startOverlay.style,{
+  position:"fixed",
+  inset:"0",
+  background:"black",
+  color:"#00ffff",
+  display:"flex",
+  alignItems:"center",
+  justifyContent:"center",
+  flexDirection:"column",
+  fontFamily:"monospace",
+  zIndex:"999998"
 });
 
 const entryTitle =
@@ -80,32 +82,27 @@ startOverlay.innerHTML = `
 
 document.body.appendChild(startOverlay);
 
-/* =============================
-   CONTROLS LAYER
-   ============================= */
+/* ============================= */
+/* CONTROLS LAYER */
+/* ============================= */
 
 const controls = document.createElement("div");
-Object.assign(controls.style, {
-  position: "fixed",
-  inset: "0",
-  display: "none",
-  zIndex: "999997",
-  pointerEvents: "none",
-  userSelect: "none",
-  webkitUserSelect: "none",
-  webkitTouchCallout: "none"
+Object.assign(controls.style,{
+  position:"fixed",
+  inset:"0",
+  display:"none",
+  zIndex:"999997",
+  pointerEvents:"none",
+  userSelect:"none"
 });
 document.body.appendChild(controls);
 
-/* Disable text selection globally */
 document.body.style.userSelect = "none";
-document.body.style.webkitUserSelect = "none";
-document.body.style.webkitTouchCallout = "none";
 document.body.style.webkitTapHighlightColor = "transparent";
 
-/* =============================
-   KEY MAP
-   ============================= */
+/* ============================= */
+/* KEY MAP */
+/* ============================= */
 
 let keyMap = {
   left: "a",
@@ -122,301 +119,302 @@ if (window.JAY_GAME_CONFIG?.keyOverrides) {
   keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
 }
 
-/* =============================
-   VM INPUT
-   ============================= */
-
 const keyboard = window.vm.runtime.ioDevices.keyboard;
 
-function pressKey(key) {
-  keyboard.postData({ key, isDown: true });
-}
+function pressKey(key){ keyboard.postData({key,isDown:true}); }
+function releaseKey(key){ keyboard.postData({key,isDown:false}); }
 
-function releaseKey(key) {
-  keyboard.postData({ key, isDown: false });
-}
+/* ============================= */
+/* DPAD SETUP */
+/* ============================= */
 
-/* =============================
-   D-PAD CORE
-   ============================= */
+const DPAD_SIZE = 160;
+const DEAD_ZONE = 20;
+const OUTER_RADIUS = DPAD_SIZE/2 - 2;
+const INNER_RADIUS = DEAD_ZONE;
 
 let currentDirections = new Set();
-const DEAD_ZONE = 20;
-const DPAD_SIZE = 160;
-const OUTER_RADIUS = DPAD_SIZE / 2 - 2; // inside border
-const INNER_RADIUS = DEAD_ZONE;         // dead zone radius
 
 const dpad = document.createElement("div");
-
-Object.assign(dpad.style, {
-  position: "absolute",
-  bottom: "40px",
-  left: "40px",
-  width: "160px",
-  height: "160px",
-  borderRadius: "50%",
-  border: "2px solid rgba(0,255,255,0.7)",
-  background: "transparent",
-  touchAction: "none",
-  pointerEvents: "auto"
+Object.assign(dpad.style,{
+  position:"absolute",
+  bottom:"40px",
+  left:"40px",
+  width:DPAD_SIZE+"px",
+  height:DPAD_SIZE+"px",
+  borderRadius:"50%",
+  border:"2px solid rgba(0,255,255,0.7)",
+  touchAction:"none",
+  pointerEvents:"auto",
+  background:"transparent"
 });
-
 controls.appendChild(dpad);
 
-/* =============================
-   RING WEDGES (ANNULAR SECTORS)
-   ============================= */
+/* ============================= */
+/* WEDGE LAYER */
+/* ============================= */
+
+const wedgeLayer = document.createElement("div");
+Object.assign(wedgeLayer.style,{
+  position:"absolute",
+  inset:"0",
+  borderRadius:"50%",
+  overflow:"hidden",
+  pointerEvents:"none"
+});
+dpad.appendChild(wedgeLayer);
 
 const wedges = [];
+const arrows = [];
 
-for (let i = 0; i < 8; i++) {
+for(let i=0;i<8;i++){
 
-  const startAngle = (i * 45 - 22.5) * Math.PI / 180;
-  const endAngle   = (i * 45 + 22.5) * Math.PI / 180;
+  const start=(i*45-22.5)*Math.PI/180;
+  const end=(i*45+22.5)*Math.PI/180;
 
-  const x1o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(startAngle);
-  const y1o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(startAngle);
+  const scale=OUTER_RADIUS/(DPAD_SIZE/2)*50;
+  const innerScale=INNER_RADIUS/(DPAD_SIZE/2)*50;
 
-  const x2o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(endAngle);
-  const y2o = 50 + (OUTER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(endAngle);
+  const x1o=50+scale*Math.cos(start);
+  const y1o=50+scale*Math.sin(start);
+  const x2o=50+scale*Math.cos(end);
+  const y2o=50+scale*Math.sin(end);
 
-  const x1i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(startAngle);
-  const y1i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(startAngle);
+  const x1i=50+innerScale*Math.cos(start);
+  const y1i=50+innerScale*Math.sin(start);
+  const x2i=50+innerScale*Math.cos(end);
+  const y2i=50+innerScale*Math.sin(end);
 
-  const x2i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.cos(endAngle);
-  const y2i = 50 + (INNER_RADIUS / (DPAD_SIZE/2)) * 50 * Math.sin(endAngle);
+  const wedge=document.createElement("div");
 
-  const wedge = document.createElement("div");
-
-  Object.assign(wedge.style, {
-    position: "absolute",
-    inset: "0",
-    background: "transparent",
-    clipPath: `
-      polygon(
-        ${x1o}% ${y1o}%,
-        ${x2o}% ${y2o}%,
-        ${x2i}% ${y2i}%,
-        ${x1i}% ${y1i}%
-      )
-    `,
-    transition: "background 0.08s ease"
+  Object.assign(wedge.style,{
+    position:"absolute",
+    inset:"0",
+    background:"transparent",
+    clipPath:`polygon(
+      ${x1o}% ${y1o}%,
+      ${x2o}% ${y2o}%,
+      ${x2i}% ${y2i}%,
+      ${x1i}% ${y1i}%
+    )`,
+    transition:"background 0.08s ease"
   });
 
   wedgeLayer.appendChild(wedge);
   wedges.push(wedge);
 }
 
-/* =============================
-   RADIAL DIVIDER LINES
-   ============================= */
+/* ============================= */
+/* DIVIDER LINES */
+/* ============================= */
 
-for (let i = 0; i < 8; i++) {
-
-  const angle = i * 45 * Math.PI / 180;
-
-  const line = document.createElement("div");
-
-  Object.assign(line.style, {
-    position: "absolute",
-    left: "50%",
-    top: "50%",
-    width: `${OUTER_RADIUS - INNER_RADIUS}px`,
-    height: "2px",
-    background: "rgba(0,255,255,0.5)",
-    transformOrigin: "0 50%",
-    transform: `
-      rotate(${i * 45}deg)
-      translate(${INNER_RADIUS}px, -50%)
-    `,
-    pointerEvents: "none"
+for(let i=0;i<8;i++){
+  const line=document.createElement("div");
+  Object.assign(line.style,{
+    position:"absolute",
+    left:"50%",
+    top:"50%",
+    width:(OUTER_RADIUS-INNER_RADIUS)+"px",
+    height:"1px",
+    background:"rgba(0,255,255,0.5)",
+    transformOrigin:"0 50%",
+    transform:`rotate(${i*45}deg) translate(${INNER_RADIUS}px,-50%)`,
+    pointerEvents:"none"
   });
-
   dpad.appendChild(line);
 }
 
-/* =============================
-   ARROWS (ABOVE WEDGES)
-   ============================= */
+/* ============================= */
+/* ARROWS */
+/* ============================= */
 
-const arrowLayer = document.createElement("div");
-Object.assign(arrowLayer.style, {
-  position: "absolute",
-  inset: "0",
-  pointerEvents: "none"
+const arrowLayer=document.createElement("div");
+Object.assign(arrowLayer.style,{
+  position:"absolute",
+  inset:"0",
+  pointerEvents:"none"
 });
 dpad.appendChild(arrowLayer);
 
-function createArrow(symbol, left, top) {
-  const arrow = document.createElement("div");
-  arrow.innerText = symbol;
-  Object.assign(arrow.style, {
-    position: "absolute",
-    left,
-    top,
-    transform: "translate(-50%, -50%)",
-    fontSize: "20px",
-    fontFamily: "monospace",
-    color: "rgba(0,255,255,0.85)"
+const arrowSymbols=["→","↘","↓","↙","←","↖","↑","↗"];
+
+for(let i=0;i<8;i++){
+  const arrow=document.createElement("div");
+  arrow.innerText=arrowSymbols[i];
+  Object.assign(arrow.style,{
+    position:"absolute",
+    left:"50%",
+    top:"50%",
+    transform:`rotate(${i*45}deg) translate(0,-60px) rotate(${-i*45}deg)`,
+    transformOrigin:"50% 60px",
+    fontFamily:"monospace",
+    fontSize:"18px",
+    color:"rgba(0,255,255,0.85)",
+    transition:"all 0.08s ease"
   });
   arrowLayer.appendChild(arrow);
+  arrows.push(arrow);
 }
 
-createArrow("↑", "50%", "15%");
-createArrow("↓", "50%", "85%");
-createArrow("←", "15%", "50%");
-createArrow("→", "85%", "50%");
-createArrow("↖", "20%", "20%");
-createArrow("↗", "80%", "20%");
-createArrow("↙", "20%", "80%");
-createArrow("↘", "80%", "80%");
+/* ============================= */
+/* THUMB */
+/* ============================= */
 
-/* =============================
-   THUMB
-   ============================= */
-
-const thumb = document.createElement("div");
-Object.assign(thumb.style, {
-  position: "absolute",
-  width: "40px",
-  height: "40px",
-  borderRadius: "50%",
-  border: "2px solid rgba(0,255,255,0.9)",
-  boxShadow: "0 0 15px rgba(0,255,255,0.8)",
-  pointerEvents: "none",
-  left: "50%",
-  top: "50%",
-  transform: "translate(-50%, -50%)",
-  transition: "transform 0.15s ease-out"
+const thumb=document.createElement("div");
+Object.assign(thumb.style,{
+  position:"absolute",
+  width:"40px",
+  height:"40px",
+  borderRadius:"50%",
+  border:"2px solid rgba(0,255,255,0.9)",
+  boxShadow:"0 0 15px rgba(0,255,255,0.8)",
+  left:"50%",
+  top:"50%",
+  transform:"translate(-50%,-50%)",
+  pointerEvents:"none",
+  transition:"transform 0.15s ease-out"
 });
 dpad.appendChild(thumb);
 
-/* =============================
-   DEAD ZONE VISUAL
-   ============================= */
+/* ============================= */
+/* HIGHLIGHT */
+/* ============================= */
 
-const deadZone = document.createElement("div");
-Object.assign(deadZone.style, {
-  position: "absolute",
-  left: "50%",
-  top: "50%",
-  width: `${DEAD_ZONE * 2}px`,
-  height: `${DEAD_ZONE * 2}px`,
-  borderRadius: "50%",
-  border: "1px solid rgba(0,255,255,0.4)",
-  transform: "translate(-50%, -50%)",
-  pointerEvents: "none"
-});
-dpad.appendChild(deadZone);
+function highlight(index){
+  wedges.forEach((w,i)=>{
+    w.style.background=i===index?"rgba(0,255,255,0.18)":"transparent";
+  });
+  arrows.forEach((a,i)=>{
+    a.style.textShadow=i===index?"0 0 10px #00ffff":"none";
+  });
+}
 
-/* =============================
-   D-PAD LOGIC (ANGLE BASED)
-   ============================= */
+/* ============================= */
+/* DPAD INPUT */
+/* ============================= */
 
-function updateDpadDirection(x, y) {
-  const rect = dpad.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
+function updateDpad(x,y){
 
-  const dx = x - cx;
-  const dy = y - cy;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  const radius = OUTER_RADIUS - 20;
+  const rect=dpad.getBoundingClientRect();
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
 
-  let limitedDx = dx;
-  let limitedDy = dy;
+  const dx=x-cx;
+  const dy=y-cy;
+  const dist=Math.sqrt(dx*dx+dy*dy);
 
-  if (distance > radius) {
-    const angle = Math.atan2(dy, dx);
-    limitedDx = Math.cos(angle) * radius;
-    limitedDy = Math.sin(angle) * radius;
+  const maxTravel=OUTER_RADIUS-20;
+
+  let lx=dx,ly=dy;
+
+  if(dist>maxTravel){
+    const ang=Math.atan2(dy,dx);
+    lx=Math.cos(ang)*maxTravel;
+    ly=Math.sin(ang)*maxTravel;
   }
 
-  thumb.style.transform =
-    `translate(calc(-50% + ${limitedDx}px), calc(-50% + ${limitedDy}px))`;
+  thumb.style.transform=
+    `translate(calc(-50% + ${lx}px), calc(-50% + ${ly}px))`;
 
-  if (distance < DEAD_ZONE) {
-    applyDirections(new Set());
-    highlightWedge(null);
+  if(dist<DEAD_ZONE){
+    clearDirs();
+    highlight(null);
     return;
   }
 
-  let angle = Math.atan2(dy, dx);
-  angle = (angle * 180 / Math.PI + 360) % 360;
+  let ang=Math.atan2(dy,dx);
+  ang=(ang*180/Math.PI+360)%360;
+  const index=Math.floor((ang+22.5)/45)%8;
 
-  const wedgeIndex = Math.floor((angle + 22.5) / 45) % 8;
-
-  const directions = [
-    ["right"],
-    ["down","right"],
-    ["down"],
-    ["down","left"],
-    ["left"],
-    ["up","left"],
-    ["up"],
-    ["up","right"]
+  const dirs=[
+    ["right"],["down","right"],["down"],["down","left"],
+    ["left"],["up","left"],["up"],["up","right"]
   ];
 
-  const newDirections = new Set(directions[wedgeIndex]);
-
-  applyDirections(newDirections);
-  highlightWedge(wedgeIndex);
+  applyDirs(new Set(dirs[index]));
+  highlight(index);
 }
 
-function applyDirections(newDirections) {
-  for (const dir of currentDirections) {
-    if (!newDirections.has(dir)) {
-      releaseKey(keyMap[dir]);
-    }
-  }
+function applyDirs(newDirs){
+  for(const d of currentDirections)
+    if(!newDirs.has(d)) releaseKey(keyMap[d]);
 
-  for (const dir of newDirections) {
-    if (!currentDirections.has(dir)) {
-      pressKey(keyMap[dir]);
-    }
-  }
+  for(const d of newDirs)
+    if(!currentDirections.has(d)) pressKey(keyMap[d]);
 
-  currentDirections = newDirections;
+  currentDirections=newDirs;
 }
 
-function clearDirections() {
-  for (const dir of currentDirections) {
-    releaseKey(keyMap[dir]);
-  }
+function clearDirs(){
+  for(const d of currentDirections)
+    releaseKey(keyMap[d]);
   currentDirections.clear();
-  highlightWedge(null);
-  thumb.style.transform = "translate(-50%, -50%)";
+  thumb.style.transform="translate(-50%,-50%)";
 }
 
-dpad.addEventListener("pointerdown", e => {
+dpad.addEventListener("pointerdown",e=>{
   dpad.setPointerCapture(e.pointerId);
-  updateDpadDirection(e.clientX, e.clientY);
+  updateDpad(e.clientX,e.clientY);
 });
-
-dpad.addEventListener("pointermove", e => {
-  updateDpadDirection(e.clientX, e.clientY);
+dpad.addEventListener("pointermove",e=>{
+  updateDpad(e.clientX,e.clientY);
 });
+dpad.addEventListener("pointerup",clearDirs);
+dpad.addEventListener("pointercancel",clearDirs);
 
-dpad.addEventListener("pointerup", clearDirections);
-dpad.addEventListener("pointercancel", clearDirections);
+/* ============================= */
+/* FACE BUTTONS */
+/* ============================= */
 
-/* =============================
-   START
-   ============================= */
+function createButton(name,label,bottom,right){
+  const btn=document.createElement("div");
+  btn.dataset.name=name;
+  btn.innerText=label;
 
-startOverlay.addEventListener("click", async () => {
+  Object.assign(btn.style,{
+    position:"absolute",
+    bottom:bottom,
+    right:right,
+    width:"74px",
+    height:"74px",
+    borderRadius:"50%",
+    border:"2px solid rgba(0,255,255,0.8)",
+    color:"rgba(0,255,255,0.9)",
+    background:"transparent",
+    display:"flex",
+    alignItems:"center",
+    justifyContent:"center",
+    fontWeight:"bold",
+    fontSize:"22px",
+    pointerEvents:"auto",
+    touchAction:"none",
+    transition:"all 0.05s ease"
+  });
 
-  if (document.documentElement.requestFullscreen)
+  controls.appendChild(btn);
+  return btn;
+}
+
+createButton("y","Y","160px","100px");
+createButton("b","B","100px","140px");
+createButton("x","X","100px","60px");
+createButton("a","A","40px","100px");
+
+/* ============================= */
+/* START */
+/* ============================= */
+
+startOverlay.addEventListener("click",async()=>{
+  if(document.documentElement.requestFullscreen)
     document.documentElement.requestFullscreen();
 
-  if (screen.orientation?.lock) {
-    try { await screen.orientation.lock("landscape"); } catch {}
+  if(screen.orientation?.lock){
+    try{await screen.orientation.lock("landscape");}catch{}
   }
 
   startOverlay.remove();
-  controls.style.display = "block";
-
-}, { once: true });
+  controls.style.display="block";
+},{once:true});
 
 }
 

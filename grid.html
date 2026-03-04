@@ -6,6 +6,7 @@
 <title>Jay's Retro Arcade</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -111,11 +112,22 @@ body{
   inset:0;
   background:black;
   color:#00ff66;
-  font-family:monospace;
+  font-family:'VT323', monospace;
   padding:40px;
-  font-size:14px;
+  font-size:22px;
+  letter-spacing:1px;
   white-space:pre-line;
   z-index:3000;
+}
+
+/* ===== BIOS CURSOR ===== */
+.bios-cursor{
+  display:inline;
+  animation:blinkCursor 1s steps(1) infinite;
+}
+
+@keyframes blinkCursor{
+  50%{opacity:0;}
 }
 
 /* ===== START ===== */
@@ -186,6 +198,12 @@ body{
 
 @media(max-width:600px){
   .game-grid{grid-template-columns:1fr;}
+}
+
+@media (max-width:900px){
+  .desktop-only{
+    display:none !important;
+  }
 }
 
 /* ===== CARDS ===== */
@@ -315,11 +333,11 @@ body{
       </div>
     </a>
 
-    <a class="game-card arcade-link" href="dodgeballs/index.html">
+    <a class="game-card arcade-link desktop-only" href="dodgeballs/index.html">
       <video muted loop preload="metadata">
         <source src="previews/dodgeballs.mp4" type="video/mp4">
       </video>
-      <div class="game-title">Dodgeballs!</div>
+      <div class="game-title">Dodgeballs! (Desktop Exclusive)</div>
       <div class="game-play-count">
         PLAYS: <span class="playCount">000000</span>
       </div>
@@ -359,27 +377,45 @@ window.addEventListener("load",()=>{
 });
 
 /* Boot */
-const bootText=`
-JAY SYSTEMS BIOS v2.3
-Initializing Arcade Hardware...
-Loading Game Engine...
-System Ready.
-`;
+const bootText =
+"JAY SYSTEMS BIOS v2.3\n" +
+"Initializing Arcade Hardware...\n" +
+"Loading Game Engine...\n" +
+"System Ready.";
 
 window.addEventListener("load",()=>{
   const loader=document.getElementById("loadingScreen");
-  let i=0;
-  const typing=setInterval(()=>{
-    loader.textContent+=bootText[i];
-    i++;
-    if(i>=bootText.length){
-      clearInterval(typing);
+  loader.innerHTML = '<span id="biosText"></span><span class="bios-cursor">_</span>';
+
+  const textElement = document.getElementById("biosText");
+
+  let i = 0;
+
+  function typeCharacter(){
+    if(i < bootText.length){
+
+      // Add character
+      textElement.textContent += bootText[i];
+
+      // If it's a newline, pause slightly longer
+      if(bootText[i] === "\n"){
+        i++;
+        setTimeout(typeCharacter, 350); // pause between lines
+        return;
+      }
+
+      i++;
+      setTimeout(typeCharacter, 18); // normal typing speed
+    } else {
+      // Finished typing
       setTimeout(()=>{
         loader.style.display="none";
         document.getElementById("startScreen").style.display="flex";
-      },600);
+      },800);
     }
-  },18);
+  }
+
+  typeCharacter();
 });
 
 /* Start */

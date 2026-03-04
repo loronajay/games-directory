@@ -200,11 +200,13 @@ body{
   .game-grid{grid-template-columns:1fr;}
 }
 
+/* 
 @media (max-width:900px){
   .desktop-only{
     display:none !important;
   }
 }
+*/
 
 /* ===== CARDS ===== */
 .game-card{
@@ -337,7 +339,7 @@ body{
       <video muted loop preload="metadata">
         <source src="previews/dodgeballs.mp4" type="video/mp4">
       </video>
-      <div class="game-title">Dodgeballs! (Desktop Exclusive)</div>
+      <div class="game-title">Dodgeballs!</div>
       <div class="game-play-count">
         PLAYS: <span class="playCount">000000</span>
       </div>
@@ -480,12 +482,15 @@ fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
 .catch(()=>{});
 
 /* Per game */
+/* Per game */
 document.querySelectorAll(".game-card").forEach(card=>{
-  const path=new URL(card.href).pathname;
-  fetch(`https://loronajay.goatcounter.com/counter/${path}.json`)
+  const url = new URL(card.href);
+  const slug = url.pathname.split("/").filter(Boolean)[0];
+
+  fetch(`https://loronajay.goatcounter.com/counter/${slug}/.json`)
   .then(res=>res.json())
   .then(data=>{
-    card.querySelector(".playCount").textContent=
+    card.querySelector(".playCount").textContent =
       formatArcadeNumber(data.count||0);
   })
   .catch(()=>{});

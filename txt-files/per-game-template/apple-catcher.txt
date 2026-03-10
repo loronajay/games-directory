@@ -1,0 +1,18 @@
+APPLE CATCHER
+
+CONTROLS OVERRIDE
+
+
+------------------------------------------------------------------------------------------------------------------------------
+If needed custom controls, add this above the above     <script src="../jay-mobile.js"></script>     change keys to liking
+------------------------------------------------------------------------------------------------------------------------------
+
+
+<script>
+  window.JAY_GAME_CONFIG = {
+  keyOverrides: {
+    b: "ArrowLeft",
+    x: "ArrowRight"
+    }
+  };
+  </script>

@@ -30,38 +30,3 @@ Add this right before </body>
 </script>
 
 
-------------------------------------------------------------------------------------------------------------------------------
-If needed custom controls, add this above the above script, change keys to liking
-------------------------------------------------------------------------------------------------------------------------------
-
-FOR APPLE CATCHER
-
-
-<script>
-  window.JAY_GAME_CONFIG = {
-  keyOverrides: {
-    b: "ArrowLeft",
-    x: "ArrowRight"
-    }
-  };
-  </script>
-
-
-
-FOR XPONG
-
-
-<script>
-  window.JAY_GAME_CONFIG = {
-  keyOverrides: {
-    y: "k",
-    a: ",",
-    x: "ArrowDown"
-    }
-  };
-  </script>
-
-
-
-
-

@@ -12,7 +12,8 @@ If needed custom controls, add this above the above     <script src="../jay-mobi
   window.JAY_GAME_CONFIG = {
   keyOverrides: {
     up: "j",
-    b: "w"
+    b: "c",
+    a: "w"
     }
   };
   </script>

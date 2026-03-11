@@ -1,0 +1,271 @@
+SHORT SUMMARY
+
+ONLY NEEDED DETAILS
+
+
+
+==============================================
+JAY'S RETRO ARCADE — QUICK PROJECT CONTEXT
+==============================================
+
+PROJECT GOAL
+------------
+
+Jay's Retro Arcade is a retro gaming platform currently running as a website but
+designed to eventually run as a Raspberry Pi arcade cabinet frontend.
+
+The website acts as the "arcade operating system" that launches individual games.
+
+The system must work both:
+
+• Online as a website
+• Offline as a local arcade cabinet
+
+
+------------------------------------------------
+CORE ARCHITECTURE
+------------------------------------------------
+
+The project has three main layers.
+
+
+1) ARCADE INTERFACE (WEBSITE)
+
+Handles:
+
+• menus
+• game selection
+• preview videos
+• CRT visual effects
+• navigation
+• play counters
+• audio
+• responsive layout
+
+Main pages:
+
+index.html
+→ mode selection (Quick Select vs Mini Arcade)
+
+grid.html
+→ shows all games
+
+
+------------------------------------------------
+2) GAME RUNTIME
+
+Each game runs independently in its own folder.
+
+Example:
+
+apple-catcher/
+blade-and-block/
+x-pong/
+
+Games are exported from TurboWarp Packager.
+
+Games handle their own:
+
+• gameplay logic
+• keyboard controls
+• gamepad controls
+• touch controls
+
+
+IMPORTANT:
+
+The arcade menu input system does NOT control gameplay.
+
+Games manage their own controls internally.
+
+
+------------------------------------------------
+3) INPUT SYSTEMS
+
+There are two separate input layers.
+
+
+MENU INPUT
+
+Handled by:
+
+js/arcade-input.js
+
+Used only for navigating menus.
+
+Supported actions:
+
+left
+right
+up
+down
+select
+
+Used by:
+
+index page
+grid page
+
+
+GAME INPUT
+
+Handled inside each TurboWarp game.
+
+
+------------------------------------------------
+MOBILE CONTROLLER
+
+Custom controller:
+
+js/jay-mobile.js
+
+Features:
+
+• virtual D-pad
+• A B X Y buttons
+• multi-touch
+• landscape lock
+• fullscreen start
+• scanline toggle
+
+Games can override controls using:
+
+window.JAY_GAME_CONFIG
+
+
+Example:
+
+window.JAY_GAME_CONFIG = {
+  keyOverrides: {
+    up: "j",
+    b: "c",
+    a: "w"
+  }
+}
+
+
+------------------------------------------------
+AUTOMATED PATCH SYSTEM
+
+Script:
+
+patch_all_games.py
+
+This script automatically modifies exported TurboWarp games.
+
+
+It performs:
+
+• viewport meta patch
+• mobile meta insertion
+• jay-mobile.js injection
+• goatcounter analytics injection
+• control override injection
+
+
+The script detects existing tags and avoids duplicates.
+
+
+------------------------------------------------
+CONTROL OVERRIDES
+
+Stored in:
+
+control_overrides.py
+
+
+Example:
+
+GAME_OVERRIDES = {
+
+  "blade-and-block": {
+    "up": "j",
+    "b": "c",
+    "a": "w"
+  },
+
+  "apple-catcher": {
+    "b": "ArrowLeft",
+    "x": "ArrowRight"
+  }
+
+}
+
+
+Overrides are automatically injected into game index.html files.
+
+
+------------------------------------------------
+DEVELOPMENT WORKFLOW
+
+Standard update loop:
+
+1) Update game in TurboWarp
+2) Export ZIP from TurboWarp Packager
+3) Extract ZIP
+4) Replace game folder files
+5) Run patch_all_games.py
+6) Test locally
+7) Push to Git
+8) Verify on website
+
+
+------------------------------------------------
+NAVIGATION SYSTEM
+
+Menus support:
+
+• mouse
+• keyboard
+• gamepad
+• mobile touch
+
+
+Selection triggers a CRT shutdown animation before loading games.
+
+
+------------------------------------------------
+CRT VISUAL SYSTEM
+
+Arcade UI simulates CRT behavior:
+
+• scanlines
+• CRT vignette
+• power-on animation
+• collapse animation
+• BIOS boot screen
+
+
+------------------------------------------------
+LONG TERM PLAN
+
+Eventually this system will run on:
+
+• Raspberry Pi
+• HDMI display
+• physical arcade controls
+
+The website interface will become the cabinet frontend.
+
+
+------------------------------------------------
+CURRENT STATUS
+
+The project already includes:
+
+• working arcade frontend
+• multiple playable games
+• gamepad navigation
+• mobile controller system
+• automated patch script
+• centralized control overrides
+• play count analytics
+• CRT themed UI
+
+
+This represents the first working version of the arcade platform.
+
+
+------------------------------------------------
+END CONTEXT
+------------------------------------------------

@@ -1,0 +1,136 @@
+SUPER SHORT SUMMARY
+_______________________________________________
+
+include with a short message 
+
+
+==============================================
+JAY'S RETRO ARCADE — CONTEXT BOOTSTRAP
+==============================================
+
+This project is a retro gaming platform currently running as a website but designed
+to eventually run as a Raspberry Pi arcade cabinet frontend.
+
+The website acts as an "arcade operating system" that launches independent games.
+
+
+CORE STRUCTURE
+--------------
+
+Arcade Interface (website UI)
+→ index page (mode select)
+→ grid page (game list)
+
+Game Runtime
+→ each game is exported from TurboWarp Packager
+→ each game runs independently in its own folder
+→ games handle their own gameplay logic and controls
+
+Automation
+→ Python patch script modifies exported games automatically
+
+
+INPUT SYSTEM
+------------
+
+Menu navigation uses a shared input script:
+
+js/arcade-input.js
+
+Handles:
+keyboard
+gamepad
+
+Actions:
+left, right, up, down, select
+
+IMPORTANT:
+Menu input does NOT control gameplay.
+
+Games handle their own controls inside TurboWarp.
+
+
+MOBILE CONTROLLER
+-----------------
+
+Mobile controller script:
+
+js/jay-mobile.js
+
+Provides:
+• virtual D-pad
+• A B X Y buttons
+• multi-touch
+• fullscreen start
+• landscape lock
+
+Games can override controls using:
+
+window.JAY_GAME_CONFIG
+
+
+AUTOMATION SYSTEM
+-----------------
+
+Python script:
+
+patch_all_games.py
+
+Automatically fixes TurboWarp exports by adding:
+
+• mobile viewport meta tags
+• mobile web app tags
+• jay-mobile.js script
+• goatcounter analytics
+• control overrides
+
+
+CONTROL OVERRIDES
+-----------------
+
+Stored in:
+
+control_overrides.py
+
+Example:
+
+GAME_OVERRIDES = {
+  "apple-catcher": {...},
+  "blade-and-block": {...}
+}
+
+Overrides are automatically injected into game HTML.
+
+
+GAME UPDATE WORKFLOW
+--------------------
+
+1) Export game from TurboWarp Packager (ZIP)
+2) Extract files
+3) Replace game folder contents
+4) Run patch_all_games.py
+5) Test
+6) Push to Git
+
+
+GOAL
+----
+
+Build a scalable retro arcade platform that works:
+
+• as a website
+• as an offline arcade
+• as a Raspberry Pi cabinet frontend
+
+The current system already includes:
+
+• arcade UI
+• multiple games
+• gamepad navigation
+• mobile controller
+• automated patch script
+• centralized control overrides
+• CRT themed interface
+
+
+END CONTEXT

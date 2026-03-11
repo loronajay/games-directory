@@ -1,0 +1,364 @@
+
+RUN FROM ROOT DIRECTORY
+
+
+python patch_all_games.py
+
+
+==============================================
+JAY'S RETRO ARCADE — DEVELOPMENT WORKFLOW
+==============================================
+
+This document describes the full workflow used to build, update, and deploy games
+for Jay's Retro Arcade.
+
+The goal is to minimize repetitive work by using automation scripts while keeping
+the process simple and reliable.
+
+------------------------------------------------
+PROJECT STRUCTURE
+------------------------------------------------
+
+Root directory structure:
+
+project-root/
+│
+├─ patch_all_games.py
+├─ control_overrides.py
+├─ WORKFLOW.txt
+├─ PROJECT_ARCHITECTURE.txt
+│
+├─ js/
+│   └─ jay-mobile.js
+│
+├─ apple-catcher/
+│   └─ index.html
+│
+├─ blade-and-block/
+│   └─ index.html
+│
+├─ x-pong/
+│   └─ index.html
+│
+└─ other game folders...
+
+
+------------------------------------------------
+GAME DEVELOPMENT PROCESS
+------------------------------------------------
+
+Games are developed inside TurboWarp and exported using the TurboWarp Packager.
+
+TurboWarp handles:
+
+• game logic
+• keyboard input
+• gamepad input
+• touch input
+• gameplay systems
+
+
+IMPORTANT RULE:
+
+The arcade website input system does NOT control gameplay.
+
+Each game handles its own controls internally.
+
+
+------------------------------------------------
+EXPORTING A GAME FROM TURBOWARP
+------------------------------------------------
+
+1) Open the game project in TurboWarp.
+
+2) Use TurboWarp Packager to export the game.
+
+3) Choose:
+
+   Export → ZIP
+
+
+4) Extract the exported ZIP file.
+
+
+------------------------------------------------
+UPDATING A GAME IN THE ARCADE
+------------------------------------------------
+
+1) Locate the correct game folder.
+
+Example:
+
+apple-catcher/
+
+
+2) Delete or replace the existing files with the newly exported files.
+
+Example:
+
+apple-catcher/index.html
+apple-catcher/assets
+apple-catcher/scripts
+etc.
+
+
+3) Run the patch script from the root directory.
+
+Command:
+
+python patch_all_games.py
+
+
+The patch script will automatically modify the exported files.
+
+
+------------------------------------------------
+WHAT THE PATCH SCRIPT DOES
+------------------------------------------------
+
+patch_all_games.py performs several automated fixes.
+
+
+1) MOBILE META TAG PATCH
+
+Ensures every game contains the correct viewport settings.
+
+Adds:
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="screen-orientation" content="landscape">
+
+
+2) MOBILE CONTROLLER INJECTION
+
+Automatically inserts:
+
+<script src="../js/jay-mobile.js"></script>
+
+
+3) ANALYTICS INJECTION
+
+Automatically inserts GoatCounter tracking.
+
+
+4) CONTROL OVERRIDE INJECTION
+
+If a game appears in:
+
+control_overrides.py
+
+the patch script inserts a control configuration block.
+
+
+Example injected code:
+
+window.JAY_GAME_CONFIG = {
+  keyOverrides: {
+    up: "j",
+    b: "c",
+    a: "w"
+  }
+};
+
+
+5) DUPLICATE PREVENTION
+
+The patch script avoids:
+
+• duplicate scripts
+• duplicate meta tags
+• duplicate control blocks
+
+
+6) SMART DETECTION
+
+The patch script detects existing viewport tags even if formatting differs.
+
+
+------------------------------------------------
+CONTROL OVERRIDES
+------------------------------------------------
+
+Some games require custom control mappings.
+
+These are managed in:
+
+control_overrides.py
+
+
+Example configuration:
+
+GAME_OVERRIDES = {
+
+  "blade-and-block": {
+    "up": "j",
+    "b": "c",
+    "a": "w"
+  },
+
+  "apple-catcher": {
+    "b": "ArrowLeft",
+    "x": "ArrowRight"
+  }
+
+}
+
+
+IMPORTANT:
+
+The folder name must match the game folder exactly.
+
+
+Example:
+
+apple-catcher/
+
+
+If no override exists for a game, the default controls are used.
+
+
+------------------------------------------------
+TESTING AFTER PATCHING
+------------------------------------------------
+
+After running the patch script:
+
+1) Launch the arcade website locally or via GitHub.
+
+2) Navigate to the game.
+
+3) Verify:
+
+• game loads
+• controls work
+• mobile controller appears on mobile
+• gamepad works
+• navigation back to arcade works
+
+
+------------------------------------------------
+DEPLOYMENT PROCESS
+------------------------------------------------
+
+Once the game is confirmed working:
+
+1) Commit changes.
+
+git add .
+
+
+2) Commit update.
+
+git commit -m "Updated [game-name]"
+
+
+3) Push to repository.
+
+git push
+
+
+4) Verify the update on the live website.
+
+
+------------------------------------------------
+ADDING A NEW GAME
+------------------------------------------------
+
+To add a new game to the arcade:
+
+1) Create a new game folder.
+
+Example:
+
+new-game/
+
+
+2) Export the game from TurboWarp.
+
+3) Copy the exported files into the folder.
+
+
+4) Run the patch script.
+
+python patch_all_games.py
+
+
+5) Add the game to the arcade grid page.
+
+Edit:
+
+grid.html
+
+
+6) Add preview video and title.
+
+
+7) Test the game.
+
+
+------------------------------------------------
+ADDING CONTROL OVERRIDES FOR A NEW GAME
+------------------------------------------------
+
+If the game requires custom controls:
+
+1) Open control_overrides.py
+
+2) Add an entry:
+
+"new-game": {
+  "up": "i",
+  "a": "z",
+  "b": "x"
+}
+
+
+3) Run patch script again.
+
+
+------------------------------------------------
+TYPICAL UPDATE WORKFLOW
+------------------------------------------------
+
+The normal update cycle looks like this:
+
+1) Update game in TurboWarp
+2) Export ZIP
+3) Extract ZIP
+4) Replace game folder contents
+5) Run patch_all_games.py
+6) Test locally
+7) Commit changes
+8) Push to Git
+9) Verify on website
+
+
+------------------------------------------------
+IMPORTANT DEVELOPMENT RULES
+------------------------------------------------
+
+1) DO NOT manually edit exported game files unless necessary.
+
+Use the patch script whenever possible.
+
+
+2) Games handle their own gameplay input.
+
+The arcade UI input system only controls menus.
+
+
+3) Always run the patch script after updating a game export.
+
+
+4) Keep control overrides centralized in control_overrides.py.
+
+
+5) Always test after updating.
+
+
+------------------------------------------------
+END OF WORKFLOW
+------------------------------------------------

@@ -16,6 +16,7 @@ PARENT_DIR = ROOT_DIR.parent
 GAMES_DIR = ROOT_DIR / "games"
 EXPORTS_DIR = PARENT_DIR / "exports"
 PATCHER_PATH = SCRIPT_DIR / "patch_all_games.py"
+GRID_GENERATOR_PATH = SCRIPT_DIR / "generate_grid.py"
 
 # -------------------------
 # HELPERS
@@ -79,6 +80,37 @@ def validate_imported_game(game_name: str):
     return True
 
 
+def read_existing_game_json(game_dir: Path):
+    game_json = game_dir / "game.json"
+    if game_json.exists():
+        return game_json.read_text(encoding="utf-8")
+    return None
+
+
+def restore_or_create_game_json(game_dir: Path, preserved_json_text: str | None):
+    game_json = game_dir / "game.json"
+
+    # If the imported ZIP already included one, leave it alone
+    if game_json.exists():
+        return
+
+    # Restore previous manual metadata if it existed
+    if preserved_json_text is not None:
+        game_json.write_text(preserved_json_text, encoding="utf-8")
+        print(f"Restored game.json for {game_dir.name}")
+        return
+
+    # Otherwise create a starter metadata file
+    starter_json = """{
+  "title": "",
+  "order": 9999,
+  "card_classes": []
+}
+"""
+    game_json.write_text(starter_json, encoding="utf-8")
+    print(f"Created starter game.json for {game_dir.name}")
+
+
 def import_one_zip(zip_path: Path, dry_run=False):
     game_name = zip_path.stem
     target_dir = GAMES_DIR / game_name
@@ -90,11 +122,15 @@ def import_one_zip(zip_path: Path, dry_run=False):
     if dry_run:
         return game_name, True
 
+    preserved_json_text = read_existing_game_json(target_dir)
+
     print("Clearing old game contents...")
     clear_directory_contents(target_dir)
 
     print("Extracting ZIP...")
     extract_zip_safely(zip_path, target_dir)
+
+    restore_or_create_game_json(target_dir, preserved_json_text)
 
     print("Validating imported files...")
     ok = validate_imported_game(game_name)
@@ -120,6 +156,15 @@ def run_patcher(game_names, dry_run=False, commit=False, push=False):
     run_command(cmd, cwd=ROOT_DIR)
 
 
+def run_grid_generator(dry_run=False):
+    if dry_run:
+        print("\nDry run: would regenerate grid.")
+        return
+
+    cmd = [sys.executable, str(GRID_GENERATOR_PATH)]
+    run_command(cmd, cwd=ROOT_DIR)
+
+
 def delete_processed_zips(zip_files):
     print("\nCleaning processed ZIPs from exports...")
     for zip_path in zip_files:
@@ -136,7 +181,7 @@ def delete_processed_zips(zip_files):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Build arcade from exports/: import ZIPs into games/, patch imported games, optionally commit/push."
+        description="Build arcade from exports/: import ZIPs into games/, patch imported games, regenerate grid, optionally commit/push."
     )
     parser.add_argument(
         "--dry-run",
@@ -180,6 +225,11 @@ def main():
     if not PATCHER_PATH.exists():
         print("ERROR: patch_all_games.py not found:")
         print(f"  {PATCHER_PATH}")
+        sys.exit(1)
+
+    if not GRID_GENERATOR_PATH.exists():
+        print("ERROR: generate_grid.py not found:")
+        print(f"  {GRID_GENERATOR_PATH}")
         sys.exit(1)
 
     zip_files = get_export_zips()
@@ -231,9 +281,21 @@ def main():
     run_patcher(
         imported_games,
         dry_run=False,
-        commit=args.commit,
-        push=args.push
+        commit=False,
+        push=False
     )
+
+    print("\nRegenerating grid...")
+    run_grid_generator(dry_run=False)
+
+    if args.commit:
+        print("\nCommitting changes...")
+        run_command(["git", "add", "."], cwd=ROOT_DIR)
+        run_command(["git", "commit", "-m", "Build arcade update"], cwd=ROOT_DIR)
+
+    if args.push:
+        print("\nPushing changes...")
+        run_command(["git", "push"], cwd=ROOT_DIR)
 
     if args.clean_exports:
         delete_processed_zips(successful_zip_files)

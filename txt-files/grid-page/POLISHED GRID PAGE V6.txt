@@ -1,0 +1,767 @@
+POLISHED GRID PAGE V6
+
+updated paths for new folder structure
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jay's Retro Arcade</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Press Start 2P',cursive;
+  background:url('images/background.png') center center fixed;
+  background-size:cover;
+  color:white;
+  text-align:center;
+  overflow-x:hidden;
+  animation:crtFlicker 6s infinite;
+}
+
+/* ===== OVERLAY ===== */
+#arcadeOverlay{
+  position:fixed;
+  inset:0;
+  background:black;
+  opacity:1;
+  z-index:9999;
+  pointer-events:none;
+  transition:opacity .45s ease;
+}
+
+/* ===== CRT COLLAPSE ===== */
+.crt-collapse {
+  animation: crtCollapse 0.6s forwards;
+}
+
+@keyframes crtCollapse {
+  0% {
+    transform: scaleY(1);
+    filter: brightness(1);
+  }
+  60% {
+    transform: scaleY(0.02);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scaleY(0);
+    filter: brightness(0);
+    background: black;
+  }
+}
+
+/* ===== CRT FLASH LINE ===== */
+#crtFlash{
+  position:fixed;
+  left:0;
+  width:100%;
+  height:4px;
+  background:white;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:0;
+  z-index:10000;
+  pointer-events:none;
+}
+
+.flash-active{
+  animation:flashLine .15s ease-out forwards;
+}
+
+@keyframes flashLine{
+  0%{opacity:1;height:6px;}
+  100%{opacity:0;height:2px;}
+}
+
+@keyframes crtFlicker{
+  0%,100%{opacity:1;}
+  50%{opacity:.985;}
+}
+
+/* ===== CRT FX ===== */
+.scanlines{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1000;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,.25) 0px,
+    rgba(0,0,0,.25) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.crt-overlay{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999;
+  background:radial-gradient(circle at center,
+    rgba(0,0,0,0) 60%,
+    rgba(0,0,0,.45) 100%);
+}
+
+/* ===== BOOT ===== */
+#loadingScreen{
+  position:fixed;
+  inset:0;
+  background:black;
+  color:#00ff66;
+  font-family:'VT323', monospace;
+  padding:40px;
+  font-size:22px;
+  letter-spacing:1px;
+  white-space:pre-line;
+  z-index:3000;
+}
+
+/* ===== BIOS CURSOR ===== */
+.bios-cursor{
+  display:inline;
+  animation:blinkCursor 1s steps(1) infinite;
+}
+
+@keyframes blinkCursor{
+  50%{opacity:0;}
+}
+
+/* ===== START ===== */
+#startScreen{
+  position:fixed;
+  inset:0;
+  background:black;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  cursor:pointer;
+  z-index:2500;
+}
+
+.arcade-title{
+  font-size:1.8rem;
+  color:#ff00ff;
+  text-shadow:0 0 25px #ff00ff;
+}
+
+.press-start{
+  margin-top:60px;
+  color:#00ffff;
+  animation:blink 1s infinite;
+  text-shadow:0 0 20px #00ffff;
+}
+
+@keyframes blink{50%{opacity:0;}}
+
+/* ===== MAIN ===== */
+#mainContent{display:none;}
+
+.title-box{
+  margin-top:80px;
+  padding:30px;
+  background:rgba(0,0,0,.75);
+  display:inline-block;
+  border:3px solid #00ffff;
+  box-shadow:0 0 40px #00ffff;
+}
+
+.title-box h1{
+  color:#ff00ff;
+  text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
+}
+
+.visitor-box{
+  margin-top:20px;
+  font-size:.8rem;
+  color:#00ffff;
+  text-shadow:0 0 10px #00ffff;
+}
+
+/* ===== GRID ===== */
+.game-grid{
+  margin:80px auto;
+  max-width:1100px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:40px;
+  padding:20px;
+}
+
+@media(max-width:900px){
+  .game-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+@media(max-width:600px){
+  .game-grid{grid-template-columns:1fr;}
+}
+
+ 
+@media (max-width:900px){
+  .desktop-only{
+    display:none !important;
+  }
+}
+
+
+/* ===== CARDS ===== */
+.game-card{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  background:rgba(0,0,0,.85);
+  border:3px solid #ff00ff;
+  padding:15px;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+
+.game-card:hover,
+.game-card.gamepad-selected{
+  transform:perspective(800px) rotateX(6deg) scale(1.06);
+  box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
+}
+
+.game-card video{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border:2px solid #00ffff;
+}
+
+.game-title{
+  margin-top:15px;
+  font-size:.8rem;
+  color:#00ffff;
+  text-shadow:0 0 12px #00ffff;
+}
+
+.game-play-count{
+  margin-top:10px;
+  font-size:.65rem;
+  color:#00ffff;
+  opacity:.85;
+  text-shadow:0 0 8px #00ffff;
+}
+
+/* CRT Power On */
+.crt-boot {
+  animation: crtBoot 0.6s forwards;
+}
+
+@keyframes crtBoot {
+  0% {
+    transform: scaleY(0);
+    filter: brightness(3);
+  }
+  40% {
+    transform: scaleY(0.05);
+    filter: brightness(2);
+  }
+  100% {
+    transform: scaleY(1);
+    filter: brightness(1);
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div id="arcadeOverlay"></div>
+<div id="crtFlash"></div>
+<div id="loadingScreen"></div>
+
+<div id="startScreen">
+  <div class="arcade-title">JAY'S RETRO ARCADE</div>
+  <div class="press-start">PRESS START</div>
+</div>
+
+<div class="scanlines"></div>
+<div class="crt-overlay"></div>
+
+<audio id="bgMusic" loop preload="auto">
+  <source src="music/background.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="hoverSound" preload="auto">
+  <source src="music/hovered.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="shutdownSound" preload="auto">
+  <source src="music/crt-shutdown.mp3" type="audio/mpeg">
+</audio>
+
+<div id="mainContent">
+
+  <div class="title-box">
+    <h1>Jay's Retro Arcade</h1>
+    <div class="visitor-box">
+      VISITORS: <span id="visitorCount">000000</span>
+    </div>
+  </div>
+
+  <div class="game-grid">
+
+  <a class="game-card arcade-link" href="games/apple-catcher/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/apple-catcher.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">Apple Catcher</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
+  <a class="game-card arcade-link" href="games/art-of-war/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/art-of-war.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">Art Of War</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
+  <a class="game-card arcade-link" href="games/bird-duty/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/bird-duty.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">Bird Duty</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
+  <a class="game-card arcade-link desktop-only" href="games/dodgeballs/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/dodgeballs.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">Dodgeballs!</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
+  <a class="game-card arcade-link" href="games/sumorai/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/sumorai.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">Sumorai</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
+  <a class="game-card arcade-link" href="games/x-pong/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/x-pong.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">X-Pong</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
+  <a class="game-card arcade-link" href="games/blade-and-block/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/blade-and-block.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">Blade & Block</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
+</div>
+</div>
+
+<script src="js/arcade-input.js"></script>
+
+<script>
+const overlay=document.getElementById("arcadeOverlay");
+const shutdownSound=document.getElementById("shutdownSound");
+const hoverSound=document.getElementById("hoverSound");
+
+/* Fade in */
+window.addEventListener("load",()=>{
+  setTimeout(()=>{overlay.style.opacity="0";},200);
+});
+
+/* Boot */
+const bootText =
+"JAY SYSTEMS BIOS v2.3\n" +
+"Initializing Arcade Hardware...\n" +
+"Loading Game Engine...\n" +
+"System Ready.";
+
+window.addEventListener("load",()=>{
+  const loader=document.getElementById("loadingScreen");
+  loader.innerHTML = '<span id="biosText"></span><span class="bios-cursor">_</span>';
+
+  const textElement = document.getElementById("biosText");
+
+  let i = 0;
+
+  function typeCharacter(){
+    if(i < bootText.length){
+
+      // Add character
+      textElement.textContent += bootText[i];
+
+      // If it's a newline, pause slightly longer
+      if(bootText[i] === "\n"){
+        i++;
+        setTimeout(typeCharacter, 350); // pause between lines
+        return;
+      }
+
+      i++;
+      setTimeout(typeCharacter, 18); // normal typing speed
+    } else {
+      // Finished typing
+      setTimeout(()=>{
+        loader.style.display="none";
+        document.getElementById("startScreen").style.display="flex";
+      },800);
+    }
+  }
+
+  typeCharacter();
+});
+
+/* Start */
+const startScreen = document.getElementById("startScreen");
+const mainContent = document.getElementById("mainContent");
+const bgMusic = document.getElementById("bgMusic");
+
+let startScreenDismissed = false;
+let gamepadEnabled = false;
+
+function startArcade() {
+  if (startScreenDismissed) return;
+
+  startScreenDismissed = true;
+  startScreen.style.display = "none";
+  mainContent.style.display = "block";
+  bgMusic.play().catch(() => {});
+
+  gamepadEnabled = true;
+
+  setSelectedIndex(0, false);
+  stopNonSelectedVideos();
+}
+
+startScreen.addEventListener("click", () => {
+  startArcade();
+});
+
+/* Navigation */
+document.querySelectorAll(".arcade-link").forEach(link=>{
+  const prefetch=document.createElement("link");
+  prefetch.rel="prefetch";
+  prefetch.href=link.href;
+  document.head.appendChild(prefetch);
+
+  link.addEventListener("mouseenter",()=>{
+    hoverSound.currentTime=0;
+    hoverSound.play().catch(()=>{});
+    const vid=link.querySelector("video");
+    if(vid)vid.play();
+  });
+
+  link.addEventListener("mouseleave",()=>{
+    const vid=link.querySelector("video");
+    if(vid){vid.pause();vid.currentTime=0;}
+  });
+
+  link.addEventListener("click", e => {
+  e.preventDefault();
+
+  shutdownSound.currentTime = 0;
+  shutdownSound.play().catch(() => {});
+
+  // Start collapse
+  document.body.classList.add("crt-collapse");
+  document.getElementById("crtFlash").classList.add("flash-active");
+
+  // Fade overlay to black immediately
+  overlay.style.transition = "opacity 0.3s ease";
+  overlay.style.opacity = "1";
+
+  // Redirect after animation completes
+  setTimeout(() => {
+    window.location.href = link.href;
+  }, 650);
+});
+});
+
+/* Counters */
+function formatArcadeNumber(num){
+  return num.toString().padStart(6,'0');
+}
+
+/* Total site */
+fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
+.then(res=>res.json())
+.then(data=>{
+  document.getElementById("visitorCount").textContent=
+    formatArcadeNumber(data.count||0);
+})
+.catch(()=>{});
+
+/* Per game */
+document.querySelectorAll(".game-card").forEach(card => {
+
+  const url = new URL(card.href);
+  const slug = url.pathname.replace(/\/$/, ""); // remove trailing slash
+
+  fetch(`https://loronajay.goatcounter.com/counter${slug}.json`)
+    .then(res => res.json())
+    .then(data => {
+      card.querySelector(".playCount").textContent =
+        formatArcadeNumber(data.count || 0);
+    })
+    .catch(err => {
+      console.log("Counter error for:", slug);
+    });
+
+});
+
+/* Force hard reload when returning via back button */
+window.addEventListener("pageshow", function(event) {
+  if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+    window.location.reload();
+  }
+});
+
+/* Detect back button navigation */
+window.addEventListener("pageshow", function(event) {
+  const navType = performance.getEntriesByType("navigation")[0]?.type;
+
+  if (event.persisted || navType === "back_forward") {
+
+    // Force fresh state
+    document.body.style.transform = "scaleY(0)";
+    document.body.style.filter = "brightness(3)";
+
+    // Small delay so style applies
+    setTimeout(() => {
+      document.body.classList.add("crt-boot");
+    }, 50);
+  }
+});
+
+/* GRID NAVIGATION USING SHARED INPUT */
+
+const gamepadItems = Array.from(document.querySelectorAll(".arcade-link"));
+
+let selectedIndex = 0;
+
+function getVisibleGamepadItems() {
+  return gamepadItems.filter(item => {
+    const style = window.getComputedStyle(item);
+    return style.display !== "none" && style.visibility !== "hidden";
+  });
+}
+
+function clearGamepadSelection() {
+  gamepadItems.forEach(item => item.classList.remove("gamepad-selected"));
+}
+
+function setSelectedIndex(index, playSound = true) {
+  const items = getVisibleGamepadItems();
+  if (!items.length) return;
+
+  clearGamepadSelection();
+
+  selectedIndex = ((index % items.length) + items.length) % items.length;
+
+  const selected = items[selectedIndex];
+  selected.classList.add("gamepad-selected");
+
+  if (playSound) {
+    hoverSound.currentTime = 0;
+    hoverSound.play().catch(() => {});
+  }
+
+  const vid = selected.querySelector("video");
+  if (vid) vid.play().catch(() => {});
+}
+
+function scrollSelectedIntoView() {
+  const items = getVisibleGamepadItems();
+  const selected = items[selectedIndex];
+  if (!selected) return;
+
+  selected.scrollIntoView({
+    block: "center",
+    inline: "nearest",
+    behavior: "auto"
+  });
+}
+
+function stopNonSelectedVideos() {
+  const items = getVisibleGamepadItems();
+  const selected = items[selectedIndex];
+
+  items.forEach(item => {
+    const vid = item.querySelector("video");
+    if (!vid) return;
+
+    if (item === selected) {
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+      vid.currentTime = 0;
+    }
+  });
+}
+
+function activateSelectedItem() {
+  const items = getVisibleGamepadItems();
+  const selected = items[selectedIndex];
+  if (!selected) return;
+
+  selected.click();
+}
+
+function getClosestIndexInDirection(direction) {
+  const items = getVisibleGamepadItems();
+  const current = items[selectedIndex];
+  if (!current) return selectedIndex;
+
+  const currentRect = current.getBoundingClientRect();
+  const currentCenterX = currentRect.left + currentRect.width / 2;
+  const currentCenterY = currentRect.top + currentRect.height / 2;
+
+  let bestIndex = selectedIndex;
+  let bestScore = Infinity;
+
+  items.forEach((item, index) => {
+    if (index === selectedIndex) return;
+
+    const rect = item.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const dx = centerX - currentCenterX;
+    const dy = centerY - currentCenterY;
+
+    let valid = false;
+    let primary = 0;
+    let secondary = 0;
+
+    if (direction === "left" && dx < -10) {
+      valid = true;
+      primary = Math.abs(dx);
+      secondary = Math.abs(dy);
+    }
+
+    if (direction === "right" && dx > 10) {
+      valid = true;
+      primary = Math.abs(dx);
+      secondary = Math.abs(dy);
+    }
+
+    if (direction === "up" && dy < -10) {
+      valid = true;
+      primary = Math.abs(dy);
+      secondary = Math.abs(dx);
+    }
+
+    if (direction === "down" && dy > 10) {
+      valid = true;
+      primary = Math.abs(dy);
+      secondary = Math.abs(dx);
+    }
+
+    if (!valid) return;
+
+    const score = primary * 1000 + secondary;
+
+    if (score < bestScore) {
+      bestScore = score;
+      bestIndex = index;
+    }
+  });
+
+  return bestIndex;
+}
+
+function moveSelection(direction, source) {
+  const items = getVisibleGamepadItems();
+  if (!items.length) return;
+
+  const nextIndex = getClosestIndexInDirection(direction);
+
+  if (nextIndex !== selectedIndex) {
+    setSelectedIndex(nextIndex);
+    stopNonSelectedVideos();
+
+    if (source === "gamepad") {
+      scrollSelectedIntoView();
+    }
+  }
+}
+
+/* Mouse hover updates selection but does NOT scroll */
+gamepadItems.forEach(item => {
+  item.addEventListener("mouseenter", () => {
+    const visibleItems = getVisibleGamepadItems();
+    const index = visibleItems.indexOf(item);
+
+    if (index !== -1) {
+      selectedIndex = index;
+      setSelectedIndex(index, false);
+      stopNonSelectedVideos();
+    }
+  });
+});
+
+/* Shared input hook */
+ArcadeInput.onAction((action, source) => {
+  if (!startScreenDismissed) {
+    if (action === "select") {
+      startArcade();
+    }
+    return;
+  }
+
+  if (!gamepadEnabled) return;
+
+  if (action === "left" || action === "right" || action === "up" || action === "down") {
+    moveSelection(action, source);
+  }
+
+  if (action === "select") {
+    activateSelectedItem();
+  }
+});
+
+/* Keep selection valid on resize */
+window.addEventListener("resize", () => {
+  const items = getVisibleGamepadItems();
+  if (!items.length) return;
+
+  if (selectedIndex >= items.length) {
+    selectedIndex = items.length - 1;
+  }
+
+  setSelectedIndex(selectedIndex, false);
+  stopNonSelectedVideos();
+});
+
+</script>
+
+</body>
+</html>

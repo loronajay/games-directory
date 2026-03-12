@@ -2,6 +2,12 @@
 RUN FROM ROOT DIRECTORY
 
 
+1. Replace contents of games/<game-name>/
+2. Run:
+
+python scripts/patch_all_games.py --push
+
+
 python patch_all_games.py
 
 

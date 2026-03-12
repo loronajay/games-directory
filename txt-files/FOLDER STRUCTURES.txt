@@ -5,7 +5,7 @@ FOLDER STRUCTURES
 PARENT
 
 
-full-games/
+Dad Games/full-games/
 ├─ exports/
 └─ games-directory-page/
    ├─ games/

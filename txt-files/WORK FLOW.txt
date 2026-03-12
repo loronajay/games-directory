@@ -1,380 +1,388 @@
 
 RUN FROM ROOT DIRECTORY
 
+DRY RUN: python scripts/build_arcade.py --dry-run
 
-1. Replace contents of games/<game-name>/
-2. Run:
+LOCAL BUILD (imports+patches only: python scripts/build_arcade.py
 
-DRY RUN:     python scripts/patch_all_games.py --dry-run
+FULL DEPLOY: python scripts/build_arcade.py --push
 
-PATCH, NO PUSH:    python scripts/patch_all_games.py
+FULL DEPLOY + DELETE OLD ZIPS:  python scripts/build_arcade.py --push
 
-PATCH AND COMMIT:   python scripts/patch_all_games.py --commit
 
-PATCH ONE GAME:    python scripts/patch_all_games.py apple-catcher
 
-PATCH ONE GAME AND PUSH :     python scripts/patch_all_games.py apple-catcher --push
 
 
+Updated path to homepage from inside games:   ../../index.html
 
-FULL PATCH AND PUSH :    python scripts/patch_all_games.py --push
 
+JAY RETRO ARCADE — BUILD AND DEPLOY WORKFLOW
 
+PROJECT OVERVIEW
 
-==============================================
-JAY'S RETRO ARCADE — DEVELOPMENT WORKFLOW
-==============================================
+The arcade project now uses a unified automated workflow built around a single build script.
 
-This document describes the full workflow used to build, update, and deploy games
-for Jay's Retro Arcade.
+The intended update process is:
 
-The goal is to minimize repetitive work by using automation scripts while keeping
-the process simple and reliable.
+Export updated games from TurboWarp Packager as ZIP files
 
-------------------------------------------------
-PROJECT STRUCTURE
-------------------------------------------------
+Place the ZIP files into the exports staging folder
 
-Root directory structure:
+Run the arcade build script
 
-project-root/
-│
-├─ patch_all_games.py
-├─ control_overrides.py
-├─ WORKFLOW.txt
-├─ PROJECT_ARCHITECTURE.txt
-│
-├─ js/
-│   └─ jay-mobile.js
-│
-├─ apple-catcher/
-│   └─ index.html
-│
-├─ blade-and-block/
-│   └─ index.html
-│
-├─ x-pong/
-│   └─ index.html
-│
-└─ other game folders...
+The build script imports games, patches them, and optionally pushes changes
 
+Preview video creation remains a manual step for each game.
 
-------------------------------------------------
-GAME DEVELOPMENT PROCESS
-------------------------------------------------
 
-Games are developed inside TurboWarp and exported using the TurboWarp Packager.
 
-TurboWarp handles:
+MAIN BUILD SCRIPT
 
-• game logic
-• keyboard input
-• gamepad input
-• touch input
-• gameplay systems
+scripts/build_arcade.py
 
+This script performs the full arcade update process.
 
-IMPORTANT RULE:
+Responsibilities:
 
-The arcade website input system does NOT control gameplay.
+• Scan the exports folder for ZIP files
+• Import each ZIP into games/<game-name>/
+• Clear old game contents before replacing
+• Validate imported game structure
+• Run the patcher automatically
+• Optionally commit and push changes
+• Optionally delete processed ZIPs
 
-Each game handles its own controls internally.
+The build script is now the main command used to update the arcade.
 
+PATCH SCRIPT
 
-------------------------------------------------
-EXPORTING A GAME FROM TURBOWARP
-------------------------------------------------
+scripts/patch_all_games.py
 
-1) Open the game project in TurboWarp.
+This script modifies game HTML files automatically.
 
-2) Use TurboWarp Packager to export the game.
+Responsibilities:
 
-3) Choose:
+• Inject correct mobile viewport meta tags
+• Inject jay-mobile.js controller script
+• Upgrade old mobile controller paths
+• Inject GoatCounter analytics block
+• Inject control overrides if configured
+• Optionally commit and push changes
 
-   Export → ZIP
-
-
-4) Extract the exported ZIP file.
-
-
-------------------------------------------------
-UPDATING A GAME IN THE ARCADE
-------------------------------------------------
-
-1) Locate the correct game folder.
-
-Example:
-
-apple-catcher/
-
-
-2) Delete or replace the existing files with the newly exported files.
-
-Example:
-
-apple-catcher/index.html
-apple-catcher/assets
-apple-catcher/scripts
-etc.
-
-
-3) Run the patch script from the root directory.
-
-Command:
-
-python patch_all_games.py
-
-
-The patch script will automatically modify the exported files.
-
-
-------------------------------------------------
-WHAT THE PATCH SCRIPT DOES
-------------------------------------------------
-
-patch_all_games.py performs several automated fixes.
-
-
-1) MOBILE META TAG PATCH
-
-Ensures every game contains the correct viewport settings.
-
-Adds:
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="screen-orientation" content="landscape">
-
-
-2) MOBILE CONTROLLER INJECTION
-
-Automatically inserts:
-
-<script src="../js/jay-mobile.js"></script>
-
-
-3) ANALYTICS INJECTION
-
-Automatically inserts GoatCounter tracking.
-
-
-4) CONTROL OVERRIDE INJECTION
-
-If a game appears in:
-
-control_overrides.py
-
-the patch script inserts a control configuration block.
-
-
-Example injected code:
-
-window.JAY_GAME_CONFIG = {
-  keyOverrides: {
-    up: "j",
-    b: "c",
-    a: "w"
-  }
-};
-
-
-5) DUPLICATE PREVENTION
-
-The patch script avoids:
-
-• duplicate scripts
-• duplicate meta tags
-• duplicate control blocks
-
-
-6) SMART DETECTION
-
-The patch script detects existing viewport tags even if formatting differs.
-
-
-------------------------------------------------
 CONTROL OVERRIDES
-------------------------------------------------
 
-Some games require custom control mappings.
+scripts/control_overrides.py
 
-These are managed in:
+This file defines custom button mappings for specific games.
 
-control_overrides.py
-
-
-Example configuration:
+Example:
 
 GAME_OVERRIDES = {
 
-  "blade-and-block": {
-    "up": "j",
-    "b": "c",
-    "a": "w"
-  },
+"blade-and-block": {
+"up": "j",
+"b": "c",
+"a": "w"
+},
 
-  "apple-catcher": {
-    "b": "ArrowLeft",
-    "x": "ArrowRight"
-  }
+"apple-catcher": {
+"b": "ArrowLeft",
+"x": "ArrowRight"
+}
 
 }
 
+These overrides are automatically injected into each game by the patcher.
 
-IMPORTANT:
+GAME PAGE STRUCTURE
 
-The folder name must match the game folder exactly.
+All games now live under the games directory.
 
+Example game path:
 
-Example:
+games/apple-catcher/index.html
 
-apple-catcher/
+Games are launched from the grid page using links like:
 
+games/apple-catcher/index.html
 
-If no override exists for a game, the default controls are used.
+games/x-pong/index.html
 
+games/blade-and-block/index.html
 
-------------------------------------------------
-TESTING AFTER PATCHING
-------------------------------------------------
+games/mini-arcade/index.html
 
-After running the patch script:
+RETURN LINKS FROM GAMES
 
-1) Launch the arcade website locally or via GitHub.
+Because game pages live two folders below the root, the correct return paths are:
 
-2) Navigate to the game.
+Return to homepage
 
-3) Verify:
+../../index.html
 
-• game loads
-• controls work
-• mobile controller appears on mobile
-• gamepad works
-• navigation back to arcade works
+Return to grid page
 
+../../grid.html
 
-------------------------------------------------
-DEPLOYMENT PROCESS
-------------------------------------------------
+Return to mini-arcade
 
-Once the game is confirmed working:
+../mini-arcade/index.html
 
-1) Commit changes.
+SHARED JAVASCRIPT FILES
 
-git add .
+Root JS folder:
 
+js/arcade-input.js
+js/jay-mobile.js
 
-2) Commit update.
+Game pages load the mobile controller using:
 
-git commit -m "Updated [game-name]"
+../../js/jay-mobile.js
 
+This path is injected automatically by the patcher.
 
-3) Push to repository.
+FULL BUILD WORKFLOW
 
-git push
+Step 1 — Export updated games
 
+Export updated games using TurboWarp Packager as ZIP files.
 
-4) Verify the update on the live website.
+Step 2 — Place ZIPs into exports folder
 
+Move the exported ZIP files into:
 
-------------------------------------------------
-ADDING A NEW GAME
-------------------------------------------------
+C:\Users\leoja\Desktop\Dad Games\full-games\exports
 
-To add a new game to the arcade:
+Step 3 — Run the build script
 
-1) Create a new game folder.
+From the repo root run:
 
-Example:
+python scripts/build_arcade.py
 
-new-game/
+This command will:
 
+• Import all ZIP files
+• Replace matching game folders
+• Patch all imported games
 
-2) Export the game from TurboWarp.
+OPTIONAL BUILD MODES
 
-3) Copy the exported files into the folder.
+Build only (no commit):
 
+python scripts/build_arcade.py
 
-4) Run the patch script.
+Build and commit:
 
-python patch_all_games.py
+python scripts/build_arcade.py --commit
 
+Build, commit, and push:
 
-5) Add the game to the arcade grid page.
+python scripts/build_arcade.py --push
 
-Edit:
+Build, push, and remove processed ZIPs:
 
+python scripts/build_arcade.py --push --clean-exports
+
+Dry run (no changes):
+
+python scripts/build_arcade.py --dry-run
+
+PATCH-ONLY WORKFLOW
+
+Patch all games:
+
+python scripts/patch_all_games.py
+
+Patch all games and commit:
+
+python scripts/patch_all_games.py --commit
+
+Patch all games and push:
+
+python scripts/patch_all_games.py --push
+
+Patch a single game:
+
+python scripts/patch_all_games.py apple-catcher
+
+Patch one game and push:
+
+python scripts/patch_all_games.py apple-catcher --push
+
+IMPORT-ONLY WORKFLOW
+
+These scripts are available but usually unnecessary now.
+
+Import one game:
+
+python scripts/import_game.py apple-catcher
+
+Import all games:
+
+python scripts/import_all_games.py
+
+Import all games and push:
+
+python scripts/import_all_games.py --push
+
+The build script replaces most use cases for these.
+
+PATCHER FEATURES
+
+Mobile compatibility
+
+The patcher ensures every game HTML includes:
+
+viewport meta tag
+apple-mobile-web-app-capable
+mobile-web-app-capable
+screen-orientation landscape
+
+Mobile controller injection
+
+Every game automatically receives:
+
+jay-mobile.js
+
+Legacy controller paths are upgraded automatically.
+
+Analytics injection
+
+The patcher injects GoatCounter tracking using:
+
+window.goatcounter path tracking
+
+Control overrides
+
+If a game appears in control_overrides.py the patcher injects:
+
+window.JAY_GAME_CONFIG
+
+before the mobile controller script.
+
+BUILD SCRIPT EXECUTION ORDER
+
+The build script runs the following steps:
+
+Scan exports folder for ZIP files
+
+Import ZIP contents into games/<game-name>/
+
+Replace existing game folder contents
+
+Validate import success
+
+Run patch_all_games.py
+
+Optionally commit and push changes
+
+Optionally delete processed ZIPs
+
+If any import fails, patching stops and the build aborts.
+
+ANALYTICS BEHAVIOR
+
+GoatCounter tracks visits by page path.
+
+Example paths:
+
+/games/apple-catcher/index.html
+/games/x-pong/index.html
+/games/mini-arcade/index.html
+
+Because of the folder restructure, games may begin new analytics counts under their new paths.
+
+INPUT SYSTEM
+
+Shared navigation input
+
+Handled by:
+
+js/arcade-input.js
+
+Used by:
+
+index.html
 grid.html
 
+Supported inputs:
 
-6) Add preview video and title.
+keyboard
+gamepad
 
+Actions:
 
-7) Test the game.
+left
+right
+up
+down
+select
 
+Mobile controls
 
-------------------------------------------------
-ADDING CONTROL OVERRIDES FOR A NEW GAME
-------------------------------------------------
+Handled by:
 
-If the game requires custom controls:
+js/jay-mobile.js
 
-1) Open control_overrides.py
+Injected automatically by the patcher.
 
-2) Add an entry:
+Features:
 
-"new-game": {
-  "up": "i",
-  "a": "z",
-  "b": "x"
-}
+virtual D-pad
+multi-touch face buttons
+fullscreen start
+landscape orientation lock
+scanline toggle
 
+Control overrides are loaded from control_overrides.py.
 
-3) Run patch script again.
+PRIMARY COMMANDS
 
+Main build command
 
-------------------------------------------------
-TYPICAL UPDATE WORKFLOW
-------------------------------------------------
+python scripts/build_arcade.py
 
-The normal update cycle looks like this:
+Main deploy command
 
-1) Update game in TurboWarp
-2) Export ZIP
-3) Extract ZIP
-4) Replace game folder contents
-5) Run patch_all_games.py
-6) Test locally
-7) Commit changes
-8) Push to Git
-9) Verify on website
+python scripts/build_arcade.py --push
 
+Build and clean export folder
 
-------------------------------------------------
-IMPORTANT DEVELOPMENT RULES
-------------------------------------------------
+python scripts/build_arcade.py --push --clean-exports
 
-1) DO NOT manually edit exported game files unless necessary.
+Patch-only deploy
 
-Use the patch script whenever possible.
+python scripts/patch_all_games.py --push
 
+DESIGN PHILOSOPHY
 
-2) Games handle their own gameplay input.
+The system now emphasizes:
 
-The arcade UI input system only controls menus.
+single-command builds
+separation between staging and live files
+automatic HTML patching
+centralized control overrides
+scalable batch updates
+future automation for dynamic grid generation
 
+The intended ongoing workflow is:
 
-3) Always run the patch script after updating a game export.
+Export games
 
+Place ZIPs in exports
 
-4) Keep control overrides centralized in control_overrides.py.
+Run build_arcade.py
 
+Test arcade
 
-5) Always test after updating.
+Optionally push changes
 
+Clean processed exports
 
-------------------------------------------------
-END OF WORKFLOW
-------------------------------------------------
+MANUAL CONTENT TASKS
+
+The primary remaining manual step per game is:
+
+creating or updating preview videos in the previews folder.
+
+All import, patching, and deployment tasks are now automated.

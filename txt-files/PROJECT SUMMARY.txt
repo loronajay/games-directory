@@ -1,13 +1,7 @@
 PROJECT SUMMARY
-___________________________________________________________________
-
-
 ================================================
-JAY'S RETRO ARCADE – PROJECT ARCHITECTURE SUMMARY
-================================================
-
+JAY'S RETRO ARCADE – PROJECT ARCHITECTURE SUMMARY (UPDATED)
 PROJECT VISION
---------------
 
 This project is not just a website. It is intended to become a complete retro gaming platform that can run:
 
@@ -16,21 +10,17 @@ This project is not just a website. It is intended to become a complete retro ga
 • As a Raspberry Pi arcade cabinet
 • Potentially as a standalone retro gaming system
 
-The website currently being built is effectively the "operating system" for the arcade interface.
+The website currently being built is effectively the operating system for the arcade interface.
 
 The long-term goal is that this same system will eventually run on a physical arcade cabinet connected to a display and arcade controls via a Raspberry Pi.
 
 The web version is the first iteration of the arcade frontend.
 
-
-------------------------------------------------
 PLATFORM STRUCTURE
-------------------------------------------------
 
 The system is organized into three main layers.
 
-
-1) ARCADE INTERFACE (WEBSITE UI)
+ARCADE INTERFACE (WEBSITE UI)
 
 This layer controls the user interface of the arcade.
 
@@ -49,31 +39,42 @@ Responsibilities include:
 Main pages include:
 
 INDEX PAGE
-- Mode selection screen
-- Choose between:
-  • Quick Select (Grid)
-  • Mini Arcade (future lobby system)
+
+Mode selection screen.
+
+Choose between:
+
+• Quick Select (Grid)
+• Mini Arcade (future lobby system)
 
 GRID PAGE
-- Displays all available games
-- Card-based UI layout
-- Video previews
-- Game play counters
-- Responsive design
-- Gamepad navigation
 
+Displays all available games.
 
-------------------------------------------------
-2) GAME RUNTIME LAYER
-------------------------------------------------
+Features:
+
+• Card-based UI layout
+• Video previews
+• Game play counters
+• Responsive design
+• Gamepad navigation
+
+GAME RUNTIME LAYER
 
 Each game runs independently in its own folder.
 
+Games now live inside the /games directory.
+
 Example structure:
 
-apple-catcher/
-blade-and-block/
-x-pong/
+games/
+  apple-catcher/
+  blade-and-block/
+  bird-duty/
+  dodgeballs/
+  mini-arcade/
+  sumorai/
+  x-pong/
 
 Each game contains its own:
 
@@ -84,25 +85,29 @@ Each game contains its own:
 
 Games are exported from TurboWarp Packager.
 
-Export workflow:
+Each game remains fully self-contained.
+
+UPDATED GAME IMPORT SYSTEM
+
+Game updates are now automated using a build pipeline.
+
+New workflow:
 
 TurboWarp Packager
 → Export ZIP
-→ Extract files
-→ Replace contents of game folder
-→ Run patch script
-→ Push to Git
-→ Test in browser
+→ Place ZIP in exports folder
+→ Run build script
+→ Import game
+→ Patch game HTML
+→ Commit and push changes
 
+The process is largely automated.
 
-------------------------------------------------
 INPUT ARCHITECTURE
-------------------------------------------------
 
 There are three separate input systems working together.
 
-
-1) SHARED MENU INPUT (ARCADE UI)
+SHARED MENU INPUT (ARCADE UI)
 
 Handled by:
 
@@ -127,7 +132,7 @@ These actions are used only for navigating the arcade UI.
 
 IMPORTANT DESIGN DECISION:
 
-The shared menu input system DOES NOT control gameplay.
+The shared menu input system does NOT control gameplay.
 
 It is strictly for navigating the arcade interface.
 
@@ -136,10 +141,7 @@ Used by:
 • Index page
 • Grid page
 
-
-------------------------------------------------
-2) GAME INPUT SYSTEM
-------------------------------------------------
+GAME INPUT SYSTEM
 
 Each game handles its own input logic internally.
 
@@ -153,14 +155,11 @@ Supported inputs inside games:
 
 Important design rule:
 
-The arcade menu input system does NOT interfere with gameplay controls.
+The arcade menu input system does not interfere with gameplay controls.
 
 Games remain fully self-contained.
 
-
-------------------------------------------------
-3) MOBILE CONTROLLER SYSTEM
-------------------------------------------------
+MOBILE CONTROLLER SYSTEM
 
 Custom mobile controller script:
 
@@ -179,29 +178,11 @@ Features include:
 • Landscape orientation lock
 • Scanline toggle button
 
-
-Control overrides are defined using:
-
-window.JAY_GAME_CONFIG
-
-Example:
-
-window.JAY_GAME_CONFIG = {
-  keyOverrides: {
-    up: "j",
-    b: "c",
-    a: "w"
-  }
-};
-
-
-------------------------------------------------
 CONTROL OVERRIDE SYSTEM
-------------------------------------------------
 
-Overrides are centralized in a Python file:
+Overrides are centralized in:
 
-control_overrides.py
+scripts/control_overrides.py
 
 Example:
 
@@ -216,33 +197,25 @@ GAME_OVERRIDES = {
   "apple-catcher": {
     "b": "ArrowLeft",
     "x": "ArrowRight"
-  },
-
-  "x-pong": {
-    "y": "k",
-    "a": ",",
-    "x": "ArrowDown"
   }
 
 }
 
+Overrides are injected automatically during patching.
+
 This prevents needing to manually edit each game's HTML.
 
-
-------------------------------------------------
 AUTOMATED PATCH SYSTEM
-------------------------------------------------
 
 Python script:
 
-patch_all_games.py
+scripts/patch_all_games.py
 
-This script modifies TurboWarp exports automatically after packaging.
+This script modifies TurboWarp exports automatically after importing.
 
 Primary responsibilities:
 
-
-1) MOBILE META PATCHING
+MOBILE META PATCHING
 
 Ensures mobile compatibility.
 
@@ -253,48 +226,36 @@ apple-mobile-web-app-capable
 mobile-web-app-capable
 screen-orientation
 
-
-2) SCRIPT INJECTION
+SCRIPT INJECTION
 
 Automatically inserts:
 
-<script src="../js/jay-mobile.js"></script>
+<script src="../../js/jay-mobile.js"></script>
 
-and
+and GoatCounter analytics configuration.
 
-GoatCounter analytics script.
+CONTROL OVERRIDE INJECTION
 
-
-3) CONTROL OVERRIDE INJECTION
-
-If a game appears in control_overrides.py, the script automatically injects:
+If a game appears in control_overrides.py the script automatically injects:
 
 window.JAY_GAME_CONFIG
 
-into the game's index.html.
+before jay-mobile.js.
 
-Overrides are inserted BEFORE jay-mobile.js.
+SMART DETECTION
 
+The patcher detects:
 
-4) SMART DETECTION
+• existing viewport tags
+• mismatched viewport formatting
+• duplicate scripts
+• existing overrides
 
-The patcher is designed to be resilient.
+PATCH REPORTING
 
-It:
+The patcher prints detailed reports when run.
 
-• Detects existing viewport tags
-• Replaces mismatched viewport formatting
-• Avoids duplicate meta tags
-• Avoids duplicate scripts
-• Updates existing override blocks safely
-• Handles formatting differences
-
-
-5) PATCH REPORTING
-
-The script prints a detailed report when run.
-
-Example output:
+Example:
 
 apple-catcher: PATCHED
   - viewport already correct
@@ -302,26 +263,48 @@ apple-catcher: PATCHED
   - control overrides applied
   - jay-mobile.js already present
   - goatcounter already present
+AUTOMATED BUILD SYSTEM
 
+New script:
 
-It also prints a control override summary:
+scripts/build_arcade.py
 
-=== CONTROL OVERRIDES SUMMARY ===
+This script is now the primary workflow entry point.
 
-Applied:
-  - apple-catcher
+Responsibilities:
 
-Updated:
-  - blade-and-block
-  - x-pong
+• Scan exports folder for ZIP files
+• Import each game into /games
+• Replace old game folder contents
+• Validate imports
+• Run patch_all_games.py
+• Optionally commit and push to GitHub
+• Optionally delete processed ZIP files
 
-Orphaned blocks found:
-  - none
+Example command:
 
+python scripts/build_arcade.py --push --clean-exports
 
-------------------------------------------------
+This performs the entire update pipeline automatically.
+
+EXPORT STAGING SYSTEM
+
+TurboWarp packaged games are staged in:
+
+exports/
+
+Example:
+
+exports/
+  apple-catcher.zip
+  blade-and-block.zip
+  x-pong.zip
+
+The build script imports these files automatically.
+
+This staging system prevents accidental overwriting of live game folders.
+
 CRT VISUAL SYSTEM
-------------------------------------------------
 
 The arcade interface simulates CRT display behavior.
 
@@ -336,10 +319,7 @@ Features include:
 
 The goal is to mimic the feel of a real arcade machine powering on.
 
-
-------------------------------------------------
 NAVIGATION SYSTEM
-------------------------------------------------
 
 Menu navigation supports:
 
@@ -352,22 +332,16 @@ All navigation ultimately triggers shared action events.
 
 Game selection triggers CRT shutdown animation before loading.
 
-
-------------------------------------------------
 GAME NAVIGATION RULES
-------------------------------------------------
 
-Games include a built-in option to return to:
+Games include built-in options to return to:
 
 • Grid page
 • Mini Arcade
 
 This ensures users always return to the arcade interface.
 
-
-------------------------------------------------
 MOBILE DESIGN PHILOSOPHY
-------------------------------------------------
 
 The platform is designed to run on:
 
@@ -383,25 +357,20 @@ Responsive design is handled through:
 • viewport meta tags
 • virtual mobile controller
 
-
-------------------------------------------------
 ASSET STRATEGY
-------------------------------------------------
 
 Some games are very asset-heavy.
 
 Example:
 
 Dodgeballs project:
+
 • ~1800 assets
 • ~213MB project size
 
-In some cases clones are avoided in TurboWarp due to gameplay requirements, leading to larger sprite counts.
+In some cases clones are avoided in TurboWarp due to gameplay requirements.
 
-
-------------------------------------------------
 LONG TERM GOALS
-------------------------------------------------
 
 Future plans include running the system on:
 
@@ -416,23 +385,23 @@ The system should eventually support:
 • Online hosted arcade
 • Offline local arcade
 
-
-------------------------------------------------
 CURRENT DEVELOPMENT WORKFLOW
-------------------------------------------------
 
-1) Build game in TurboWarp
-2) Export ZIP
-3) Extract files
-4) Replace game folder contents
-5) Run patch_all_games.py
-6) Push to Git
-7) Test in browser
+Build game in TurboWarp
 
+Export ZIP
 
-------------------------------------------------
+Place ZIP in exports folder
+
+Run build_arcade.py
+
+Patch games automatically
+
+Push to GitHub
+
+Test in browser
+
 DESIGN PHILOSOPHY
-------------------------------------------------
 
 The architecture prioritizes:
 
@@ -450,10 +419,7 @@ Game Runtime
 Mobile Controller
 Automation Tools
 
-
-------------------------------------------------
 CURRENT PROJECT STATUS
-------------------------------------------------
 
 The project currently includes:
 
@@ -461,14 +427,9 @@ The project currently includes:
 • Multiple playable games
 • Shared input navigation
 • Mobile controller system
-• Automated build patcher
+• Automated build pipeline
 • Centralized control override management
 • Play count analytics
 • CRT themed UI
 
-This effectively represents the first working version of the arcade operating system.
-
-
-------------------------------------------------
-END OF DOCUMENT
-------------------------------------------------
+This represents the first fully automated version of the arcade platform frontend.

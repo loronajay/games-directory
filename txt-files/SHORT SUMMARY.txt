@@ -1,99 +1,114 @@
-SHORT SUMMARY
+Project name: Jay's Retro Arcade
 
-ONLY NEEDED DETAILS
+This project is a retro-themed arcade gaming platform built as a website but designed to eventually run as a full arcade cabinet frontend.
 
+The system is designed to support:
 
+• Web hosted arcade
+• Offline local arcade
+• Raspberry Pi arcade cabinet
+• Physical arcade controls
 
-==============================================
-JAY'S RETRO ARCADE — QUICK PROJECT CONTEXT
-==============================================
+The website interface effectively functions as the "operating system" for the arcade.
 
-PROJECT GOAL
-------------
+CORE WEBSITE STRUCTURE
 
-Jay's Retro Arcade is a retro gaming platform currently running as a website but
-designed to eventually run as a Raspberry Pi arcade cabinet frontend.
-
-The website acts as the "arcade operating system" that launches individual games.
-
-The system must work both:
-
-• Online as a website
-• Offline as a local arcade cabinet
-
-
-------------------------------------------------
-CORE ARCHITECTURE
-------------------------------------------------
-
-The project has three main layers.
-
-
-1) ARCADE INTERFACE (WEBSITE)
-
-Handles:
-
-• menus
-• game selection
-• preview videos
-• CRT visual effects
-• navigation
-• play counters
-• audio
-• responsive layout
-
-Main pages:
+The site consists of two main UI pages:
 
 index.html
-→ mode selection (Quick Select vs Mini Arcade)
+Mode selection screen.
+
+Players choose between:
+
+• Quick Select (grid page)
+• Mini Arcade (future lobby interface)
 
 grid.html
-→ shows all games
+Displays all games in a card-based grid.
 
+Features:
 
-------------------------------------------------
-2) GAME RUNTIME
+• Preview videos
+• Game play counters
+• Responsive layout
+• Keyboard/gamepad navigation
 
-Each game runs independently in its own folder.
+GAME STRUCTURE
+
+Each game runs independently inside:
+
+games/<game-name>/
 
 Example:
 
-apple-catcher/
-blade-and-block/
-x-pong/
+games/apple-catcher/
+games/blade-and-block/
+games/x-pong/
+
+Each game contains its own:
+
+• index.html
+• assets
+• sounds
+• scripts
 
 Games are exported from TurboWarp Packager.
 
-Games handle their own:
+AUTOMATED BUILD PIPELINE
 
-• gameplay logic
-• keyboard controls
-• gamepad controls
-• touch controls
+Game updates use a staging folder and automated build script.
 
+Exports folder:
 
-IMPORTANT:
+C:\Users\leoja\Desktop\Dad Games\full-games\exports
 
-The arcade menu input system does NOT control gameplay.
+Workflow:
 
-Games manage their own controls internally.
+Export TurboWarp game as ZIP
 
+Place ZIP in exports folder
 
-------------------------------------------------
-3) INPUT SYSTEMS
+Run build script
 
-There are two separate input layers.
+Game imports into /games directory
 
+HTML patcher runs automatically
 
-MENU INPUT
+Changes optionally commit/push to GitHub
+
+Primary build command:
+
+python scripts/build_arcade.py --push --clean-exports
+
+PATCH SYSTEM
+
+Script:
+
+scripts/patch_all_games.py
+
+Automatically injects:
+
+• Mobile viewport meta tags
+• jay-mobile.js controller
+• GoatCounter analytics
+• Control overrides from control_overrides.py
+
+INPUT SYSTEM
+
+There are three separate input systems.
+
+Menu Navigation
 
 Handled by:
 
 js/arcade-input.js
 
-Used only for navigating menus.
+Supports:
 
-Supported actions:
+• Keyboard
+• Gamepad
+
+Actions:
 
 left
 right
@@ -101,171 +116,81 @@ up
 down
 select
 
-Used by:
+This is ONLY used for navigating the arcade interface.
 
-index page
-grid page
+Game Controls
 
+Each game handles its own input internally through TurboWarp.
 
-GAME INPUT
+Mobile Controller
 
-Handled inside each TurboWarp game.
-
-
-------------------------------------------------
-MOBILE CONTROLLER
-
-Custom controller:
+Script:
 
 js/jay-mobile.js
 
 Features:
 
-• virtual D-pad
-• A B X Y buttons
-• multi-touch
-• landscape lock
-• fullscreen start
-• scanline toggle
+• Virtual 8-direction D-pad
+• Multi-touch buttons (A B X Y)
+• Configurable key mapping
+• Landscape orientation lock
+• Fullscreen mobile start
+• Scanline toggle
 
-Games can override controls using:
+CONTROL OVERRIDE SYSTEM
 
-window.JAY_GAME_CONFIG
+Overrides are centralized in:
 
-
-Example:
-
-window.JAY_GAME_CONFIG = {
-  keyOverrides: {
-    up: "j",
-    b: "c",
-    a: "w"
-  }
-}
-
-
-------------------------------------------------
-AUTOMATED PATCH SYSTEM
-
-Script:
-
-patch_all_games.py
-
-This script automatically modifies exported TurboWarp games.
-
-
-It performs:
-
-• viewport meta patch
-• mobile meta insertion
-• jay-mobile.js injection
-• goatcounter analytics injection
-• control override injection
-
-
-The script detects existing tags and avoids duplicates.
-
-
-------------------------------------------------
-CONTROL OVERRIDES
-
-Stored in:
-
-control_overrides.py
-
+scripts/control_overrides.py
 
 Example:
 
 GAME_OVERRIDES = {
 
-  "blade-and-block": {
-    "up": "j",
-    "b": "c",
-    "a": "w"
-  },
+"blade-and-block": {
+"up": "j",
+"b": "c",
+"a": "w"
+},
 
-  "apple-catcher": {
-    "b": "ArrowLeft",
-    "x": "ArrowRight"
-  }
+"apple-catcher": {
+"b": "ArrowLeft",
+"x": "ArrowRight"
+}
 
 }
 
+Overrides are automatically injected during patching.
 
-Overrides are automatically injected into game index.html files.
-
-
-------------------------------------------------
-DEVELOPMENT WORKFLOW
-
-Standard update loop:
-
-1) Update game in TurboWarp
-2) Export ZIP from TurboWarp Packager
-3) Extract ZIP
-4) Replace game folder files
-5) Run patch_all_games.py
-6) Test locally
-7) Push to Git
-8) Verify on website
-
-
-------------------------------------------------
-NAVIGATION SYSTEM
-
-Menus support:
-
-• mouse
-• keyboard
-• gamepad
-• mobile touch
-
-
-Selection triggers a CRT shutdown animation before loading games.
-
-
-------------------------------------------------
 CRT VISUAL SYSTEM
 
-Arcade UI simulates CRT behavior:
+The UI simulates an arcade CRT display.
 
-• scanlines
+Features include:
+
+• Scanlines
 • CRT vignette
-• power-on animation
-• collapse animation
-• BIOS boot screen
+• Power-on animation
+• Shutdown collapse animation
+• Flash shutdown line
+• BIOS-style boot screen
 
+CURRENT PROJECT STATUS
 
-------------------------------------------------
-LONG TERM PLAN
+The arcade currently includes:
 
-Eventually this system will run on:
+• Multiple playable TurboWarp games
+• Fully working arcade interface
+• Gamepad + keyboard navigation
+• Mobile touch controller
+• Play count analytics
+• Automated build + patch system
+• Centralized control override management
 
-• Raspberry Pi
-• HDMI display
-• physical arcade controls
+The project represents the first functional version of the arcade platform frontend.
 
-The website interface will become the cabinet frontend.
+LONG TERM GOAL
 
+The system is intended to eventually run as a full arcade cabinet frontend on Raspberry Pi with physical controls.
 
-------------------------------------------------
-CURRENT STATUS
-
-The project already includes:
-
-• working arcade frontend
-• multiple playable games
-• gamepad navigation
-• mobile controller system
-• automated patch script
-• centralized control overrides
-• play count analytics
-• CRT themed UI
-
-
-This represents the first working version of the arcade platform.
-
-
-------------------------------------------------
-END CONTEXT
-------------------------------------------------
+The website version is the first implementation of that system.

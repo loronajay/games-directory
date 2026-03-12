@@ -1,0 +1,49 @@
+FOLDER STRUCTURES
+
+
+
+PARENT
+
+
+full-games/
+├─ exports/
+└─ games-directory-page/
+   ├─ games/
+   ├─ scripts/
+   ├─ js/
+   ├─ images/
+   ├─ music/
+   ├─ previews/
+   ├─ grid.html
+   └─ index.html
+
+
+
+WEBSITE/CABINET
+
+
+
+games-directory-page/
+├── games/
+│   ├── apple-catcher/
+│   ├── art-of-war/
+│   ├── bird-duty/
+│   ├── blade-and-block/
+│   ├── dodgeballs/
+│   ├── mini-arcade/
+│   ├── sumorai/
+│   └── x-pong/
+├── scripts/
+│   ├── build_arcade.py
+│   ├── patch_all_games.py
+│   ├── import_game.py
+│   ├── import_all_games.py
+│   └── control_overrides.py
+├── js/
+│   ├── arcade-input.js
+│   └── jay-mobile.js
+├── images/
+├── music/
+├── previews/
+├── grid.html
+└── index.html

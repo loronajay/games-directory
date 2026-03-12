@@ -1,112 +1,205 @@
-Project name: Jay's Retro Arcade
+Project: Jay's Retro Arcade
 
-This project is a retro-themed arcade gaming platform built as a website but designed to eventually run as a full arcade cabinet frontend.
+Jay's Retro Arcade is a retro-themed arcade website that acts as the frontend OS for a future Raspberry Pi arcade cabinet.
 
-The system is designed to support:
+The website handles:
 
-• Web hosted arcade
-• Offline local arcade
-• Raspberry Pi arcade cabinet
-• Physical arcade controls
+• CRT boot visuals
+• game selection grid
+• keyboard/gamepad navigation
+• mobile touch controls
+• analytics tracking
+• launching individual games
 
-The website interface effectively functions as the "operating system" for the arcade.
+Games themselves are treated as independent apps.
 
-CORE WEBSITE STRUCTURE
+Project Structure
+Dad Games/full-games/
+├─ exports/
+└─ games-directory-page/
+   ├─ games/
+   ├─ scripts/
+   ├─ js/
+   ├─ images/
+   ├─ music/
+   ├─ previews/
+   ├─ grid.html
+   └─ index.html
+exports/
 
-The site consists of two main UI pages:
+Temporary staging folder for TurboWarp ZIP exports.
 
-index.html
-Mode selection screen.
+games-directory-page/
 
-Players choose between:
+The actual arcade frontend.
 
-• Quick Select (grid page)
-• Mini Arcade (future lobby interface)
+Game Structure
 
-grid.html
-Displays all games in a card-based grid.
+Each game lives in:
 
-Features:
-
-• Preview videos
-• Game play counters
-• Responsive layout
-• Keyboard/gamepad navigation
-
-GAME STRUCTURE
-
-Each game runs independently inside:
-
-games/<game-name>/
+games/<slug>/
 
 Example:
 
-games/apple-catcher/
-games/blade-and-block/
-games/x-pong/
+games/
+├ apple-catcher/
+├ art-of-war/
+├ bird-duty/
+├ blade-and-block/
+├ dodgeballs/
+├ mini-arcade/
+├ sumorai/
+└ x-pong/
 
-Each game contains its own:
+Minimum contents:
 
-• index.html
-• assets
-• sounds
-• scripts
+index.html
+assets/
+sounds/
 
 Games are exported from TurboWarp Packager.
 
-AUTOMATED BUILD PIPELINE
+Game folders do not contain scripts folders.
 
-Game updates use a staging folder and automated build script.
+Special Case
+games/mini-arcade/
 
-Exports folder:
+Exists but must NOT appear in the grid page.
 
-C:\Users\leoja\Desktop\Dad Games\full-games\exports
+The grid generator intentionally excludes it.
+
+Build Pipeline
+
+Primary script:
+
+scripts/build_arcade.py
 
 Workflow:
 
 Export TurboWarp game as ZIP
 
-Place ZIP in exports folder
+Place ZIP into:
 
-Run build script
+exports/
 
-Game imports into /games directory
+Run:
 
-HTML patcher runs automatically
+python scripts/build_arcade.py
 
-Changes optionally commit/push to GitHub
+The build script:
 
-Primary build command:
+scan exports
+import ZIPs into games/
+preserve or create game.json
+patch game HTML
+regenerate grid
+optional commit/push
+optional clean exports
+
+Typical deploy command:
 
 python scripts/build_arcade.py --push --clean-exports
+Metadata System
 
-PATCH SYSTEM
+Each game can optionally include:
+
+games/<slug>/game.json
+
+Example:
+
+{
+  "title": "Blade & Block",
+  "order": 20,
+  "card_classes": ["desktop-only"]
+}
+
+Fields:
+
+Field	Purpose
+title	override auto title
+order	manual grid ordering
+card_classes	extra CSS classes
+preview	override preview video name
+
+If values are blank, defaults are used.
+
+Starter file auto-created by build script:
+
+{
+  "title": "",
+  "order": 9999,
+  "card_classes": []
+}
+Grid Page
+grid.html
+
+Game cards are auto-generated.
+
+Marker section:
+
+<div class="game-grid">
+
+<!-- AUTO-GENERATED-GAME-CARDS-START -->
+
+<!-- AUTO-GENERATED-GAME-CARDS-END -->
+
+</div>
+Grid Generator
 
 Script:
 
+scripts/generate_grid.py
+
+Responsibilities:
+
+• scan games folder
+• ignore mini-arcade
+• read optional metadata
+• auto-generate titles from slug
+• build card HTML
+• inject cards into grid.html
+
+Preview naming convention:
+
+previews/<slug>.mp4
+
+If preview missing, card shows black video area.
+
+Card HTML Structure
+
+Cards must stay exactly like this because the JS depends on it:
+
+<a class="game-card arcade-link" href="games/<slug>/index.html">
+
+  <video muted loop preload="metadata">
+    <source src="previews/<slug>.mp4" type="video/mp4">
+  </video>
+
+  <div class="game-title">Game Title</div>
+
+  <div class="game-play-count">
+    PLAYS: <span class="playCount">000000</span>
+  </div>
+
+</a>
+Patch System
 scripts/patch_all_games.py
 
 Automatically injects:
 
-• Mobile viewport meta tags
+• mobile viewport meta
 • jay-mobile.js controller
 • GoatCounter analytics
-• Control overrides from control_overrides.py
+• control overrides
 
-INPUT SYSTEM
-
-There are three separate input systems.
-
-Menu Navigation
-
-Handled by:
-
+Input Systems
+Arcade Navigation
 js/arcade-input.js
 
 Supports:
 
-• Keyboard
-• Gamepad
+keyboard
+gamepad
 
 Actions:
 
@@ -116,81 +209,64 @@ up
 down
 select
 
-This is ONLY used for navigating the arcade interface.
+Used by:
 
-Game Controls
-
-Each game handles its own input internally through TurboWarp.
-
+index.html
+grid.html
 Mobile Controller
-
-Script:
-
 js/jay-mobile.js
 
 Features:
 
-• Virtual 8-direction D-pad
-• Multi-touch buttons (A B X Y)
-• Configurable key mapping
-• Landscape orientation lock
-• Fullscreen mobile start
-• Scanline toggle
+• virtual D-pad
+• multitouch buttons
+• fullscreen start
+• landscape orientation lock
+• scanline toggle
 
-CONTROL OVERRIDE SYSTEM
+Uses TurboWarp input injection:
 
-Overrides are centralized in:
+keyboard.postData()
+CRT Visual System
 
-scripts/control_overrides.py
+UI simulates an arcade CRT.
 
-Example:
+Includes:
 
-GAME_OVERRIDES = {
+• scanlines
+• vignette
+• flicker
+• BIOS boot sequence
+• power-on animation
+• CRT collapse shutdown animation
 
-"blade-and-block": {
-"up": "j",
-"b": "c",
-"a": "w"
-},
+Analytics
 
-"apple-catcher": {
-"b": "ArrowLeft",
-"x": "ArrowRight"
-}
+GoatCounter tracks visits per page.
 
-}
+Example paths:
 
-Overrides are automatically injected during patching.
+/games/apple-catcher/index.html
+/games/x-pong/index.html
 
-CRT VISUAL SYSTEM
+The grid page fetches counts and displays them on cards.
 
-The UI simulates an arcade CRT display.
+Design Philosophy
 
-Features include:
+The system prioritizes:
 
-• Scanlines
-• CRT vignette
-• Power-on animation
-• Shutdown collapse animation
-• Flash shutdown line
-• BIOS-style boot screen
+• automated builds
+• automated patching
+• automated grid generation
+• independent game folders
+• scalable update pipeline
 
-CURRENT PROJECT STATUS
+Long-term goal:
 
-The arcade currently includes:
-
-• Multiple playable TurboWarp games
-• Fully working arcade interface
-• Gamepad + keyboard navigation
-• Mobile touch controller
-• Play count analytics
-• Automated build + patch system
-• Centralized control override management
-
-The project represents the first functional version of the arcade platform frontend.
-
-LONG TERM GOAL
-
-The system is intended to eventually run as a full arcade cabinet frontend on Raspberry Pi with physical controls.
-
-The website version is the first implementation of that system.
+Raspberry Pi
+↓
+Browser kiosk mode
+↓
+Jay's Retro Arcade
+↓
+Physical arcade cabinet

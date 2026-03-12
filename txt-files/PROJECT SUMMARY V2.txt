@@ -1,0 +1,341 @@
+PROJECT SUMMARY V2
+
+
+
+Project name: Jay's Retro Arcade
+
+This project is a retro-themed arcade gaming platform built as a website, designed to eventually run as the frontend for a physical Raspberry Pi arcade cabinet.
+
+The website functions as the operating system for the arcade.
+
+It handles:
+
+• boot sequence
+• CRT visual effects
+• game selection
+• navigation input
+• analytics tracking
+• game launching
+
+Games themselves are treated as independent applications.
+
+Core Website Structure
+
+The project root contains two main areas:
+
+Dad Games/full-games/
+├─ exports/
+└─ games-directory-page/
+   ├─ games/
+   ├─ scripts/
+   ├─ js/
+   ├─ images/
+   ├─ music/
+   ├─ previews/
+   ├─ grid.html
+   └─ index.html
+exports/
+
+A staging folder where newly exported TurboWarp game ZIP files are placed before being imported into the arcade.
+
+games-directory-page/
+
+The actual arcade frontend website.
+
+Game Directory Structure
+
+All playable games live inside:
+
+games/<game-name>/
+
+Example:
+
+games/
+├─ apple-catcher/
+├─ art-of-war/
+├─ bird-duty/
+├─ blade-and-block/
+├─ dodgeballs/
+├─ mini-arcade/
+├─ sumorai/
+└─ x-pong/
+
+Each game folder contains at minimum:
+
+index.html
+assets/
+sounds/
+
+Games are exported from TurboWarp Packager.
+
+Game folders do NOT contain a scripts directory.
+
+Special Game
+
+mini-arcade is a special game/lobby page.
+
+It exists inside games/, but:
+
+• it must NOT appear in the grid page
+• the grid generator intentionally excludes it.
+
+Automated Build Pipeline
+
+The arcade is updated using a build script:
+
+scripts/build_arcade.py
+
+The normal workflow is:
+
+Export a TurboWarp game as a ZIP.
+
+Place the ZIP into:
+
+exports/
+
+Run the build command:
+
+python scripts/build_arcade.py
+
+The script then performs:
+
+scan exports/
+import ZIPs into games/
+restore or create game.json metadata
+patch imported games
+regenerate the game grid
+optional git commit
+optional git push
+optional delete processed ZIPs
+
+The typical deployment command is:
+
+python scripts/build_arcade.py --push --clean-exports
+Import Behavior
+
+When importing a game ZIP:
+
+The existing game folder is cleared.
+
+The ZIP contents are extracted.
+
+game.json is preserved if it existed.
+
+If no metadata file exists, a starter game.json is created automatically.
+
+Example starter file:
+
+{
+  "title": "",
+  "order": 9999,
+  "card_classes": []
+}
+
+Blank values are treated as automatic defaults.
+
+Metadata System
+
+Each game can optionally include:
+
+games/<slug>/game.json
+
+This file allows overriding grid metadata.
+
+Example:
+
+{
+  "title": "Blade & Block"
+}
+
+Supported fields:
+
+Field	Purpose
+title	Custom title override
+order	Manual grid sort order
+card_classes	Extra CSS classes for the card
+preview	Custom preview video name
+
+Example using all fields:
+
+{
+  "title": "Dodgeballs!",
+  "order": 20,
+  "card_classes": ["desktop-only"],
+  "preview": "dodgeballs.mp4"
+}
+
+If fields are blank or missing, defaults are used.
+
+Grid Page
+
+The grid page displays all games.
+
+File:
+
+grid.html
+
+Cards are automatically generated.
+
+The HTML contains a marker section:
+
+<div class="game-grid">
+
+<!-- AUTO-GENERATED-GAME-CARDS-START -->
+
+<!-- AUTO-GENERATED-GAME-CARDS-END -->
+
+</div>
+
+A script generates cards between these markers.
+
+Grid Generator
+
+Script:
+
+scripts/generate_grid.py
+
+Responsibilities:
+
+• scan games/ directory
+• ignore mini-arcade
+• detect games containing index.html
+• read optional game.json metadata
+• auto-generate titles from folder names
+• generate preview video paths automatically
+• inject card HTML into grid.html
+
+Preview video convention:
+
+previews/<game-slug>.mp4
+
+If the preview file is missing, the video area appears black but the card still renders.
+
+Grid Card Structure
+
+Each generated card matches this structure:
+
+<a class="game-card arcade-link" href="games/<slug>/index.html">
+
+  <video muted loop preload="metadata">
+    <source src="previews/<slug>.mp4" type="video/mp4">
+  </video>
+
+  <div class="game-title">Game Title</div>
+
+  <div class="game-play-count">
+    PLAYS: <span class="playCount">000000</span>
+  </div>
+
+</a>
+
+This structure must remain unchanged because the page's JavaScript relies on these selectors.
+
+Patch System
+
+Script:
+
+scripts/patch_all_games.py
+
+Automatically injects platform features into game HTML.
+
+Responsibilities:
+
+• mobile viewport meta tags
+• jay-mobile.js mobile controller
+• GoatCounter analytics
+• control overrides
+
+Input System
+
+There are three independent input systems.
+
+1. Arcade Navigation
+
+Script:
+
+js/arcade-input.js
+
+Used by:
+
+index.html
+grid.html
+
+Supports:
+
+• keyboard
+• gamepad
+
+Actions:
+
+left
+right
+up
+down
+select
+2. Game Input
+
+Handled internally by TurboWarp projects.
+
+Games listen for keyboard input.
+
+3. Mobile Controller
+
+Script:
+
+js/jay-mobile.js
+
+Features:
+
+• virtual 8-direction D-pad
+• multitouch face buttons
+• fullscreen start
+• landscape orientation lock
+• scanline toggle
+
+Input is injected into TurboWarp using:
+
+keyboard.postData()
+CRT Visual System
+
+The arcade UI simulates a CRT monitor.
+
+Features include:
+
+• scanlines
+• vignette
+• flicker
+• power-on animation
+• shutdown collapse animation
+• BIOS-style boot text
+
+Analytics
+
+GoatCounter tracks visits.
+
+Example endpoints:
+
+/games/apple-catcher/index.html
+/games/x-pong/index.html
+
+The grid page fetches per-game counts and displays them on cards.
+
+Design Philosophy
+
+The system emphasizes:
+
+• automated game imports
+• automated HTML patching
+• automated grid generation
+• centralized metadata overrides
+• independent game folders
+• scalable update pipeline
+
+The intended long-term use is:
+
+Raspberry Pi
+↓
+Browser kiosk mode
+↓
+Jay's Retro Arcade
+↓
+Physical arcade controls

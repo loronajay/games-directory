@@ -7,7 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 GAMES_DIR = ROOT / "games"
-PREVIEWS_DIR = ROOT / "previews"
 GRID_HTML = ROOT / "grid.html"
 
 START_MARKER = "<!-- AUTO-GENERATED-GAME-CARDS-START -->"
@@ -25,7 +24,10 @@ def load_game_metadata(game_dir: Path) -> dict:
         return {}
 
     try:
-        return json.loads(metadata_file.read_text(encoding="utf-8"))
+        raw = metadata_file.read_text(encoding="utf-8").strip()
+        if not raw:
+            return {}
+        return json.loads(raw)
     except Exception as exc:
         print(f"[generate_grid] Warning: could not read {metadata_file}: {exc}")
         return {}
@@ -54,25 +56,23 @@ def discover_games() -> list[dict]:
             continue
 
         slug = game_dir.name
-        
+
         if slug == "mini-arcade":
             continue
-        index_file = game_dir / "index.html"
 
+        index_file = game_dir / "index.html"
         if not index_file.exists():
             continue
 
         metadata = load_game_metadata(game_dir)
 
-        title = metadata.get("title", slug_to_title(slug))
+        title = metadata.get("title") or slug_to_title(slug)
         order = metadata.get("order", 9999)
-        card_classes = metadata.get("card_classes", [])
+        card_classes = metadata.get("card_classes") or []
+        preview_filename = metadata.get("preview") or f"{slug}.mp4"
 
         if not isinstance(card_classes, list):
             card_classes = []
-
-        preview_filename = metadata.get("preview", f"{slug}.mp4")
-        preview_exists = (PREVIEWS_DIR / preview_filename).exists()
 
         games.append({
             "slug": slug,
@@ -80,7 +80,6 @@ def discover_games() -> list[dict]:
             "order": order,
             "card_classes": card_classes,
             "preview_filename": preview_filename,
-            "preview_exists": preview_exists,
         })
 
     games.sort(key=lambda g: (g["order"], g["title"].lower()))
@@ -98,9 +97,8 @@ def build_card_html(game: dict) -> str:
 
     preview_src = f"previews/{game['preview_filename']}"
 
-    # Keep exact card structure/classes as current grid.html
     return f"""  <a class="{escape_html(class_attr)}" href="games/{escape_html(game['slug'])}/index.html">
-    <video muted loop preload="metadata" style="background:black;">
+    <video muted loop preload="metadata">
       <source src="{escape_html(preview_src)}" type="video/mp4">
     </video>
     <div class="game-title">{escape_html(game['title'])}</div>
@@ -147,8 +145,7 @@ def main() -> None:
 
     print(f"[generate_grid] Generated {len(games)} game card(s).")
     for game in games:
-        status = "preview" if game["preview_exists"] else "black-fallback"
-        print(f"  - {game['slug']} -> {game['title']} [{status}]")
+        print(f"  - {game['slug']} -> {game['title']}")
 
 
 if __name__ == "__main__":

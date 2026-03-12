@@ -1,0 +1,29 @@
+custom json
+
+
+
+{
+  "title": "Dodgeballs!",
+  "order": 9999,
+  "card_classes": ["desktop-only"]
+}
+
+
+
+
+
+{
+  "title": "Blade & Block",
+  "order": 9999,
+  "card_classes": []
+}
+
+
+
+
+
+{
+  "title": "X-Pong",
+  "order": 9999,
+  "card_classes": []
+}

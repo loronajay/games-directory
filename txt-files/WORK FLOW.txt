@@ -5,10 +5,20 @@ RUN FROM ROOT DIRECTORY
 1. Replace contents of games/<game-name>/
 2. Run:
 
-python scripts/patch_all_games.py --push
+DRY RUN:     python scripts/patch_all_games.py --dry-run
+
+PATCH, NO PUSH:    python scripts/patch_all_games.py
+
+PATCH AND COMMIT:   python scripts/patch_all_games.py --commit
+
+PATCH ONE GAME:    python scripts/patch_all_games.py apple-catcher
+
+PATCH ONE GAME AND PUSH :     python scripts/patch_all_games.py apple-catcher --push
 
 
-python patch_all_games.py
+
+FULL PATCH AND PUSH :    python scripts/patch_all_games.py --push
+
 
 
 ==============================================

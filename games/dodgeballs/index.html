@@ -3,15 +3,13 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <!-- We only include this to explicitly loosen the CSP of various packager environments. It does not provide any security. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="screen-orientation" content="landscape">
-
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="screen-orientation" content="landscape">
+  <!-- We only include this to explicitly loosen the CSP of various packager environments. It does not provide any security. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
   <title>Dodgeballs!</title>
   <style>
     body {
@@ -240,7 +238,7 @@
       if (vm.setFramerate) vm.setFramerate(30);
       if (vm.renderer.setUseHighQualityRender) vm.renderer.setUseHighQualityRender(false);
       if (vm.setRuntimeOptions) vm.setRuntimeOptions({
-        fencing: true,
+        fencing: false,
         miscLimits: true,
         maxClones: 300,
       });
@@ -329,11 +327,7 @@
     };
     run().catch(handleError);
   </script>
-
-  <script src="../js/jay-mobile.js"></script>
-  
-  <script data-goatcounter="https://loronajay.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+<script src="../js/jay-mobile.js"></script>
 
 <script>
   window.goatcounter = {

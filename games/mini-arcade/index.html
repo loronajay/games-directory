@@ -3,23 +3,14 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="screen-orientation" content="landscape">
   <!-- We only include this to explicitly loosen the CSP of various packager environments. It does not provide any security. -->
   <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
   <title>Mini Arcade</title>
-
-  <script>
-  window.JAY_GAME_CONFIG = {
-  entryTitle: "CLICK TO ENTER ARCADE",
-  entrySub: ""
-  };
-  </script>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="screen-orientation" content="landscape">
-
   <style>
     body {
       color: #ffffff;
@@ -336,8 +327,7 @@
     };
     run().catch(handleError);
   </script>
-
-  <script src="../js/jay-mobile.js"></script>
+<script src="../js/jay-mobile.js"></script>
 
 <script>
   window.goatcounter = {

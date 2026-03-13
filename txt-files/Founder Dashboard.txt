@@ -1,0 +1,196 @@
+Founder Dashboard
+Project Status
+
+Current Phase:
+
+Platform Development
+
+Primary Goal:
+
+Polished arcade website with 15 playable games
+
+Current Focus:
+
+Website stability and polish
+
+Next Major Milestone:
+
+Complete arcade cabinet prototype
+Core Vision Reminder
+
+Jay’s Retro Arcade is a modern arcade ecosystem that combines:
+
+• original arcade-style games
+• a web-based arcade operating system
+• arcade cabinet hardware
+• competitive leaderboards
+• tournaments and community competition
+
+Players can experience the platform through:
+
+• web browsers
+• mobile devices
+• gamepads
+• arcade cabinets
+
+The long-term goal is a global competitive arcade network.
+
+Current Development Priorities
+1 — Website Platform
+
+Status: In development
+
+Key goals:
+
+• stable arcade interface
+• responsive layout for all devices
+• smooth game launching
+• controller compatibility
+
+2 — Game Library
+
+Target:
+
+15 polished arcade games
+
+Requirements for each game:
+
+• bug free
+• optimized performance
+• high score system working
+
+3 — Cross-Device Play
+
+Supported platforms:
+
+Desktop keyboard
+Desktop gamepad
+Mobile touch controls
+Arcade joystick + buttons (future)
+
+The platform must remain controller-agnostic so it works with any input method.
+
+Next Phase
+
+When the platform and games are stable:
+
+Hardware Development
+
+Build the first arcade cabinet prototype.
+
+Goals:
+
+• Raspberry Pi powered
+• joystick + arcade buttons
+• instant boot into arcade OS
+• plug-and-play gameplay
+
+Hardware Roadmap
+
+Step 1:
+
+Arcade cabinet prototype
+
+Step 2:
+
+Backpack arcade system
+
+Purpose:
+
+• portable demonstrations
+• marketing content
+• tournament prize
+
+Competition Roadmap
+
+Once hardware exists:
+
+Introduce competitive features.
+
+Future systems include:
+
+Player Profiles
+
+Track:
+
+• total scores
+• game rankings
+• achievements
+
+Global Leaderboards
+
+Per game:
+
+• high score rankings
+• fastest clears
+• survival times
+
+Tournaments
+
+Example event:
+
+Sumorai Championship
+
+Prizes:
+
+• backpack arcade prototype
+• home arcade cabinet
+• community recognition
+
+Marketing Strategy
+
+Primary growth drivers:
+
+Gameplay Clips
+
+Short arcade clips ideal for:
+
+• TikTok
+• YouTube Shorts
+• Instagram
+
+Hardware Showcases
+
+Demonstrate arcade cabinet and backpack system.
+
+Competitive Events
+
+Leaderboards and tournaments attract players.
+
+Long-Term Company Goal
+
+Scale Jay’s Retro Arcade into a $1M+ gaming ecosystem through:
+
+• arcade cabinet sales
+• digital platform traffic
+• sponsorships
+• competitive events
+• community growth
+
+Daily Development Focus
+
+When working on the project, prioritize:
+
+1. Platform stability
+2. Game quality
+3. Expanding game library
+
+Avoid distractions until these are complete.
+
+Current Personal Rule
+Finish the platform before expanding the vision.
+
+Small consistent progress builds the ecosystem.
+
+Long-Term Vision
+
+Jay’s Retro Arcade becomes:
+
+A global competitive arcade network
+
+Where players compete through:
+
+• web browsers
+• arcade cabinets
+• tournaments
+• community events

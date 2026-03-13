@@ -1,0 +1,376 @@
+Jay’s Retro Arcade — Founder Operating Document
+1. Core Vision
+
+Jay’s Retro Arcade is a modern arcade ecosystem combining:
+
+• original arcade-style games
+• a browser-based arcade operating system
+• arcade cabinet hardware
+• competitive leaderboards and tournaments
+• a community-driven player base
+
+The long-term goal is to recreate the spirit of classic arcades while making the experience accessible through modern technology.
+
+Players should be able to experience Jay’s Retro Arcade through:
+
+• home arcade cabinets
+• web browsers
+• mobile devices
+• competitive tournaments
+• community events
+
+The platform is designed to grow into a global competitive arcade network.
+
+2. Core Philosophy
+
+Every design decision should follow these principles.
+
+Arcade First
+
+Games must feel like true arcade games.
+
+Meaning:
+
+• fast to start
+• easy to learn
+• hard to master
+• highly replayable
+
+Competition Driven
+
+Every game must support competition.
+
+Examples:
+
+• high scores
+• win streaks
+• speed runs
+• survival times
+
+Instant Access
+
+Players should be able to:
+
+click → play immediately
+
+No installs.
+
+No friction.
+
+Small Games, Big Library
+
+Instead of building one large game, the platform grows through many small arcade games.
+
+This increases:
+
+• replayability
+• variety
+• viral potential
+
+3. Platform Components
+
+Jay’s Retro Arcade has five major systems.
+
+System 1 — Arcade Operating System
+
+The main arcade interface.
+
+Features:
+
+• CRT-style boot animation
+• arcade game grid
+• controller navigation
+• touch controls for mobile
+• instant game launching
+
+Future features:
+
+• player login
+• player profiles
+• leaderboard display
+• tournaments interface
+
+System 2 — Game Library
+
+The platform’s core content.
+
+Current games:
+
+• X-Pong
+• Dodgeballs
+• Blade & Block
+• Apple Catcher
+• Bird Duty
+• Sumorai
+
+Future goals:
+
+10–15 launch games
+50+ long term
+
+Every game must support:
+
+• high score tracking
+• competitive replayability
+
+System 3 — Competitive System
+
+The competitive layer that connects all games.
+
+Planned features:
+
+Global Leaderboards
+
+Track:
+
+• high scores
+• fastest clears
+• survival times
+• win records
+
+Player Profiles
+
+Example:
+
+Player: JAY
+
+Total Arcade Score: 84,000
+
+Top Rankings:
+#3 Blade & Block
+#12 Sumorai
+#8 X-Pong
+Daily Challenges
+
+Example:
+
+Today's Challenge
+Dodgeballs
+Survive 90 seconds
+Seasonal Leaderboards
+
+Example:
+
+Arcade Season 1
+Top 100 players
+Tournament System
+
+Examples:
+
+• Sumorai Championship
+• Weekly challenges
+• arcade leagues
+
+System 4 — Arcade Hardware
+
+Custom arcade cabinets designed to run the platform.
+
+Goals:
+
+• affordable
+• reliable
+• plug-and-play
+
+Prototype hardware:
+
+Raspberry Pi
+Arcade joystick + buttons
+Monitor
+
+Future cabinet versions:
+
+• home cabinet
+• mini cabinet
+• backpack arcade system
+
+System 5 — Community
+
+The long-term success of the platform depends on a community of players.
+
+Community features:
+
+• tournaments
+• leaderboard rivalries
+• streaming and clips
+• social sharing
+
+Long-term goal:
+
+A recognizable Jay’s Retro Arcade player community.
+
+4. Technical Architecture
+
+Current stack:
+
+Frontend
+
+HTML
+CSS
+JavaScript
+
+Game engine
+
+TurboWarp Packager
+
+Automation pipeline
+
+Python scripts that:
+
+• import game builds
+• update HTML files
+• regenerate game grid
+• deploy new games
+
+5. Development Roadmap
+Phase 1 — Core Platform
+
+Goal:
+
+A functional arcade platform.
+
+Tasks:
+
+• build arcade OS
+• implement game grid
+• integrate game launcher
+• implement mobile controller system
+
+Status:
+
+In progress
+
+Phase 2 — Game Library
+
+Goal:
+
+Create launch-ready game library.
+
+Target:
+
+10–15 games
+
+Requirements:
+
+• high-score capable
+• competitive gameplay
+
+Phase 3 — Competition Systems
+
+Features to build:
+
+• player accounts
+• global leaderboards
+• score submission API
+• tournament support
+
+Phase 4 — Hardware Prototype
+
+Goals:
+
+• working cabinet prototype
+• optimized kiosk mode
+• durable control hardware
+
+Phase 5 — Community Growth
+
+Focus:
+
+• tournaments
+• social media presence
+• player engagement
+
+6. Marketing Strategy
+
+Key marketing approaches.
+
+Viral Gameplay Clips
+
+Arcade-style games produce short clips perfect for:
+
+• TikTok
+• YouTube Shorts
+• Instagram
+
+Competitive Events
+
+Example:
+
+Sumorai Tournament
+
+Prizes:
+
+1st — Backpack arcade prototype
+2nd — Home cabinet prototype
+3rd — Community recognition
+
+Community Competitions
+
+Examples:
+
+• weekly challenges
+• seasonal leaderboards
+• score battles
+
+Arcade Hardware Showcases
+
+Showcase cabinet prototypes in:
+
+• events
+• gaming meetups
+• bars
+
+7. Monetization
+
+Primary revenue streams.
+
+Arcade Cabinet Sales
+
+Estimated range:
+
+$300 – $700
+Digital Platform Revenue
+
+Possible sources:
+
+• advertising
+• sponsorships
+• premium games
+
+Licensing
+
+License the platform to:
+
+• bars
+• arcades
+• gaming lounges
+• events
+
+Game Packs
+
+Sell additional arcade game collections.
+
+8. Long-Term Vision
+
+Jay’s Retro Arcade becomes:
+
+A global competitive arcade network
+
+Possible future features:
+
+• online tournaments
+• player rankings
+• streaming integration
+• seasonal events
+• expanded hardware lineup
+
+9. Immediate Priorities
+
+Current focus should remain on small steps.
+
+Priority order:
+
+1. Finish core platform
+2. Expand game library
+3. Build cabinet prototype
+4. Add competitive features
+5. Grow community

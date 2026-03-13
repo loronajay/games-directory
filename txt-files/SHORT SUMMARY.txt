@@ -25,7 +25,8 @@ Dad Games/full-games/
    ├─ previews/
    ├─ grid.html
    └─ index.html
-exports/
+
+exports/ lives outside of the git repository, purposefully so.
 
 Temporary staging folder for TurboWarp ZIP exports.
 

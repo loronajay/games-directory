@@ -1,0 +1,194 @@
+Jay's Retro Arcade — Project Memory Prompt
+
+You are assisting with the development of Jay’s Retro Arcade, a retro-themed arcade platform that functions as a browser-based arcade operating system and the future frontend for a Raspberry Pi-powered arcade cabinet ecosystem.
+
+The project is being developed by a solo developer, and the system is intentionally designed for automation, scalability, and minimal manual maintenance.
+
+Current Project Status
+
+Jay’s Retro Arcade currently exists as a fully functional arcade website platform that supports multiple input methods and launches independent games.
+
+The platform already supports:
+
+• desktop keyboard controls
+• desktop gamepad controls
+• mobile touch controls
+• controller-agnostic input design for future arcade hardware
+
+The website functions as the main arcade operating system interface, which will later also power physical arcade cabinets.
+
+Current Game Library
+
+Games currently present on the platform include:
+
+• Apple Catcher
+• Art of War
+• Bird Duty
+• Blade & Block
+• Dodgeballs
+• Mini Arcade (special case — hidden from grid)
+• Sumorai
+• X-Pong
+
+These games are exported using TurboWarp Packager and treated as independent game applications.
+
+Each game lives in:
+
+games/<slug>/
+
+Games include their own:
+
+• assets
+• sounds
+• internal high score systems.
+
+Platform-level features are injected automatically through the patch system.
+
+Current Platform Features
+
+The arcade platform currently includes:
+
+• CRT-style boot sequence
+• arcade game selection grid
+• keyboard navigation
+• gamepad navigation
+• mobile controller system
+• game preview videos on the grid
+• GoatCounter analytics integration
+• automated game ingestion pipeline
+
+The platform is designed to behave like a retro arcade operating system.
+
+Target Near-Term Milestone
+
+The current primary development goal is:
+
+15 polished arcade games
+
+Each game should be:
+
+• stable
+• optimized
+• replayable
+• competitive-ready
+
+The focus is on arcade-style gameplay designed for high score competition.
+
+Next Development Phases
+
+After reaching the 15-game milestone, development will shift to:
+
+Phase 2 — Arcade Hardware
+
+Build the first Raspberry Pi arcade cabinet prototype that runs the arcade OS locally in kiosk mode.
+
+Cabinet goals:
+
+• joystick + arcade buttons
+• instant boot experience
+• plug-and-play gameplay
+
+Phase 3 — Backpack Arcade System
+
+Develop a portable arcade backpack prototype used for:
+
+• demonstrations
+• tournaments
+• marketing content
+• community events
+
+Phase 4 — Competitive Systems
+
+Introduce platform-wide competition features:
+
+• player profiles
+• global leaderboards
+• daily challenges
+• speedrun tracking
+• tournaments
+
+Competition and replayability are core to the project’s vision.
+
+First Planned Competitive Event
+
+One planned early tournament concept is a Sumorai Championship.
+
+Possible structure:
+
+• online qualifiers
+• leaderboard rankings
+• final tournament
+
+Possible prizes:
+
+1st — Backpack arcade prototype
+2nd — Home arcade cabinet prototype
+3rd — community recognition / special reward
+
+Long-Term Vision
+
+Jay’s Retro Arcade aims to grow into a modern arcade ecosystem combining:
+
+• original arcade games
+• a browser-based arcade operating system
+• arcade cabinet hardware
+• competitive leaderboards
+• tournaments
+• a global arcade community
+
+Players will eventually interact with the platform through:
+
+• web browsers
+• mobile devices
+• gamepads
+• arcade cabinets
+
+The long-term goal is to create a community-driven competitive arcade network inspired by classic arcades.
+
+Design Philosophy
+
+The system prioritizes:
+
+• automated build pipelines
+• automated grid generation
+• automated HTML patching
+• independent game folders
+• scalable game ingestion
+• minimal manual editing
+
+The platform is intentionally designed to scale into a large arcade library with minimal maintenance overhead.
+
+Development Approach
+
+Development follows a step-by-step progression:
+
+Platform stability
+↓
+Game library expansion
+↓
+Hardware prototypes
+↓
+Competitive systems
+↓
+Community growth
+↓
+Business scaling
+
+The developer intentionally focuses on small steps and stable systems before expanding features.
+
+Important Notes
+
+• The project is currently pre-leaderboard phase.
+• Individual games already include internal high score systems.
+• Platform-level leaderboards will be added later.
+• Competition and community are core to the long-term vision.
+
+When assisting with this project
+
+Responses should:
+
+• respect the existing architecture
+• prioritize automation
+• avoid unnecessary complexity
+• support long-term scalability
+• help the solo developer move forward efficiently.

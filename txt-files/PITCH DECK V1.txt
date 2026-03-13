@@ -1,0 +1,189 @@
+PITCH DECK V1
+
+
+
+Slide 1 — Title
+
+Jay's Retro Arcade
+
+Modern Retro Gaming
+Arcade Cabinets • Web Platform • Original Games
+
+Founder: Jay Lorona
+
+Optional visual ideas:
+
+CRT arcade screen
+
+your arcade grid UI
+
+cabinet mockup
+
+Goal: immediate vibe
+
+Slide 2 — The Vision
+
+Bring arcades back for the modern era.
+
+Classic arcades were:
+
+• social
+• competitive
+• simple to play
+• instantly fun
+
+Modern gaming lost that simplicity.
+
+Jay's Retro Arcade recreates that experience using:
+
+• modern hardware
+• original games
+• a browser-based arcade OS
+
+Slide 3 — The Problem
+
+Modern gaming experiences are:
+
+• complicated
+• expensive
+• time-consuming
+
+Arcades disappeared because:
+
+• cabinets were expensive
+• maintenance was difficult
+• games weren't easily updated
+
+Today there is no modern arcade platform built from scratch.
+
+Slide 4 — The Solution
+
+Jay's Retro Arcade is a modern arcade ecosystem.
+
+It combines:
+
+🎮 Arcade OS
+
+CRT-style interface
+
+game grid
+
+controller support
+
+🎮 Original Games
+
+fast
+
+competitive
+
+replayable
+
+🎮 Arcade Cabinet Hardware
+
+Raspberry Pi powered
+
+plug-and-play
+
+affordable
+
+Slide 5 — Product Demo
+
+This slide should show visuals.
+
+Examples:
+
+• arcade boot sequence
+• game grid screen
+• gameplay clips
+• cabinet prototype
+
+This is where you sell the experience.
+
+Slide 6 — Market Opportunity
+
+The retro gaming market is huge.
+
+Examples:
+
+• Arcade1Up sold millions of cabinets
+• indie retro games generate millions in revenue
+• nostalgia gaming market continues growing
+
+Target markets:
+
+• home arcade enthusiasts
+• retro gamers
+• indie gaming fans
+• bars and entertainment venues
+
+Slide 7 — Competitive Advantage
+
+Jay's Retro Arcade is different because:
+
+Built for arcades from day one
+
+Not:
+
+• emulation
+• ROM collections
+• hacked systems
+
+Instead:
+
+• original games
+• modern architecture
+• automated game pipeline
+
+Slide 8 — Business Model
+
+Multiple revenue streams.
+
+1 — Arcade Cabinet Sales
+
+$300–$700 hardware units
+
+2 — Online Arcade Platform
+
+ads
+sponsorships
+
+3 — Game Packs
+
+new games added over time
+
+4 — Venue Licensing
+
+bars
+arcades
+events
+
+Slide 9 — Development Progress
+
+Already built:
+
+✔ arcade frontend OS
+✔ game grid system
+✔ multiple playable games
+✔ mobile controller
+✔ automated build pipeline
+
+Next milestones:
+
+• cabinet prototype
+• 10+ launch games
+• Kickstarter campaign
+
+Slide 10 — The Ask
+
+Seeking early-stage funding.
+
+Funds will support:
+
+• cabinet prototyping
+• game development
+• platform scaling
+• marketing
+
+Goal:
+
+Launch the first modern arcade ecosystem built from scratch.

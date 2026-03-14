@@ -347,6 +347,16 @@ body{
     </div>
   </a>
 
+  <a class="game-card arcade-link" href="games/dodgeballs-mobile/index.html">
+    <video muted loop preload="metadata">
+      <source src="previews/dodgeballs-mobile.mp4" type="video/mp4">
+    </video>
+    <div class="game-title">Dodgeballs Mobile</div>
+    <div class="game-play-count">
+      PLAYS: <span class="playCount">000000</span>
+    </div>
+  </a>
+
   <a class="game-card arcade-link desktop-only" href="games/dodgeballs/index.html">
     <video muted loop preload="metadata">
       <source src="previews/dodgeballs.mp4" type="video/mp4">
@@ -518,19 +528,21 @@ fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
 /* Per game */
 document.querySelectorAll(".game-card").forEach(card => {
 
-  const url = new URL(card.href);
-  const slug = url.pathname.replace(/\/$/, ""); // remove trailing slash
+  const url = new URL(card.href, window.location.origin);
 
-  fetch(`https://loronajay.goatcounter.com/counter${slug}.json`)
+  const goatPath = url.pathname
+    .replace(/index\.html$/, "")
+    .replace(/\/?$/, "/");
+
+  fetch(`https://loronajay.goatcounter.com/counter${goatPath}.json`)
     .then(res => res.json())
     .then(data => {
       card.querySelector(".playCount").textContent =
         formatArcadeNumber(data.count || 0);
     })
-    .catch(err => {
-      console.log("Counter error for:", slug);
+    .catch(() => {
+      console.log("Counter error for:", goatPath);
     });
-
 });
 
 /* Force hard reload when returning via back button */

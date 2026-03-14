@@ -277,12 +277,12 @@ def main():
         print("\nBuild stopped because one or more imports failed.")
         sys.exit(1)
 
-    print("\nRunning patcher...")
+    print("\nRunning patcher on all games...")
     run_patcher(
-        imported_games,
-        dry_run=False,
-        commit=False,
-        push=False
+      [],
+      dry_run=False,
+      commit=False,
+      push=False
     )
 
     print("\nRegenerating grid...")

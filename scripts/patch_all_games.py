@@ -37,12 +37,16 @@ LEGACY_JAY_MOBILE_SCRIPTS = [
 ]
 
 GOATCOUNTER_BLOCK = """<script>
-  window.goatcounter = {
-    path: function() {
-      return location.pathname;
-    }
-  };
+window.goatcounter = {
+  path: function(p) {
+    return (p || location.pathname || "/")
+      .replace(/index\\.html$/, "")
+      .replace(/\\/?$/, "/");
+  }
+};
 </script>"""
+
+GOATCOUNTER_SCRIPT = '<script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
 
 # -------------------------
 # CONFIG BLOCK MARKERS
@@ -248,14 +252,29 @@ def patch_shared_scripts(html, notes):
 
         notes.append("jay-mobile.js already present")
 
-    if "window.goatcounter" not in html:
+    old_goatcounter_block_regex = re.compile(
+        r'<script>\s*window\.goatcounter\s*=\s*\{.*?\};\s*</script>',
+        re.DOTALL
+    )
+
+    if old_goatcounter_block_regex.search(html):
+
+        html = old_goatcounter_block_regex.sub(GOATCOUNTER_BLOCK, html, count=1)
+        notes.append("updated goatcounter block")
+
+    else:
 
         missing_blocks.append(GOATCOUNTER_BLOCK)
         notes.append("added goatcounter block")
 
+    if 'data-goatcounter="https://loronajay.goatcounter.com/count"' not in html:
+
+        missing_blocks.append(GOATCOUNTER_SCRIPT)
+        notes.append("added goatcounter count.js")
+
     else:
 
-        notes.append("goatcounter already present")
+        notes.append("goatcounter count.js already present")
 
     if missing_blocks:
 

@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v19.1
+   JAY ARCADE MOBILE CONTROLLER v19.3
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -16,7 +16,7 @@
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v19.1";
+const JAY_MOBILE_VERSION = "v19.3";
 
 function isMobile() {
   return (
@@ -143,26 +143,37 @@ document.head.appendChild(style);
   }
 
   function getLayoutMetrics() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const portrait = vh > vw;
-    const shortSide = Math.min(vw, vh);
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const portrait = vh > vw;
+  const shortSide = Math.min(vw, vh);
 
-    const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27), 145, 250);
-    const buttonSize = clamp(shortSide * (portrait ? 0.105 : 0.115), 60, 110);
-    const edge = clamp(shortSide * 0.055, 16, 42);
-    const faceGap = clamp(buttonSize * (portrait ? 0.70 : 0.78), 38, 82);
+  const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27), 145, 250);
+  const buttonSize = clamp(shortSide * (portrait ? 0.105 : 0.115), 60, 110);
 
-    return {
-      vw,
-      vh,
-      portrait,
-      padSize,
-      buttonSize,
-      edge,
-      faceGap
-    };
-  }
+  const edge = clamp(shortSide * 0.055, 16, 42);
+  const faceGap = clamp(buttonSize * (portrait ? 0.70 : 0.78), 38, 82);
+
+  const faceRight = portrait
+    ? clamp(shortSide * 0.020, 8, 16)
+    : edge;
+
+  const faceBottom = portrait
+    ? clamp(shortSide * 0.030, 10, 20)
+    : edge;
+
+  return {
+    vw,
+    vh,
+    portrait,
+    padSize,
+    buttonSize,
+    edge,
+    faceGap,
+    faceRight,
+    faceBottom
+  };
+}
 
   function makeBaseControl() {
     const el = document.createElement("div");
@@ -687,69 +698,115 @@ svg.appendChild(path);
   }
 
   function createFaceButton({ name, label, size }) {
-    const btn = makeBaseControl();
-    let activePointerId = null;
+  const btn = makeBaseControl();
 
-    Object.assign(btn.style, {
-      width: `${size}px`,
-      height: `${size}px`,
-      borderRadius: "50%",
-      background: "rgba(0,255,255,0.08)",
-      border: "3px solid rgba(0,255,255,0.85)",
-      color: "rgba(0,255,255,0.92)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "sans-serif",
-      fontWeight: "bold",
-      fontSize: `${Math.max(20, size * 0.34)}px`,
-      boxSizing: "border-box",
-      backdropFilter: "blur(2px)",
-      transition: "transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease"
-    });
+  let activePointerId = null;
+  let isPressed = false;
 
-    btn.textContent = label;
+  Object.assign(btn.style, {
+    width: `${size}px`,
+    height: `${size}px`,
+    borderRadius: "50%",
+    background: "rgba(0,255,255,0.08)",
+    border: "3px solid rgba(0,255,255,0.85)",
+    color: "rgba(0,255,255,0.92)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontFamily: "sans-serif",
+    fontWeight: "bold",
+    fontSize: `${Math.max(20, size * 0.34)}px`,
+    boxSizing: "border-box",
+    backdropFilter: "blur(2px)",
+    transition: "transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease"
+  });
 
-    function activate() {
-      btn.style.transform = "scale(0.95)";
-      btn.style.background = "rgba(0,255,255,0.18)";
-      btn.style.boxShadow = "0 0 20px rgba(0,255,255,0.35)";
-      pressKey(keyMap[name]);
-    }
+  btn.textContent = label;
 
-    function deactivate() {
-      btn.style.transform = "scale(1)";
-      btn.style.background = "rgba(0,255,255,0.08)";
-      btn.style.boxShadow = "none";
-      releaseKey(keyMap[name]);
-    }
-
-    btn.addEventListener("pointerdown", async (e) => {
-      await handleFirstGestureSetup();
-      activePointerId = e.pointerId;
-      btn.setPointerCapture(e.pointerId);
-      activate();
-    });
-
-    function endPointer(e) {
-      if (e.pointerId !== activePointerId) return;
-      activePointerId = null;
-      deactivate();
-    }
-
-    btn.addEventListener("pointerup", endPointer);
-    btn.addEventListener("pointercancel", endPointer);
-
-    return {
-      el: btn,
-      setPosition({ left, right, bottom, top }) {
-        btn.style.left = left ?? "";
-        btn.style.right = right ?? "";
-        btn.style.bottom = bottom ?? "";
-        btn.style.top = top ?? "";
-      }
-    };
+  function activate() {
+    if (isPressed) return;
+    isPressed = true;
+    btn.style.transform = "scale(0.95)";
+    btn.style.background = "rgba(0,255,255,0.18)";
+    btn.style.boxShadow = "0 0 20px rgba(0,255,255,0.35)";
+    pressKey(keyMap[name]);
   }
+
+  function deactivate() {
+    if (!isPressed) return;
+    isPressed = false;
+    btn.style.transform = "scale(1)";
+    btn.style.background = "rgba(0,255,255,0.08)";
+    btn.style.boxShadow = "none";
+    releaseKey(keyMap[name]);
+  }
+
+  function getFaceButtonsUnderPoint(x, y) {
+    const elements = document.elementsFromPoint(x, y);
+    return elements.find(el => el?.dataset?.jayFaceButton === "true");
+  }
+
+  function switchToButton(targetBtnEl, pointerId, x, y) {
+    if (!targetBtnEl || targetBtnEl === btn) return;
+
+    deactivate();
+
+    const handoff = targetBtnEl._jayFaceButtonApi;
+    if (handoff) {
+      handoff.takeOverPointer(pointerId, x, y);
+    }
+  }
+
+  btn.dataset.jayFaceButton = "true";
+
+  btn._jayFaceButtonApi = {
+    takeOverPointer(pointerId, x, y) {
+      activePointerId = pointerId;
+      try {
+        btn.setPointerCapture(pointerId);
+      } catch {}
+      activate();
+    }
+  };
+
+  btn.addEventListener("pointerdown", async (e) => {
+    await handleFirstGestureSetup();
+    activePointerId = e.pointerId;
+    try {
+      btn.setPointerCapture(e.pointerId);
+    } catch {}
+    activate();
+  });
+
+  btn.addEventListener("pointermove", (e) => {
+    if (e.pointerId !== activePointerId) return;
+
+    const targetBtnEl = getFaceButtonsUnderPoint(e.clientX, e.clientY);
+    if (targetBtnEl && targetBtnEl !== btn) {
+      switchToButton(targetBtnEl, e.pointerId, e.clientX, e.clientY);
+      activePointerId = null;
+    }
+  });
+
+  function endPointer(e) {
+    if (e.pointerId !== activePointerId) return;
+    activePointerId = null;
+    deactivate();
+  }
+
+  btn.addEventListener("pointerup", endPointer);
+  btn.addEventListener("pointercancel", endPointer);
+
+  return {
+    el: btn,
+    setPosition({ left, right, bottom, top }) {
+      btn.style.left = left ?? "";
+      btn.style.right = right ?? "";
+      btn.style.bottom = bottom ?? "";
+      btn.style.top = top ?? "";
+    }
+  };
+}
 
   function createScanlineButton() {
     const scanlineBtn = document.createElement("div");
@@ -807,59 +864,24 @@ svg.appendChild(path);
     }
   });
 
+  leftPad.setPosition({
+    left: `${m.edge}px`,
+    bottom: `${m.edge}px`
+  });
+
   const yBtn = createFaceButton({ name: "y", label: "Y", size: m.buttonSize });
   const bBtn = createFaceButton({ name: "b", label: "B", size: m.buttonSize });
   const xBtn = createFaceButton({ name: "x", label: "X", size: m.buttonSize });
   const aBtn = createFaceButton({ name: "a", label: "A", size: m.buttonSize });
 
-  if (m.portrait) {
-    const padBottom = Math.max(22, m.edge + 8);
-    const padLeft = Math.max(12, m.edge + 2);
+  const groupRight = m.faceRight;
+  const baseBottom = m.faceBottom;
+  const gap = m.faceGap;
 
-    leftPad.setPosition({
-      left: `${padLeft}px`,
-      bottom: `${padBottom}px`
-    });
-
-    const portraitRight = Math.max(18, m.edge + 8);
-    const portraitBottom = Math.max(28, m.edge + 6);
-    const hGap = m.buttonSize * 0.92;
-    const vGap = m.buttonSize * 0.86;
-
-    yBtn.setPosition({
-      right: `${portraitRight + hGap * 0.95}px`,
-      bottom: `${portraitBottom + vGap * 2.0}px`
-    });
-
-    bBtn.setPosition({
-      right: `${portraitRight + hGap * 1.95}px`,
-      bottom: `${portraitBottom + vGap * 1.0}px`
-    });
-
-    xBtn.setPosition({
-      right: `${portraitRight}px`,
-      bottom: `${portraitBottom + vGap * 1.0}px`
-    });
-
-    aBtn.setPosition({
-      right: `${portraitRight + hGap * 0.95}px`,
-      bottom: `${portraitBottom}px`
-    });
-  } else {
-    leftPad.setPosition({
-      left: `${m.edge}px`,
-      bottom: `${m.edge}px`
-    });
-
-    const groupRight = m.edge;
-    const baseBottom = m.edge;
-    const gap = m.faceGap;
-
-    yBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom + gap * 2}px` });
-    bBtn.setPosition({ right: `${groupRight + gap * 2}px`, bottom: `${baseBottom + gap}px` });
-    xBtn.setPosition({ right: `${groupRight}px`, bottom: `${baseBottom + gap}px` });
-    aBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom}px` });
-  }
+  yBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom + gap * 2}px` });
+  bBtn.setPosition({ right: `${groupRight + gap * 2}px`, bottom: `${baseBottom + gap}px` });
+  xBtn.setPosition({ right: `${groupRight}px`, bottom: `${baseBottom + gap}px` });
+  aBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom}px` });
 }
 
   function renderDualDpadLayout() {

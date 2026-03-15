@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v18.4
+   JAY ARCADE MOBILE CONTROLLER v18.5
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -10,12 +10,13 @@
    - curved segmented highlight regions
    - aligned wedge boundaries
    - smooth raw-touch thumb cursor
+   - improved arrow appearance
    ========================================== */
 
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v18.4";
+const JAY_MOBILE_VERSION = "v18.5";
 
 function isMobile() {
   return (
@@ -526,29 +527,33 @@ function initController() {
     });
     el.appendChild(arrowLayer);
 
-    const arrows = [
-      ["↑", 50, 18],
-      ["↗", 78, 28],
-      ["→", 82, 50],
-      ["↘", 78, 72],
-      ["↓", 50, 82],
-      ["↙", 22, 72],
-      ["←", 18, 50],
-      ["↖", 22, 28]
+      const arrows = [
+      { symbol: "↑", angle: 270 },
+      { symbol: "↗", angle: 315 },
+      { symbol: "→", angle: 0 },
+      { symbol: "↘", angle: 45 },
+      { symbol: "↓", angle: 90 },
+      { symbol: "↙", angle: 135 },
+      { symbol: "←", angle: 180 },
+      { symbol: "↖", angle: 225 }
     ];
 
-    for (const [symbol, x, y] of arrows) {
+    const arrowRadius = innerR + (outerR - innerR) * 0.50;
+
+    for (const { symbol, angle } of arrows) {
+      const p = polarToCartesian(cx, cy, arrowRadius, angle);
       const a = document.createElement("div");
       a.textContent = symbol;
       Object.assign(a.style, {
         position: "absolute",
-        left: `${x}%`,
-        top: `${y}%`,
+        left: `${p.x}px`,
+        top: `${p.y}px`,
         transform: "translate(-50%, -50%)",
         color: "rgba(0,255,255,0.88)",
         fontFamily: "monospace",
         fontSize: `${Math.max(14, options.size * 0.10)}px`,
-        textShadow: "0 0 8px rgba(0,255,255,0.25)"
+        textShadow: "0 0 8px rgba(0,255,255,0.25)",
+        lineHeight: "1"
       });
       arrowLayer.appendChild(a);
     }

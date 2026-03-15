@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v18.6
+   JAY ARCADE MOBILE CONTROLLER v18.7
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -16,7 +16,7 @@
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v18.6";
+const JAY_MOBILE_VERSION = "v18.7";
 
 function isMobile() {
   return (
@@ -528,56 +528,56 @@ function initController() {
     el.appendChild(arrowLayer);
 
     const arrows = [
-      { angle: 270, rotate:   0 },
-      { angle: 315, rotate:  45 },
-      { angle:   0, rotate:  90 },
-      { angle:  45, rotate: 135 },
-      { angle:  90, rotate: 180 },
-      { angle: 135, rotate: 225 },
-      { angle: 180, rotate: 270 },
-      { angle: 225, rotate: 315 }
-    ];
+  { angle: 270, rotate:   0 },
+  { angle: 315, rotate:  45 },
+  { angle:   0, rotate:  90 },
+  { angle:  45, rotate: 135 },
+  { angle:  90, rotate: 180 },
+  { angle: 135, rotate: 225 },
+  { angle: 180, rotate: 270 },
+  { angle: 225, rotate: 315 }
+];
 
-    const arrowRadius = innerR + (outerR - innerR) * 0.50;
-    const arrowSize = Math.max(14, options.size * 0.09);
+const arrowRadius = innerR + (outerR - innerR) * 0.50;
+const arrowSize = options.size * 0.07;
 
-    for (const { angle, rotate } of arrows) {
-      const p = polarToCartesian(cx, cy, arrowRadius, angle);
+for (const { angle, rotate } of arrows) {
 
-      const icon = document.createElement("div");
-      Object.assign(icon.style, {
-        position: "absolute",
-        left: `${p.x}px`,
-        top: `${p.y}px`,
-        width: `${arrowSize}px`,
-        height: `${arrowSize}px`,
-        transform: `translate(-50%, -50%) rotate(${rotate}deg)`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        pointerEvents: "none"
-      });
+  const p = polarToCartesian(cx, cy, arrowRadius, angle);
 
-      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttribute("viewBox", "0 0 24 24");
-      Object.assign(svg.style, {
-        width: "100%",
-        height: "100%",
-        overflow: "visible",
-        filter: "drop-shadow(0 0 6px rgba(0,255,255,0.25))"
-      });
+  const icon = document.createElement("div");
 
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", "M12 5 L19 12 L16.5 14.5 L13.5 11.5 V19 H10.5 V11.5 L7.5 14.5 L5 12 Z");
-      path.setAttribute("fill", "rgba(0,255,255,0.90)");
-      path.setAttribute("stroke", "rgba(0,255,255,0.95)");
-      path.setAttribute("stroke-width", "0.75");
-      path.setAttribute("stroke-linejoin", "round");
+  Object.assign(icon.style,{
+    position:"absolute",
+    left:`${p.x}px`,
+    top:`${p.y}px`,
+    width:`${arrowSize}px`,
+    height:`${arrowSize}px`,
+    transform:`translate(-50%, -50%) rotate(${rotate}deg)`,
+    pointerEvents:"none"
+  });
 
-      svg.appendChild(path);
-      icon.appendChild(svg);
-      arrowLayer.appendChild(icon);
-    }
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 24 24");
+
+  Object.assign(svg.style,{
+    width:"100%",
+    height:"100%"
+  });
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+
+  path.setAttribute(
+    "d",
+    "M12 4 L20 18 H4 Z"
+  );
+
+  path.setAttribute("fill","rgba(0,255,255,0.92)");
+
+  svg.appendChild(path);
+  icon.appendChild(svg);
+  arrowLayer.appendChild(icon);
+}
 
     el.addEventListener("pointerdown", async (e) => {
       await handleFirstGestureSetup();

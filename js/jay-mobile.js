@@ -1,10 +1,13 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v17.5
+   JAY ARCADE MOBILE CONTROLLER v17.6
+   - no touch-to-start overlay
+   - controls visible immediately
+   - fullscreen/orientation on first control touch
    ========================================== */
 
 (function () {
 
-const JAY_MOBILE_VERSION = "v17.5";
+const JAY_MOBILE_VERSION = "v17.6";
 
 function isMobile() {
   return (
@@ -47,36 +50,6 @@ Object.assign(versionBadge.style, {
 document.body.appendChild(versionBadge);
 
 /* =============================
-   START OVERLAY
-   ============================= */
-const startOverlay = document.createElement("div");
-Object.assign(startOverlay.style, {
-  position: "fixed",
-  inset: "0",
-  background: "black",
-  color: "#00ffff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexDirection: "column",
-  fontFamily: "monospace",
-  zIndex: "999998"
-});
-
-const entryTitle =
-  window.JAY_GAME_CONFIG?.entryTitle || "INSERT COIN";
-
-const entrySub =
-  window.JAY_GAME_CONFIG?.entrySub || "TAP TO START";
-
-startOverlay.innerHTML = `
-  <h2 style="margin:0 0 20px 0;">${entryTitle}</h2>
-  <p style="margin:0;">${entrySub}</p>
-`;
-
-document.body.appendChild(startOverlay);
-
-/* =============================
    CONTROLS LAYER
    ============================= */
 
@@ -84,13 +57,12 @@ const controls = document.createElement("div");
 Object.assign(controls.style, {
   position: "fixed",
   inset: "0",
-  display: "none",
+  display: "block",
   zIndex: "999997",
   pointerEvents: "none",
   userSelect: "none",
   webkitUserSelect: "none",
   webkitTouchCallout: "none"
-
 });
 document.body.appendChild(controls);
 
@@ -128,14 +100,35 @@ if (window.JAY_GAME_CONFIG?.keyOverrides) {
 
 const keyboard = window.vm.runtime.ioDevices.keyboard;
 
-let activePointerId = null;
-
 function pressKey(key) {
   keyboard.postData({ key, isDown: true });
 }
 
 function releaseKey(key) {
   keyboard.postData({ key, isDown: false });
+}
+
+/* =============================
+   FIRST USER GESTURE SETUP
+   ============================= */
+
+let firstGestureDone = false;
+
+async function handleFirstGestureSetup() {
+  if (firstGestureDone) return;
+  firstGestureDone = true;
+
+  if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+    try {
+      await document.documentElement.requestFullscreen();
+    } catch {}
+  }
+
+  if (screen.orientation?.lock) {
+    try {
+      await screen.orientation.lock("landscape");
+    } catch {}
+  }
 }
 
 /* =============================
@@ -180,7 +173,6 @@ Object.assign(thumb.style, {
   left: "50%",
   top: "50%",
   transition: "transform 0.15s ease-out"
-
 });
 
 dpad.appendChild(thumb);
@@ -216,13 +208,10 @@ function createArrow(symbol, left, top) {
   arrowLayer.appendChild(arrow);
 }
 
-/* Cardinal */
 createArrow("↑", "50%", "15%");
 createArrow("↓", "50%", "85%");
 createArrow("←", "15%", "50%");
 createArrow("→", "85%", "50%");
-
-/* Diagonal */
 createArrow("↖", "20%", "20%");
 createArrow("↗", "80%", "20%");
 createArrow("↙", "20%", "80%");
@@ -240,7 +229,7 @@ function updateDpadDirection(x, y) {
   const dx = x - cx;
   const dy = y - cy;
 
-  const radius = rect.width / 2 - 20; // keep inside circle
+  const radius = rect.width / 2 - 20;
 
   let limitedDx = dx;
   let limitedDy = dy;
@@ -253,7 +242,6 @@ function updateDpadDirection(x, y) {
     limitedDy = Math.sin(angle) * radius;
   }
 
-  // Move thumb
   thumb.style.transform = `translate(calc(-50% + ${limitedDx}px), calc(-50% + ${limitedDy}px))`;
 
   const newDirections = new Set();
@@ -295,7 +283,8 @@ function clearDirections() {
   thumb.style.transform = "translate(-50%, -50%)";
 }
 
-dpad.addEventListener("pointerdown", e => {
+dpad.addEventListener("pointerdown", async e => {
+  await handleFirstGestureSetup();
   dpad.setPointerCapture(e.pointerId);
   updateDpadDirection(e.clientX, e.clientY);
 });
@@ -320,7 +309,7 @@ function deactivateButton(btn) {
 }
 
 /* =============================
-   FACE BUTTONS (mirrored tighter cluster)
+   FACE BUTTONS
    ============================= */
 
 function createButton(name, label, bottom, left, right) {
@@ -329,40 +318,39 @@ function createButton(name, label, bottom, left, right) {
   btn.innerText = label;
 
   Object.assign(btn.style, {
-  position: "absolute",
-  bottom: bottom,
-  left: left,
-  right: right,
-  width: "74px",
-  height: "74px",
-  borderRadius: "50%",
-  background: "transparent",
-  border: "2px solid rgba(0,255,255,0.8)",
-  color: "rgba(0,255,255,0.9)",
-  backdropFilter: "blur(1px)",
-  fontWeight: "bold",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "22px",
-  touchAction: "none",
-  pointerEvents: "auto",
-  boxShadow: "none",
-  transition: "transform 0.05s ease"
-});
+    position: "absolute",
+    bottom: bottom,
+    left: left,
+    right: right,
+    width: "74px",
+    height: "74px",
+    borderRadius: "50%",
+    background: "transparent",
+    border: "2px solid rgba(0,255,255,0.8)",
+    color: "rgba(0,255,255,0.9)",
+    backdropFilter: "blur(1px)",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "22px",
+    touchAction: "none",
+    pointerEvents: "auto",
+    boxShadow: "none",
+    transition: "transform 0.05s ease"
+  });
 
   controls.appendChild(btn);
   return btn;
 }
 
-/*  margins */
 createButton("y", "Y", "160px", null, "100px");
 createButton("b", "B", "100px", null, "140px");
 createButton("x", "X", "100px", null, "60px");
-createButton("a", "A", "40px",  null, "100px");
+createButton("a", "A", "40px", null, "100px");
 
 /* =============================
-   TOGGLE SCANLINES BUTTON (Screen Corner)
+   TOGGLE SCANLINES BUTTON
    ============================= */
 
 const scanlineBtn = document.createElement("div");
@@ -387,7 +375,8 @@ Object.assign(scanlineBtn.style, {
 
 document.body.appendChild(scanlineBtn);
 
-scanlineBtn.addEventListener("pointerdown", () => {
+scanlineBtn.addEventListener("pointerdown", async () => {
+  await handleFirstGestureSetup();
   scanlineBtn.style.borderColor = "#00ffff";
   pressKey("2");
 });
@@ -445,8 +434,9 @@ function releaseFace(pointerId) {
   activePointers.delete(pointerId);
 }
 
-controls.addEventListener("pointerdown", e => {
+controls.addEventListener("pointerdown", async e => {
   if (!e.target.dataset.name) return;
+  await handleFirstGestureSetup();
   e.target.setPointerCapture(e.pointerId);
   pressFace(e.pointerId, e.target.dataset.name);
 });
@@ -459,22 +449,6 @@ controls.addEventListener("pointermove", e => {
 
 controls.addEventListener("pointerup", e => releaseFace(e.pointerId));
 controls.addEventListener("pointercancel", e => releaseFace(e.pointerId));
-
-/* =============================
-   START
-   ============================= */
-
-startOverlay.addEventListener("click", async () => {
-  if (document.documentElement.requestFullscreen)
-    document.documentElement.requestFullscreen();
-
-  if (screen.orientation?.lock) {
-    try { await screen.orientation.lock("landscape"); } catch {}
-  }
-
-  startOverlay.remove();
-  controls.style.display = "block";
-}, { once: true });
 
 }
 

@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v19.3
+   JAY ARCADE MOBILE CONTROLLER v19.4
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -16,7 +16,7 @@
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v19.3";
+const JAY_MOBILE_VERSION = "v19.4";
 
 function isMobile() {
   return (
@@ -42,6 +42,56 @@ function initController() {
   const gameConfig = window.JAY_GAME_CONFIG || {};
   const mobileConfig = gameConfig.mobile || {};
   const layoutName = mobileConfig.layout || "default";
+  const COLOR_PRESETS = {
+  "arcade-cyan": "#00ffff",
+  "crt-amber": "#ffb000",
+  "genesis-green": "#5aff87",
+  "neon-pink": "#ff4fd8",
+  "ice-blue": "#7fdcff"
+};
+
+const THEME_ORDER = [
+  "arcade-cyan",
+  "crt-amber",
+  "genesis-green",
+  "neon-pink",
+  "ice-blue"
+];
+
+const THEME_LABELS = {
+  "arcade-cyan": "Arcade Cyan",
+  "crt-amber": "CRT Amber",
+  "genesis-green": "Genesis Green",
+  "neon-pink": "Neon Pink",
+  "ice-blue": "Ice Blue"
+};
+
+function getSavedThemeName() {
+  const saved = localStorage.getItem("jayControllerTheme");
+  return COLOR_PRESETS[saved] ? saved : "arcade-cyan";
+}
+
+let currentThemeName = getSavedThemeName();
+let colorHex = COLOR_PRESETS[currentThemeName];
+let themeColor = hexToRgb(colorHex);
+
+function applyThemeByName(name) {
+  currentThemeName = COLOR_PRESETS[name] ? name : "arcade-cyan";
+  colorHex = COLOR_PRESETS[currentThemeName];
+  themeColor = hexToRgb(colorHex);
+  localStorage.setItem("jayControllerTheme", currentThemeName);
+}
+
+const buttonLabels = {
+  a: mobileConfig.buttonLabels?.a || "A",
+  b: mobileConfig.buttonLabels?.b || "B",
+  x: mobileConfig.buttonLabels?.x || "X",
+  y: mobileConfig.buttonLabels?.y || "Y"
+};
+
+const sizeProfile = mobileConfig.sizeProfile || "normal";
+const showScanlineButton = mobileConfig.showScanlineButton !== false;
+  
 
   let keyMap = {
     left: "a",
@@ -59,14 +109,19 @@ function initController() {
   }
 
   const style = document.createElement("style");
+  document.head.appendChild(style);
+
+function refreshThemeStyleTag() {
   style.innerHTML = `
-  @keyframes jayArcadePulse {
-  0% { box-shadow: 0 0 10px rgba(0,255,255,.25); }
-  50% { box-shadow: 0 0 18px rgba(0,255,255,.45); }
-  100% { box-shadow: 0 0 10px rgba(0,255,255,.25); }
+    @keyframes jayArcadePulse {
+      0% { box-shadow: 0 0 10px ${rgba(themeColor, 0.25)}; }
+      50% { box-shadow: 0 0 18px ${rgba(themeColor, 0.45)}; }
+      100% { box-shadow: 0 0 10px ${rgba(themeColor, 0.25)}; }
+    }
+  `;
 }
-`;
-document.head.appendChild(style);
+
+refreshThemeStyleTag();
 
   const keyboard = window.vm.runtime.ioDevices.keyboard;
   const pressedKeys = new Set();
@@ -93,13 +148,21 @@ document.head.appendChild(style);
     position: "fixed",
     top: "8px",
     right: "12px",
-    color: "#00ffff",
+    color: colorHex,
     fontFamily: "monospace",
     fontSize: "14px",
     opacity: "0.6",
     zIndex: "999999"
   });
+
+  function refreshThemeVisuals() {
+    versionBadge.style.color = colorHex;
+    refreshThemeStyleTag();
+  }
+
   document.body.appendChild(versionBadge);
+
+  refreshThemeVisuals();
 
   const controls = document.createElement("div");
   Object.assign(controls.style, {
@@ -148,19 +211,31 @@ document.head.appendChild(style);
   const portrait = vh > vw;
   const shortSide = Math.min(vw, vh);
 
-  const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27), 145, 250);
-  const buttonSize = clamp(shortSide * (portrait ? 0.105 : 0.115), 60, 110);
+  const activeTweaks = portrait
+    ? (mobileConfig.portraitOffsetTweaks || {})
+    : (mobileConfig.landscapeOffsetTweaks || {});
+
+  const sizeScale =
+    sizeProfile === "compact" ? 0.90 :
+    sizeProfile === "large" ? 1.10 :
+    1.00;
+
+  const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27) * sizeScale, 145, 250);
+  const buttonSize = clamp(shortSide * (portrait ? 0.105 : 0.115) * sizeScale, 60, 110);
 
   const edge = clamp(shortSide * 0.055, 16, 42);
   const faceGap = clamp(buttonSize * (portrait ? 0.70 : 0.78), 38, 82);
 
-  const faceRight = portrait
+  const faceRightBase = portrait
     ? clamp(shortSide * 0.020, 8, 16)
     : edge;
 
-  const faceBottom = portrait
+  const faceBottomBase = portrait
     ? clamp(shortSide * 0.030, 10, 20)
     : edge;
+
+  const padLeftBase = edge;
+  const padBottomBase = edge;
 
   return {
     vw,
@@ -170,8 +245,10 @@ document.head.appendChild(style);
     buttonSize,
     edge,
     faceGap,
-    faceRight,
-    faceBottom
+    faceRight: faceRightBase + (activeTweaks.faceRight || 0),
+    faceBottom: faceBottomBase + (activeTweaks.faceBottom || 0),
+    padLeft: padLeftBase + (activeTweaks.padLeft || 0),
+    padBottom: padBottomBase + (activeTweaks.padBottom || 0)
   };
 }
 
@@ -343,45 +420,45 @@ document.head.appendChild(style);
     }
 
     function updateVisualState() {
-    const pressure = thumbVisible
-      ? Math.min(1, Math.hypot(thumbX, thumbY) / thumbMaxR)
-      : 0;
+  const pressure = thumbVisible
+    ? Math.min(1, Math.hypot(thumbX, thumbY) / thumbMaxR)
+    : 0;
 
-    for (let i = 0; i < segments.length; i++) {
-      const seg = segments[i];
-      const zone = visualZones[i];
-      const isActive = zone.dir === activeDirection;
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    const zone = visualZones[i];
+    const isActive = zone.dir === activeDirection;
 
-      if (isActive) {
-        seg.setAttribute(
-          "fill",
-          `rgba(0,255,255,${0.16 + pressure * 0.16})`
-        );
-        seg.style.filter =
-          `drop-shadow(0 0 ${8 + pressure * 10}px rgba(0,255,255,${0.22 + pressure * 0.22}))`;
-        seg.setAttribute("opacity", `${0.95 + pressure * 0.05}`);
-      } else {
-        seg.setAttribute("fill", "rgba(0,255,255,0.045)");
-        seg.style.filter = "none";
-        seg.setAttribute("opacity", "0.90");
-      }
+    if (isActive) {
+      seg.setAttribute(
+        "fill",
+        rgba(themeColor, 0.16 + pressure * 0.16)
+      );
+      seg.style.filter =
+        `drop-shadow(0 0 ${8 + pressure * 10}px ${rgba(themeColor, 0.22 + pressure * 0.22)})`;
+      seg.setAttribute("opacity", `${0.95 + pressure * 0.05}`);
+    } else {
+      seg.setAttribute("fill", rgba(themeColor, 0.045));
+      seg.style.filter = "none";
+      seg.setAttribute("opacity", "0.90");
+    }
   }
 
   centerCap.style.boxShadow = activeDirection
-    ? `0 0 ${16 + pressure * 12}px rgba(0,255,255,${0.24 + pressure * 0.20})`
-    : "0 0 10px rgba(0,255,255,0.18)";
+    ? `0 0 ${16 + pressure * 12}px ${rgba(themeColor, 0.24 + pressure * 0.20)}`
+    : `0 0 10px ${rgba(themeColor, 0.18)}`;
 
   el.style.boxShadow = thumbVisible
-    ? `0 0 ${12 + pressure * 22}px rgba(0,255,255,${0.10 + pressure * 0.20})`
-    : "0 0 0px rgba(0,255,255,0)";
+    ? `0 0 ${12 + pressure * 22}px ${rgba(themeColor, 0.10 + pressure * 0.20)}`
+    : `0 0 0px ${rgba(themeColor, 0)}`;
 
   energyLayer.style.opacity = thumbVisible
     ? `${0.18 + pressure * 0.28}`
     : "0.18";
 
   energyLayer.style.filter = thumbVisible
-    ? `drop-shadow(0 0 ${8 + pressure * 12}px rgba(0,255,255,${0.10 + pressure * 0.18}))`
-    : "none";  
+    ? `drop-shadow(0 0 ${8 + pressure * 12}px ${rgba(themeColor, 0.10 + pressure * 0.18)})`
+    : "none";
 
   if (!thumbVisible) {
     thumb.style.opacity = "0";
@@ -394,9 +471,9 @@ document.head.appendChild(style);
       `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px)) scale(${sizeScale})`;
 
     thumb.style.boxShadow =
-      `0 0 ${10 + pressure * 14}px rgba(0,255,255,${0.22 + pressure * 0.28})`;
+      `0 0 ${10 + pressure * 14}px ${rgba(themeColor, 0.22 + pressure * 0.28)}`;
     thumb.style.background =
-      `rgba(0,255,255,${0.10 + pressure * 0.14})`;
+      rgba(themeColor, 0.10 + pressure * 0.14);
   }
 }
 
@@ -460,7 +537,7 @@ document.head.appendChild(style);
     width: `${options.size}px`,
     height: `${options.size}px`,
     borderRadius: "50%",
-    border: "3px solid rgba(0,255,255,0.88)",
+    border: `3px solid ${rgba(themeColor, 0.88)}`,
     boxSizing: "border-box",
     overflow: "hidden",
     backdropFilter: "blur(2px)",
@@ -470,7 +547,7 @@ document.head.appendChild(style);
       radial-gradient(circle at 50% 70%, rgba(0,0,0,0.35), transparent 65%),
       radial-gradient(circle at 50% 50%, rgba(0,0,0,0.28), rgba(0,0,0,0.18))
     `
-    });
+  });
 
     const glass = document.createElement("div");
     Object.assign(glass.style, {
@@ -490,8 +567,8 @@ document.head.appendChild(style);
       pointerEvents: "none",
       opacity: "0.22",
       background: `
-        radial-gradient(circle at 50% 50%, rgba(0,255,255,0.10), transparent 42%),
-        radial-gradient(circle at 50% 50%, rgba(0,255,255,0.05), transparent 68%)
+        radial-gradient(circle at 50% 50%, ${rgba(themeColor, 0.10)}, transparent 42%),
+        radial-gradient(circle at 50% 50%, ${rgba(themeColor, 0.05)}, transparent 68%)
       `,
       transition: "opacity 0.04s linear, filter 0.04s linear"
     });
@@ -520,7 +597,7 @@ el.appendChild(energyLayer);
         "d",
         describeRingSegmentPath(cx, cy, innerR, outerR, startDeg, endDeg)
       );
-      seg.setAttribute("fill", "rgba(0,255,255,0.05)");
+      seg.setAttribute("fill", rgba(themeColor, 0.05));
       seg.setAttribute("opacity", "0.92");
       seg.style.transition = "fill 0.04s linear, opacity 0.04s linear, filter 0.04s linear";
 
@@ -542,7 +619,7 @@ el.appendChild(energyLayer);
       line.setAttribute("y1", p1.y);
       line.setAttribute("x2", p2.x);
       line.setAttribute("y2", p2.y);
-      line.setAttribute("stroke", "rgba(0,255,255,0.22)");
+      line.setAttribute("stroke", rgba(themeColor, 0.22));
       line.setAttribute("stroke-width", Math.max(1.5, options.size * 0.010));
       line.setAttribute("stroke-linecap", "round");
       dividerGroup.appendChild(line);
@@ -556,7 +633,7 @@ el.appendChild(energyLayer);
       height: `${innerR * 2}px`,
       transform: "translate(-50%, -50%)",
       borderRadius: "50%",
-      border: "3px solid rgba(0,255,255,0.88)",
+      border: `3px solid ${rgba(themeColor, 0.88)}`,
       background: "rgba(0,0,0,0.22)",
       display: "flex",
       alignItems: "center",
@@ -569,8 +646,8 @@ el.appendChild(energyLayer);
       width: `${options.size * 0.11}px`,
       height: `${options.size * 0.11}px`,
       borderRadius: "50%",
-      border: "2px solid rgba(0,255,255,0.75)",
-      color: "rgba(0,255,255,0.75)",
+      border: `2px solid ${rgba(themeColor, 0.75)}`,
+      color: rgba(themeColor, 0.75),
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -586,9 +663,9 @@ el.appendChild(energyLayer);
       width: `${Math.max(18, options.size * 0.14)}px`,
       height: `${Math.max(18, options.size * 0.14)}px`,
       borderRadius: "50%",
-      background: "rgba(0,255,255,0.16)",
-      border: "2px solid rgba(0,255,255,0.88)",
-      boxShadow: "0 0 12px rgba(0,255,255,0.25)",
+      background: rgba(themeColor, 0.16),
+      border: `2px solid ${rgba(themeColor, 0.88)}`,
+      boxShadow: `0 0 12px ${rgba(themeColor, 0.25)}`,
       pointerEvents: "none",
       opacity: "0",
       transform: "translate(-50%, -50%)",
@@ -655,7 +732,7 @@ for (const { angle, rotate } of arrows) {
 const path = document.createElementNS("http://www.w3.org/2000/svg","path");
 
 path.setAttribute("d","M12 4 L20 18 H4 Z");
-path.setAttribute("fill","rgba(0,255,255,0.92)");
+path.setAttribute("fill", rgba(themeColor, 0.92));
 
 svg.appendChild(path);
   icon.appendChild(svg);
@@ -707,9 +784,9 @@ svg.appendChild(path);
     width: `${size}px`,
     height: `${size}px`,
     borderRadius: "50%",
-    background: "rgba(0,255,255,0.08)",
-    border: "3px solid rgba(0,255,255,0.85)",
-    color: "rgba(0,255,255,0.92)",
+    background: rgba(themeColor, 0.08),
+    border: `3px solid ${rgba(themeColor, 0.85)}`,
+    color: rgba(themeColor, 0.92),
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -727,8 +804,9 @@ svg.appendChild(path);
     if (isPressed) return;
     isPressed = true;
     btn.style.transform = "scale(0.95)";
-    btn.style.background = "rgba(0,255,255,0.18)";
-    btn.style.boxShadow = "0 0 20px rgba(0,255,255,0.35)";
+    btn.style.background = rgba(themeColor, 0.18);
+    btn.style.boxShadow =
+      `0 0 18px ${rgba(themeColor, 0.35)}, inset 0 0 10px ${rgba(themeColor, 0.18)}`;
     pressKey(keyMap[name]);
   }
 
@@ -736,7 +814,7 @@ svg.appendChild(path);
     if (!isPressed) return;
     isPressed = false;
     btn.style.transform = "scale(1)";
-    btn.style.background = "rgba(0,255,255,0.08)";
+    btn.style.background = rgba(themeColor, 0.08);
     btn.style.boxShadow = "none";
     releaseKey(keyMap[name]);
   }
@@ -746,21 +824,21 @@ svg.appendChild(path);
     return elements.find(el => el?.dataset?.jayFaceButton === "true");
   }
 
-  function switchToButton(targetBtnEl, pointerId, x, y) {
+  function switchToButton(targetBtnEl, pointerId) {
     if (!targetBtnEl || targetBtnEl === btn) return;
 
     deactivate();
 
     const handoff = targetBtnEl._jayFaceButtonApi;
     if (handoff) {
-      handoff.takeOverPointer(pointerId, x, y);
+      handoff.takeOverPointer(pointerId);
     }
   }
 
   btn.dataset.jayFaceButton = "true";
 
   btn._jayFaceButtonApi = {
-    takeOverPointer(pointerId, x, y) {
+    takeOverPointer(pointerId) {
       activePointerId = pointerId;
       try {
         btn.setPointerCapture(pointerId);
@@ -783,7 +861,7 @@ svg.appendChild(path);
 
     const targetBtnEl = getFaceButtonsUnderPoint(e.clientX, e.clientY);
     if (targetBtnEl && targetBtnEl !== btn) {
-      switchToButton(targetBtnEl, e.pointerId, e.clientX, e.clientY);
+      switchToButton(targetBtnEl, e.pointerId);
       activePointerId = null;
     }
   });
@@ -819,9 +897,9 @@ svg.appendChild(path);
       padding: "4px 8px",
       fontSize: "11px",
       fontFamily: "monospace",
-      color: "#00ffff",
+      color: "colorHex",
       background: "transparent",
-      border: "1px solid rgba(0,255,255,0.7)",
+      border: `1px solid ${rgba(themeColor, 0.7)}`,
       borderRadius: "6px",
       pointerEvents: "auto",
       touchAction: "none",
@@ -833,18 +911,73 @@ svg.appendChild(path);
 
     scanlineBtn.addEventListener("pointerdown", async () => {
       await handleFirstGestureSetup();
-      scanlineBtn.style.borderColor = "#00ffff";
+      scanlineBtn.style.borderColor = colorHex;
       pressKey("2");
     });
 
     function end() {
-      scanlineBtn.style.borderColor = "rgba(0,255,255,0.7)";
+      scanlineBtn.style.borderColor = rgba(themeColor, 0.7);
       releaseKey("2");
     }
 
     scanlineBtn.addEventListener("pointerup", end);
     scanlineBtn.addEventListener("pointercancel", end);
   }
+
+  function createThemeButton() {
+  const themeBtn = document.createElement("div");
+  themeBtn.textContent = "Change Theme";
+
+  Object.assign(themeBtn.style, {
+    position: "fixed",
+    top: "36px",
+    left: "6px",
+    padding: "4px 8px",
+    fontSize: "11px",
+    fontFamily: "monospace",
+    color: colorHex,
+    background: "transparent",
+    border: `1px solid ${rgba(themeColor, 0.7)}`,
+    borderRadius: "6px",
+    pointerEvents: "auto",
+    touchAction: "none",
+    zIndex: "999999",
+    userSelect: "none"
+  });
+
+  document.body.appendChild(themeBtn);
+
+  function syncThemeButton() {
+    themeBtn.style.color = colorHex;
+    themeBtn.style.borderColor = rgba(themeColor, 0.7);
+    themeBtn.textContent = "Change Theme";
+  }
+
+  themeBtn.addEventListener("pointerdown", async () => {
+    await handleFirstGestureSetup();
+
+    const currentIndex = THEME_ORDER.indexOf(currentThemeName);
+    const nextIndex = (currentIndex + 1) % THEME_ORDER.length;
+    const nextTheme = THEME_ORDER[nextIndex];
+
+    applyThemeByName(nextTheme);
+    refreshThemeVisuals();
+    renderLayout();
+
+    themeBtn.style.color = colorHex;
+    themeBtn.style.borderColor = colorHex;
+    themeBtn.textContent = THEME_LABELS[currentThemeName] || "Change Theme";
+  });
+
+  function end() {
+    syncThemeButton();
+  }
+
+  themeBtn.addEventListener("pointerup", end);
+  themeBtn.addEventListener("pointercancel", end);
+
+  syncThemeButton();
+}
 
   function clearControls() {
     controls.innerHTML = "";
@@ -865,14 +998,14 @@ svg.appendChild(path);
   });
 
   leftPad.setPosition({
-    left: `${m.edge}px`,
-    bottom: `${m.edge}px`
+    left: `${m.padLeft}px`,
+    bottom: `${m.padBottom}px`
   });
 
-  const yBtn = createFaceButton({ name: "y", label: "Y", size: m.buttonSize });
-  const bBtn = createFaceButton({ name: "b", label: "B", size: m.buttonSize });
-  const xBtn = createFaceButton({ name: "x", label: "X", size: m.buttonSize });
-  const aBtn = createFaceButton({ name: "a", label: "A", size: m.buttonSize });
+  const yBtn = createFaceButton({ name: "y", label: buttonLabels.y, size: m.buttonSize });
+  const bBtn = createFaceButton({ name: "b", label: buttonLabels.b, size: m.buttonSize });
+  const xBtn = createFaceButton({ name: "x", label: buttonLabels.x, size: m.buttonSize });
+  const aBtn = createFaceButton({ name: "a", label: buttonLabels.a, size: m.buttonSize });
 
   const groupRight = m.faceRight;
   const baseBottom = m.faceBottom;
@@ -899,8 +1032,8 @@ svg.appendChild(path);
     });
 
     leftPad.setPosition({
-      left: `${m.edge}px`,
-      bottom: `${m.edge}px`
+      left: `${m.padLeft}px`,
+      bottom: `${m.padBottom}px`
     });
 
     const rightPad = createRingDpad({
@@ -914,8 +1047,8 @@ svg.appendChild(path);
     });
 
     rightPad.setPosition({
-      right: `${m.edge}px`,
-      bottom: `${m.edge}px`
+      right: `${m.faceRight}px`,
+      bottom: `${m.padBottom}px`
     });
   }
 
@@ -928,6 +1061,7 @@ svg.appendChild(path);
   }
 
   createScanlineButton();
+  createThemeButton();
   renderLayout();
   window.addEventListener("resize", renderLayout);
 }

@@ -1,16 +1,17 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v18.0
+   JAY ARCADE MOBILE CONTROLLER v18.1
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
    - portrait + landscape support
    - dual-dpad support
+   - upgraded Genesis-style d-pad feel
    ========================================== */
 
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v18.0";
+const JAY_MOBILE_VERSION = "v18.1";
 
 function isMobile() {
   return (
@@ -173,19 +174,65 @@ function initController() {
     }
   }
 
-  function angleToDirection(angle) {
-    const slice = Math.round(angle / 45) % 8;
-    const directions = [
-      "right",
-      "down-right",
-      "down",
-      "down-left",
-      "left",
-      "up-left",
-      "up",
-      "up-right"
+  function normalizeAngle(angle) {
+    return (angle % 360 + 360) % 360;
+  }
+
+  function shortestAngleDelta(a, b) {
+    let d = normalizeAngle(a - b);
+    if (d > 180) d -= 360;
+    return d;
+  }
+
+  function getDirectionCenter(direction) {
+    switch (direction) {
+      case "right": return 0;
+      case "down-right": return 45;
+      case "down": return 90;
+      case "down-left": return 135;
+      case "left": return 180;
+      case "up-left": return 225;
+      case "up": return 270;
+      case "up-right": return 315;
+      default: return null;
+    }
+  }
+
+  function angleToDirectionGenesis(angle, options = {}) {
+    const {
+      cardinalHalf = 26,
+      diagonalHalf = 18
+    } = options;
+
+    const a = normalizeAngle(angle);
+
+    const zones = [
+      ["right", 0, cardinalHalf],
+      ["down-right", 45, diagonalHalf],
+      ["down", 90, cardinalHalf],
+      ["down-left", 135, diagonalHalf],
+      ["left", 180, cardinalHalf],
+      ["up-left", 225, diagonalHalf],
+      ["up", 270, cardinalHalf],
+      ["up-right", 315, diagonalHalf]
     ];
-    return directions[(slice + 8) % 8];
+
+    for (const [dir, center, half] of zones) {
+      if (Math.abs(shortestAngleDelta(a, center)) <= half) {
+        return dir;
+      }
+    }
+
+    let bestDir = null;
+    let bestDist = Infinity;
+    for (const [dir, center] of zones) {
+      const dist = Math.abs(shortestAngleDelta(a, center));
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestDir = dir;
+      }
+    }
+    return bestDir;
   }
 
   function createRingDpad(options) {
@@ -194,9 +241,11 @@ function initController() {
     const dividers = [];
     const centerCap = document.createElement("div");
     const centerDot = document.createElement("div");
+    const thumb = document.createElement("div");
 
     let activeDirection = null;
     let activePointerId = null;
+    let visualAngle = null;
 
     function applyDirection(nextDirection) {
       if (nextDirection === activeDirection) return;
@@ -212,6 +261,7 @@ function initController() {
     }
 
     function clearDirection() {
+      visualAngle = null;
       applyDirection(null);
     }
 
@@ -229,18 +279,62 @@ function initController() {
 
       for (let i = 0; i < segments.length; i++) {
         const seg = segments[i];
-        const isActive = order[i] === activeDirection;
+        const dir = order[i];
+        const isActive = dir === activeDirection;
+
         seg.style.background = isActive
-          ? "rgba(0,255,255,0.20)"
-          : "rgba(0,255,255,0.06)";
+          ? "rgba(0,255,255,0.24)"
+          : "rgba(0,255,255,0.05)";
+
         seg.style.boxShadow = isActive
-          ? "inset 0 0 18px rgba(0,255,255,0.45), 0 0 18px rgba(0,255,255,0.25)"
+          ? "inset 0 0 18px rgba(0,255,255,0.50), 0 0 14px rgba(0,255,255,0.22)"
           : "none";
+
+        seg.style.opacity = isActive ? "1" : "0.92";
       }
 
       centerCap.style.boxShadow = activeDirection
         ? "0 0 18px rgba(0,255,255,0.35)"
         : "0 0 10px rgba(0,255,255,0.18)";
+
+      if (visualAngle == null) {
+        thumb.style.opacity = "0";
+        thumb.style.transform = "translate(-50%, -50%)";
+      } else {
+        const radius = options.size * 0.23;
+        const rad = visualAngle * Math.PI / 180;
+        const x = Math.cos(rad) * radius;
+        const y = Math.sin(rad) * radius;
+        thumb.style.opacity = "1";
+        thumb.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+      }
+    }
+
+    function resolveDirection(angleDeg, distance, outerRadius) {
+      const ringStart = outerRadius * 0.36;
+      const ringEnd = outerRadius * 0.98;
+
+      if (distance < ringStart) return null;
+      if (distance > ringEnd) return activeDirection;
+
+      const candidate = angleToDirectionGenesis(angleDeg, {
+        cardinalHalf: 26,
+        diagonalHalf: 18
+      });
+
+      if (!activeDirection) return candidate;
+
+      const currentCenter = getDirectionCenter(activeDirection);
+      const candidateCenter = getDirectionCenter(candidate);
+
+      const currentError = Math.abs(shortestAngleDelta(angleDeg, currentCenter));
+      const candidateError = Math.abs(shortestAngleDelta(angleDeg, candidateCenter));
+
+      if (candidate !== activeDirection && candidateError + 8 < currentError) {
+        return candidate;
+      }
+
+      return activeDirection;
     }
 
     function updateFromPoint(clientX, clientY) {
@@ -249,28 +343,23 @@ function initController() {
       const cy = rect.top + rect.height / 2;
       const dx = clientX - cx;
       const dy = clientY - cy;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+      const distance = Math.hypot(dx, dy);
 
       const outerRadius = rect.width / 2;
-      const neutralRadius = outerRadius * 0.34;
-
-      if (distance < neutralRadius) {
-        clearDirection();
-        return;
-      }
-
       const angleRad = Math.atan2(dy, dx);
-      const angleDeg = (angleRad * 180 / Math.PI + 360) % 360;
-      const snapped = angleToDirection(angleDeg);
+      const angleDeg = normalizeAngle(angleRad * 180 / Math.PI);
 
-      applyDirection(snapped);
+      visualAngle = angleDeg;
+
+      const nextDirection = resolveDirection(angleDeg, distance, outerRadius);
+      applyDirection(nextDirection);
     }
 
     Object.assign(el.style, {
       width: `${options.size}px`,
       height: `${options.size}px`,
       borderRadius: "50%",
-      background: "rgba(0,0,0,0.16)",
+      background: "radial-gradient(circle at 50% 50%, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.28) 100%)",
       border: "3px solid rgba(0,255,255,0.88)",
       boxSizing: "border-box",
       overflow: "hidden",
@@ -279,15 +368,20 @@ function initController() {
 
     for (let i = 0; i < 8; i++) {
       const seg = document.createElement("div");
-      const start = i * 45 - 22.5;
-      const end = i * 45 + 22.5;
+      const center = i * 45;
+      const start = (center - 22.5) * Math.PI / 180;
+      const end = (center + 22.5) * Math.PI / 180;
 
       Object.assign(seg.style, {
         position: "absolute",
         inset: "0",
-        clipPath: `polygon(50% 50%, ${50 + 55 * Math.cos(start * Math.PI / 180)}% ${50 + 55 * Math.sin(start * Math.PI / 180)}%, ${50 + 55 * Math.cos(end * Math.PI / 180)}% ${50 + 55 * Math.sin(end * Math.PI / 180)}%)`,
-        background: "rgba(0,255,255,0.06)",
-        transition: "background 0.06s ease, box-shadow 0.06s ease"
+        clipPath: `polygon(
+          50% 50%,
+          ${50 + 50 * Math.cos(start)}% ${50 + 50 * Math.sin(start)}%,
+          ${50 + 50 * Math.cos(end)}% ${50 + 50 * Math.sin(end)}%
+        )`,
+        background: "rgba(0,255,255,0.05)",
+        transition: "background 0.04s linear, box-shadow 0.04s linear, opacity 0.04s linear"
       });
 
       el.appendChild(seg);
@@ -315,12 +409,12 @@ function initController() {
       position: "absolute",
       left: "50%",
       top: "50%",
-      width: `${options.size * 0.50}px`,
-      height: `${options.size * 0.50}px`,
+      width: `${options.size * 0.46}px`,
+      height: `${options.size * 0.46}px`,
       transform: "translate(-50%, -50%)",
-      borderRadius: "42%",
+      borderRadius: "38%",
       border: "3px solid rgba(0,255,255,0.88)",
-      background: "rgba(0,0,0,0.18)",
+      background: "rgba(0,0,0,0.22)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -328,8 +422,8 @@ function initController() {
     });
 
     Object.assign(centerDot.style, {
-      width: `${options.size * 0.12}px`,
-      height: `${options.size * 0.12}px`,
+      width: `${options.size * 0.11}px`,
+      height: `${options.size * 0.11}px`,
       borderRadius: "50%",
       border: "2px solid rgba(0,255,255,0.75)",
       color: "rgba(0,255,255,0.75)",
@@ -341,7 +435,24 @@ function initController() {
     });
     centerDot.textContent = "×";
 
+    Object.assign(thumb.style, {
+      position: "absolute",
+      left: "50%",
+      top: "50%",
+      width: `${Math.max(18, options.size * 0.14)}px`,
+      height: `${Math.max(18, options.size * 0.14)}px`,
+      borderRadius: "50%",
+      background: "rgba(0,255,255,0.16)",
+      border: "2px solid rgba(0,255,255,0.88)",
+      boxShadow: "0 0 12px rgba(0,255,255,0.25)",
+      pointerEvents: "none",
+      opacity: "0",
+      transform: "translate(-50%, -50%)",
+      transition: "transform 0.03s linear, opacity 0.03s linear"
+    });
+
     centerCap.appendChild(centerDot);
+    el.appendChild(thumb);
     el.appendChild(centerCap);
 
     const arrowLayer = document.createElement("div");
@@ -395,6 +506,7 @@ function initController() {
       if (e.pointerId !== activePointerId) return;
       activePointerId = null;
       clearDirection();
+      updateVisualState();
     }
 
     el.addEventListener("pointerup", endPointer);

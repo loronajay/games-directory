@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v19.6
+   JAY ARCADE MOBILE CONTROLLER v19.7
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -11,12 +11,13 @@
    - aligned wedge boundaries
    - smooth raw-touch thumb cursor
    - improved arrow appearance
+   - separate plate + glow color engines
    ========================================== */
 
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v19.6";
+const JAY_MOBILE_VERSION = "v19.7";
 
 function isMobile() {
   return (
@@ -44,116 +45,119 @@ function initController() {
   const layoutName = mobileConfig.layout || "default";
 
   let scanlineButtonApi = null;
-  let themeButtonApi = null;
+  let plateColorButtonApi = null;
+  let glowColorButtonApi = null;
 
   const COLOR_PRESETS = {
+    "arcade-cyan": "#00ffff",
+    "crt-amber": "#ffb000",
+    "genesis-green": "#5aff87",
+    "neon-pink": "#ff4fd8",
+    "ice-blue": "#7fdcff",
 
-  "arcade-cyan": "#00ffff",
-  "crt-amber": "#ffb000",
-  "genesis-green": "#5aff87",
-  "neon-pink": "#ff4fd8",
-  "ice-blue": "#7fdcff",
+    "arcade-red": "#ff4040",
+    "laser-purple": "#b46cff",
+    "electric-lime": "#b8ff2c",
+    "deep-gold": "#ffd34d",
+    "terminal-green": "#33ff66",
 
-  "arcade-red": "#ff4040",
-  "laser-purple": "#b46cff",
-  "electric-lime": "#b8ff2c",
-  "deep-gold": "#ffd34d",
-  "terminal-green": "#33ff66",
-  "plasma-blue": "#2fa7ff",
-  "vaporwave-purple": "#a66bff",
-  "matrix-green": "#00ff5e",
-  "retro-orange": "#ff7a1a",
-  "hot-magenta": "#ff2fa7",
-  "arctic-blue": "#5fd6ff",
-  "crt-yellow": "#ffe34d",
-  "electric-indigo": "#6c7bff"
+    "plasma-blue": "#2fa7ff",
+    "vaporwave-purple": "#a66bff",
+    "matrix-green": "#00ff5e",
+    "retro-orange": "#ff7a1a",
+    "hot-magenta": "#ff2fa7",
+    "arctic-blue": "#5fd6ff",
+    "crt-yellow": "#ffe34d",
+    "electric-indigo": "#6c7bff"
+  };
 
-};
+  const COLOR_ORDER = [
+    "arcade-cyan",
+    "crt-amber",
+    "genesis-green",
+    "neon-pink",
+    "ice-blue",
 
-const THEME_ORDER = [
+    "arcade-red",
+    "laser-purple",
+    "electric-lime",
+    "deep-gold",
+    "terminal-green",
 
-  "arcade-cyan",
-  "crt-amber",
-  "genesis-green",
-  "neon-pink",
-  "ice-blue",
+    "plasma-blue",
+    "vaporwave-purple",
+    "matrix-green",
+    "retro-orange",
+    "hot-magenta",
+    "arctic-blue",
+    "crt-yellow",
+    "electric-indigo"
+  ];
 
-  "arcade-red",
-  "laser-purple",
-  "electric-lime",
-  "deep-gold",
-  "terminal-green",
-  "plasma-blue",
-  "vaporwave-purple",
-  "matrix-green",
-  "retro-orange",
-  "hot-magenta",
-  "arctic-blue",
-  "crt-yellow",
-  "electric-indigo"
-  
+  function hexToRgb(hex) {
+    const clean = String(hex || "").replace("#", "");
+    const value = clean.length === 3
+      ? clean.split("").map(c => c + c).join("")
+      : clean;
 
-];
+    const num = parseInt(value, 16);
 
-const THEME_LABELS = {
-  "arcade-cyan": "Arcade Cyan",
-  "crt-amber": "CRT Amber",
-  "genesis-green": "Genesis Green",
-  "neon-pink": "Neon Pink",
-  "ice-blue": "Ice Blue"
-};
+    if (Number.isNaN(num)) {
+      return { r: 0, g: 255, b: 255 };
+    }
 
-
-
-function getSavedThemeName() {
-  const saved = localStorage.getItem("jayControllerTheme");
-  return COLOR_PRESETS[saved] ? saved : "arcade-cyan";
-}
-
-function hexToRgb(hex) {
-  const clean = String(hex || "").replace("#", "");
-  const value = clean.length === 3
-    ? clean.split("").map(c => c + c).join("")
-    : clean;
-
-  const num = parseInt(value, 16);
-
-  if (Number.isNaN(num)) {
-    return { r: 0, g: 255, b: 255 };
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255
+    };
   }
 
-  return {
-    r: (num >> 16) & 255,
-    g: (num >> 8) & 255,
-    b: num & 255
+  function rgba(rgb, alpha) {
+    return `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
+  }
+
+  function getSavedPlateColorName() {
+    const saved = localStorage.getItem("jayControllerPlateColor");
+    return COLOR_PRESETS[saved] ? saved : "arcade-cyan";
+  }
+
+  function getSavedGlowColorName(fallbackPlateName) {
+    const saved = localStorage.getItem("jayControllerGlowColor");
+    return COLOR_PRESETS[saved] ? saved : fallbackPlateName;
+  }
+
+  let currentPlateColorName = getSavedPlateColorName();
+  let currentGlowColorName = getSavedGlowColorName(currentPlateColorName);
+
+  let plateHex = COLOR_PRESETS[currentPlateColorName];
+  let glowHex = COLOR_PRESETS[currentGlowColorName];
+
+  let plateColor = hexToRgb(plateHex);
+  let glowColor = hexToRgb(glowHex);
+
+  function applyPlateColorByName(name) {
+    currentPlateColorName = COLOR_PRESETS[name] ? name : "arcade-cyan";
+    plateHex = COLOR_PRESETS[currentPlateColorName];
+    plateColor = hexToRgb(plateHex);
+    localStorage.setItem("jayControllerPlateColor", currentPlateColorName);
+  }
+
+  function applyGlowColorByName(name) {
+    currentGlowColorName = COLOR_PRESETS[name] ? name : currentPlateColorName;
+    glowHex = COLOR_PRESETS[currentGlowColorName];
+    glowColor = hexToRgb(glowHex);
+    localStorage.setItem("jayControllerGlowColor", currentGlowColorName);
+  }
+
+  const buttonLabels = {
+    a: mobileConfig.buttonLabels?.a || "A",
+    b: mobileConfig.buttonLabels?.b || "B",
+    x: mobileConfig.buttonLabels?.x || "X",
+    y: mobileConfig.buttonLabels?.y || "Y"
   };
-}
 
-function rgba(rgb, alpha) {
-  return `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
-}
-
-let currentThemeName = getSavedThemeName();
-let colorHex = COLOR_PRESETS[currentThemeName];
-let themeColor = hexToRgb(colorHex);
-
-function applyThemeByName(name) {
-  currentThemeName = COLOR_PRESETS[name] ? name : "arcade-cyan";
-  colorHex = COLOR_PRESETS[currentThemeName];
-  themeColor = hexToRgb(colorHex);
-  localStorage.setItem("jayControllerTheme", currentThemeName);
-}
-
-const buttonLabels = {
-  a: mobileConfig.buttonLabels?.a || "A",
-  b: mobileConfig.buttonLabels?.b || "B",
-  x: mobileConfig.buttonLabels?.x || "X",
-  y: mobileConfig.buttonLabels?.y || "Y"
-};
-
-const sizeProfile = mobileConfig.sizeProfile || "normal";
-const showScanlineButton = mobileConfig.showScanlineButton !== false;
-  
+  const sizeProfile = mobileConfig.sizeProfile || "normal";
 
   let keyMap = {
     left: "a",
@@ -173,17 +177,16 @@ const showScanlineButton = mobileConfig.showScanlineButton !== false;
   const style = document.createElement("style");
   document.head.appendChild(style);
 
-function refreshThemeStyleTag() {
-  style.innerHTML = `
-    @keyframes jayArcadePulse {
-      0% { box-shadow: 0 0 10px ${rgba(themeColor, 0.25)}; }
-      50% { box-shadow: 0 0 18px ${rgba(themeColor, 0.45)}; }
-      100% { box-shadow: 0 0 10px ${rgba(themeColor, 0.25)}; }
-    }
-  `;
-}
-
-refreshThemeStyleTag();
+  function refreshThemeStyleTag() {
+    style.innerHTML = `
+      @keyframes jayArcadePulse {
+        0% { box-shadow: 0 0 10px ${rgba(glowColor, 0.25)}; }
+        50% { box-shadow: 0 0 18px ${rgba(glowColor, 0.45)}; }
+        100% { box-shadow: 0 0 10px ${rgba(glowColor, 0.25)}; }
+      }
+    `;
+  }
+  refreshThemeStyleTag();
 
   const keyboard = window.vm.runtime.ioDevices.keyboard;
   const pressedKeys = new Set();
@@ -210,7 +213,7 @@ refreshThemeStyleTag();
     position: "fixed",
     top: "8px",
     right: "12px",
-    color: colorHex,
+    color: plateHex,
     fontFamily: "monospace",
     fontSize: "14px",
     opacity: "0.6",
@@ -218,12 +221,11 @@ refreshThemeStyleTag();
   });
 
   function refreshThemeVisuals() {
-    versionBadge.style.color = colorHex;
+    versionBadge.style.color = plateHex;
     refreshThemeStyleTag();
   }
 
   document.body.appendChild(versionBadge);
-
   refreshThemeVisuals();
 
   const controls = document.createElement("div");
@@ -268,51 +270,51 @@ refreshThemeStyleTag();
   }
 
   function getLayoutMetrics() {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const portrait = vh > vw;
-  const shortSide = Math.min(vw, vh);
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const portrait = vh > vw;
+    const shortSide = Math.min(vw, vh);
 
-  const activeTweaks = portrait
-    ? (mobileConfig.portraitOffsetTweaks || {})
-    : (mobileConfig.landscapeOffsetTweaks || {});
+    const activeTweaks = portrait
+      ? (mobileConfig.portraitOffsetTweaks || {})
+      : (mobileConfig.landscapeOffsetTweaks || {});
 
-  const sizeScale =
-    sizeProfile === "compact" ? 0.90 :
-    sizeProfile === "large" ? 1.10 :
-    1.00;
+    const sizeScale =
+      sizeProfile === "compact" ? 0.90 :
+      sizeProfile === "large" ? 1.10 :
+      1.00;
 
-  const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27) * sizeScale, 145, 250);
-  const buttonSize = clamp(shortSide * (portrait ? 0.105 : 0.115) * sizeScale, 60, 110);
+    const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27) * sizeScale, 145, 250);
+    const buttonSize = clamp(shortSide * (portrait ? 0.105 : 0.115) * sizeScale, 60, 110);
 
-  const edge = clamp(shortSide * 0.055, 16, 42);
-  const faceGap = clamp(buttonSize * (portrait ? 0.70 : 0.78), 38, 82);
+    const edge = clamp(shortSide * 0.055, 16, 42);
+    const faceGap = clamp(buttonSize * (portrait ? 0.70 : 0.78), 38, 82);
 
-  const faceRightBase = portrait
-    ? clamp(shortSide * 0.020, 8, 16)
-    : edge;
+    const faceRightBase = portrait
+      ? clamp(shortSide * 0.020, 8, 16)
+      : edge;
 
-  const faceBottomBase = portrait
-    ? clamp(shortSide * 0.030, 10, 20)
-    : edge;
+    const faceBottomBase = portrait
+      ? clamp(shortSide * 0.030, 10, 20)
+      : edge;
 
-  const padLeftBase = edge;
-  const padBottomBase = edge;
+    const padLeftBase = edge;
+    const padBottomBase = edge;
 
-  return {
-    vw,
-    vh,
-    portrait,
-    padSize,
-    buttonSize,
-    edge,
-    faceGap,
-    faceRight: faceRightBase + (activeTweaks.faceRight || 0),
-    faceBottom: faceBottomBase + (activeTweaks.faceBottom || 0),
-    padLeft: padLeftBase + (activeTweaks.padLeft || 0),
-    padBottom: padBottomBase + (activeTweaks.padBottom || 0)
-  };
-}
+    return {
+      vw,
+      vh,
+      portrait,
+      padSize,
+      buttonSize,
+      edge,
+      faceGap,
+      faceRight: faceRightBase + (activeTweaks.faceRight || 0),
+      faceBottom: faceBottomBase + (activeTweaks.faceBottom || 0),
+      padLeft: padLeftBase + (activeTweaks.padLeft || 0),
+      padBottom: padBottomBase + (activeTweaks.padBottom || 0)
+    };
+  }
 
   function makeBaseControl() {
     const el = document.createElement("div");
@@ -482,62 +484,62 @@ refreshThemeStyleTag();
     }
 
     function updateVisualState() {
-  const pressure = thumbVisible
-    ? Math.min(1, Math.hypot(thumbX, thumbY) / thumbMaxR)
-    : 0;
+      const pressure = thumbVisible
+        ? Math.min(1, Math.hypot(thumbX, thumbY) / thumbMaxR)
+        : 0;
 
-  for (let i = 0; i < segments.length; i++) {
-    const seg = segments[i];
-    const zone = visualZones[i];
-    const isActive = zone.dir === activeDirection;
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        const zone = visualZones[i];
+        const isActive = zone.dir === activeDirection;
 
-    if (isActive) {
-      seg.setAttribute(
-        "fill",
-        rgba(themeColor, 0.16 + pressure * 0.16)
-      );
-      seg.style.filter =
-        `drop-shadow(0 0 ${8 + pressure * 10}px ${rgba(themeColor, 0.22 + pressure * 0.22)})`;
-      seg.setAttribute("opacity", `${0.95 + pressure * 0.05}`);
-    } else {
-      seg.setAttribute("fill", rgba(themeColor, 0.045));
-      seg.style.filter = "none";
-      seg.setAttribute("opacity", "0.90");
+        if (isActive) {
+          seg.setAttribute(
+            "fill",
+            rgba(glowColor, 0.16 + pressure * 0.16)
+          );
+          seg.style.filter =
+            `drop-shadow(0 0 ${8 + pressure * 10}px ${rgba(glowColor, 0.22 + pressure * 0.22)})`;
+          seg.setAttribute("opacity", `${0.95 + pressure * 0.05}`);
+        } else {
+          seg.setAttribute("fill", rgba(plateColor, 0.045));
+          seg.style.filter = "none";
+          seg.setAttribute("opacity", "0.90");
+        }
+      }
+
+      centerCap.style.boxShadow = activeDirection
+        ? `0 0 ${16 + pressure * 12}px ${rgba(glowColor, 0.24 + pressure * 0.20)}`
+        : `0 0 10px ${rgba(glowColor, 0.18)}`;
+
+      el.style.boxShadow = thumbVisible
+        ? `0 0 ${12 + pressure * 22}px ${rgba(glowColor, 0.10 + pressure * 0.20)}`
+        : `0 0 0px ${rgba(glowColor, 0)}`;
+
+      energyLayer.style.opacity = thumbVisible
+        ? `${0.18 + pressure * 0.28}`
+        : "0.18";
+
+      energyLayer.style.filter = thumbVisible
+        ? `drop-shadow(0 0 ${8 + pressure * 12}px ${rgba(glowColor, 0.10 + pressure * 0.18)})`
+        : "none";
+
+      if (!thumbVisible) {
+        thumb.style.opacity = "0";
+        thumb.style.transform = "translate(-50%, -50%)";
+      } else {
+        thumb.style.opacity = "1";
+        const sizeScale = 0.85 + pressure * 0.35;
+
+        thumb.style.transform =
+          `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px)) scale(${sizeScale})`;
+
+        thumb.style.boxShadow =
+          `0 0 ${10 + pressure * 14}px ${rgba(glowColor, 0.22 + pressure * 0.28)}`;
+        thumb.style.background =
+          rgba(glowColor, 0.10 + pressure * 0.14);
+      }
     }
-  }
-
-  centerCap.style.boxShadow = activeDirection
-    ? `0 0 ${16 + pressure * 12}px ${rgba(themeColor, 0.24 + pressure * 0.20)}`
-    : `0 0 10px ${rgba(themeColor, 0.18)}`;
-
-  el.style.boxShadow = thumbVisible
-    ? `0 0 ${12 + pressure * 22}px ${rgba(themeColor, 0.10 + pressure * 0.20)}`
-    : `0 0 0px ${rgba(themeColor, 0)}`;
-
-  energyLayer.style.opacity = thumbVisible
-    ? `${0.18 + pressure * 0.28}`
-    : "0.18";
-
-  energyLayer.style.filter = thumbVisible
-    ? `drop-shadow(0 0 ${8 + pressure * 12}px ${rgba(themeColor, 0.10 + pressure * 0.18)})`
-    : "none";
-
-  if (!thumbVisible) {
-    thumb.style.opacity = "0";
-    thumb.style.transform = "translate(-50%, -50%)";
-  } else {
-    thumb.style.opacity = "1";
-    const sizeScale = 0.85 + pressure * 0.35;
-
-    thumb.style.transform =
-      `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px)) scale(${sizeScale})`;
-
-    thumb.style.boxShadow =
-      `0 0 ${10 + pressure * 14}px ${rgba(themeColor, 0.22 + pressure * 0.28)}`;
-    thumb.style.background =
-      rgba(themeColor, 0.10 + pressure * 0.14);
-  }
-}
 
     function resolveDirection(angleDeg, distance, outerRadius) {
       const ringStart = outerRadius * 0.24;
@@ -596,20 +598,20 @@ refreshThemeStyleTag();
     }
 
     Object.assign(el.style, {
-    width: `${options.size}px`,
-    height: `${options.size}px`,
-    borderRadius: "50%",
-    border: `3px solid ${rgba(themeColor, 0.88)}`,
-    boxSizing: "border-box",
-    overflow: "hidden",
-    backdropFilter: "blur(2px)",
-    animation: "jayArcadePulse 4s ease-in-out infinite",
-    background: `
-      radial-gradient(circle at 50% 35%, rgba(255,255,255,0.08), transparent 40%),
-      radial-gradient(circle at 50% 70%, rgba(0,0,0,0.35), transparent 65%),
-      radial-gradient(circle at 50% 50%, rgba(0,0,0,0.28), rgba(0,0,0,0.18))
-    `
-  });
+      width: `${options.size}px`,
+      height: `${options.size}px`,
+      borderRadius: "50%",
+      border: `3px solid ${rgba(plateColor, 0.88)}`,
+      boxSizing: "border-box",
+      overflow: "hidden",
+      backdropFilter: "blur(2px)",
+      animation: "jayArcadePulse 4s ease-in-out infinite",
+      background: `
+        radial-gradient(circle at 50% 35%, rgba(255,255,255,0.08), transparent 40%),
+        radial-gradient(circle at 50% 70%, rgba(0,0,0,0.35), transparent 65%),
+        radial-gradient(circle at 50% 50%, rgba(0,0,0,0.28), rgba(0,0,0,0.18))
+      `
+    });
 
     const glass = document.createElement("div");
     Object.assign(glass.style, {
@@ -619,7 +621,7 @@ refreshThemeStyleTag();
       pointerEvents: "none",
       background: "linear-gradient(135deg, rgba(255,255,255,0.05), transparent 40%)"
     });
-  el.appendChild(glass);
+    el.appendChild(glass);
 
     const energyLayer = document.createElement("div");
     Object.assign(energyLayer.style, {
@@ -629,12 +631,12 @@ refreshThemeStyleTag();
       pointerEvents: "none",
       opacity: "0.22",
       background: `
-        radial-gradient(circle at 50% 50%, ${rgba(themeColor, 0.10)}, transparent 42%),
-        radial-gradient(circle at 50% 50%, ${rgba(themeColor, 0.05)}, transparent 68%)
+        radial-gradient(circle at 50% 50%, ${rgba(glowColor, 0.10)}, transparent 42%),
+        radial-gradient(circle at 50% 50%, ${rgba(glowColor, 0.05)}, transparent 68%)
       `,
       transition: "opacity 0.04s linear, filter 0.04s linear"
     });
-el.appendChild(energyLayer);
+    el.appendChild(energyLayer);
 
     Object.assign(svg.style, {
       position: "absolute",
@@ -659,7 +661,7 @@ el.appendChild(energyLayer);
         "d",
         describeRingSegmentPath(cx, cy, innerR, outerR, startDeg, endDeg)
       );
-      seg.setAttribute("fill", rgba(themeColor, 0.05));
+      seg.setAttribute("fill", rgba(plateColor, 0.05));
       seg.setAttribute("opacity", "0.92");
       seg.style.transition = "fill 0.04s linear, opacity 0.04s linear, filter 0.04s linear";
 
@@ -681,7 +683,7 @@ el.appendChild(energyLayer);
       line.setAttribute("y1", p1.y);
       line.setAttribute("x2", p2.x);
       line.setAttribute("y2", p2.y);
-      line.setAttribute("stroke", rgba(themeColor, 0.22));
+      line.setAttribute("stroke", rgba(plateColor, 0.22));
       line.setAttribute("stroke-width", Math.max(1.5, options.size * 0.010));
       line.setAttribute("stroke-linecap", "round");
       dividerGroup.appendChild(line);
@@ -695,12 +697,12 @@ el.appendChild(energyLayer);
       height: `${innerR * 2}px`,
       transform: "translate(-50%, -50%)",
       borderRadius: "50%",
-      border: `3px solid ${rgba(themeColor, 0.88)}`,
+      border: `3px solid ${rgba(plateColor, 0.88)}`,
       background: "rgba(0,0,0,0.22)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      boxShadow: "0 0 10px rgba(0,255,255,0.18)",
+      boxShadow: `0 0 10px ${rgba(glowColor, 0.18)}`,
       boxSizing: "border-box"
     });
 
@@ -708,8 +710,8 @@ el.appendChild(energyLayer);
       width: `${options.size * 0.11}px`,
       height: `${options.size * 0.11}px`,
       borderRadius: "50%",
-      border: `2px solid ${rgba(themeColor, 0.75)}`,
-      color: rgba(themeColor, 0.75),
+      border: `2px solid ${rgba(plateColor, 0.75)}`,
+      color: rgba(plateColor, 0.75),
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -725,9 +727,9 @@ el.appendChild(energyLayer);
       width: `${Math.max(18, options.size * 0.14)}px`,
       height: `${Math.max(18, options.size * 0.14)}px`,
       borderRadius: "50%",
-      background: rgba(themeColor, 0.16),
-      border: `2px solid ${rgba(themeColor, 0.88)}`,
-      boxShadow: `0 0 12px ${rgba(themeColor, 0.25)}`,
+      background: rgba(glowColor, 0.16),
+      border: `2px solid ${rgba(plateColor, 0.88)}`,
+      boxShadow: `0 0 12px ${rgba(glowColor, 0.25)}`,
       pointerEvents: "none",
       opacity: "0",
       transform: "translate(-50%, -50%)",
@@ -738,7 +740,7 @@ el.appendChild(energyLayer);
     el.appendChild(thumb);
     el.appendChild(centerCap);
 
-        const arrowLayer = document.createElement("div");
+    const arrowLayer = document.createElement("div");
     Object.assign(arrowLayer.style, {
       position: "absolute",
       inset: "0",
@@ -747,59 +749,56 @@ el.appendChild(energyLayer);
     el.appendChild(arrowLayer);
 
     const arrows = [
-  { angle: 270, rotate:   0 },
-  { angle: 315, rotate:  45 },
-  { angle:   0, rotate:  90 },
-  { angle:  45, rotate: 135 },
-  { angle:  90, rotate: 180 },
-  { angle: 135, rotate: 225 },
-  { angle: 180, rotate: 270 },
-  { angle: 225, rotate: 315 }
-];
+      { angle: 270, rotate: 0 },
+      { angle: 315, rotate: 45 },
+      { angle: 0, rotate: 90 },
+      { angle: 45, rotate: 135 },
+      { angle: 90, rotate: 180 },
+      { angle: 135, rotate: 225 },
+      { angle: 180, rotate: 270 },
+      { angle: 225, rotate: 315 }
+    ];
 
-const arrowRadius = innerR + (outerR - innerR) * 0.58;
-const arrowSize = options.size * 0.062;
+    const arrowRadius = innerR + (outerR - innerR) * 0.58;
+    const arrowSize = options.size * 0.062;
 
-for (const { angle, rotate } of arrows) {
+    for (const { angle, rotate } of arrows) {
+      const p = polarToCartesian(cx, cy, arrowRadius, angle);
 
-  const p = polarToCartesian(cx, cy, arrowRadius, angle);
+      const icon = document.createElement("div");
 
-  const icon = document.createElement("div");
+      Object.assign(icon.style, {
+        position: "absolute",
+        left: `${p.x}px`,
+        top: `${p.y}px`,
+        width: `${arrowSize}px`,
+        height: `${arrowSize}px`,
+        transform: `translate(-50%, -50%) rotate(${rotate}deg)`,
+        transformOrigin: "50% 50%",
+        pointerEvents: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      });
 
-  Object.assign(icon.style,{
-  position:"absolute",
-  left:`${p.x}px`,
-  top:`${p.y}px`,
-  width:`${arrowSize}px`,
-  height:`${arrowSize}px`,
-  transform:`translate(-50%, -50%) rotate(${rotate}deg)`,
-  transformOrigin:"50% 50%",
-  pointerEvents:"none",
-  display:"flex",
-  alignItems:"center",
-  justifyContent:"center"
-});
+      const arrowSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      arrowSvg.setAttribute("viewBox", "0 0 24 24");
+      arrowSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      Object.assign(arrowSvg.style, {
+        width: "100%",
+        height: "100%",
+        display: "block"
+      });
 
-  svg.setAttribute("viewBox","0 0 24 24");
-  svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M12 4 L20 18 H4 Z");
+      path.setAttribute("fill", rgba(plateColor, 0.92));
 
-  Object.assign(svg.style,{
-    width:"100%",
-    height:"100%",
-    display:"block"
-});
-
-const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-
-path.setAttribute("d","M12 4 L20 18 H4 Z");
-path.setAttribute("fill", rgba(themeColor, 0.92));
-
-svg.appendChild(path);
-  icon.appendChild(svg);
-  arrowLayer.appendChild(icon);
-}
+      arrowSvg.appendChild(path);
+      icon.appendChild(arrowSvg);
+      arrowLayer.appendChild(icon);
+    }
 
     el.addEventListener("pointerdown", async (e) => {
       await handleFirstGestureSetup();
@@ -837,266 +836,328 @@ svg.appendChild(path);
   }
 
   function createFaceButton({ name, label, size }) {
-  const btn = makeBaseControl();
+    const btn = makeBaseControl();
 
-  let activePointerId = null;
-  let isPressed = false;
+    let activePointerId = null;
+    let isPressed = false;
 
-  Object.assign(btn.style, {
-    width: `${size}px`,
-    height: `${size}px`,
-    borderRadius: "50%",
-    background: rgba(themeColor, 0.08),
-    border: `3px solid ${rgba(themeColor, 0.85)}`,
-    color: rgba(themeColor, 0.92),
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "sans-serif",
-    fontWeight: "bold",
-    fontSize: `${Math.max(20, size * 0.34)}px`,
-    boxSizing: "border-box",
-    backdropFilter: "blur(2px)",
-    transition: "transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease"
-  });
+    Object.assign(btn.style, {
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "50%",
+      background: rgba(plateColor, 0.08),
+      border: `3px solid ${rgba(plateColor, 0.85)}`,
+      color: rgba(plateColor, 0.92),
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: "sans-serif",
+      fontWeight: "bold",
+      fontSize: `${Math.max(20, size * 0.34)}px`,
+      boxSizing: "border-box",
+      backdropFilter: "blur(2px)",
+      transition: "transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease"
+    });
 
-  btn.textContent = label;
+    btn.textContent = label;
 
-  function activate() {
-    if (isPressed) return;
-    isPressed = true;
-    btn.style.transform = "scale(0.95)";
-    btn.style.background = rgba(themeColor, 0.18);
-    btn.style.boxShadow =
-      `0 0 18px ${rgba(themeColor, 0.35)}, inset 0 0 10px ${rgba(themeColor, 0.18)}`;
-    pressKey(keyMap[name]);
-  }
-
-  function deactivate() {
-    if (!isPressed) return;
-    isPressed = false;
-    btn.style.transform = "scale(1)";
-    btn.style.background = rgba(themeColor, 0.08);
-    btn.style.boxShadow = "none";
-    releaseKey(keyMap[name]);
-  }
-
-  function getFaceButtonsUnderPoint(x, y) {
-    const elements = document.elementsFromPoint(x, y);
-    return elements.find(el => el?.dataset?.jayFaceButton === "true");
-  }
-
-  function switchToButton(targetBtnEl, pointerId) {
-    if (!targetBtnEl || targetBtnEl === btn) return;
-
-    deactivate();
-
-    const handoff = targetBtnEl._jayFaceButtonApi;
-    if (handoff) {
-      handoff.takeOverPointer(pointerId);
+    function activate() {
+      if (isPressed) return;
+      isPressed = true;
+      btn.style.transform = "scale(0.95)";
+      btn.style.background = rgba(plateColor, 0.18);
+      btn.style.boxShadow =
+        `0 0 18px ${rgba(glowColor, 0.35)}, inset 0 0 10px ${rgba(glowColor, 0.18)}`;
+      pressKey(keyMap[name]);
     }
-  }
 
-  btn.dataset.jayFaceButton = "true";
+    function deactivate() {
+      if (!isPressed) return;
+      isPressed = false;
+      btn.style.transform = "scale(1)";
+      btn.style.background = rgba(plateColor, 0.08);
+      btn.style.boxShadow = "none";
+      releaseKey(keyMap[name]);
+    }
 
-  btn._jayFaceButtonApi = {
-    takeOverPointer(pointerId) {
-      activePointerId = pointerId;
+    function getFaceButtonsUnderPoint(x, y) {
+      const elements = document.elementsFromPoint(x, y);
+      return elements.find(el => el?.dataset?.jayFaceButton === "true");
+    }
+
+    function switchToButton(targetBtnEl, pointerId) {
+      if (!targetBtnEl || targetBtnEl === btn) return;
+
+      deactivate();
+
+      const handoff = targetBtnEl._jayFaceButtonApi;
+      if (handoff) {
+        handoff.takeOverPointer(pointerId);
+      }
+    }
+
+    btn.dataset.jayFaceButton = "true";
+
+    btn._jayFaceButtonApi = {
+      takeOverPointer(pointerId) {
+        activePointerId = pointerId;
+        try {
+          btn.setPointerCapture(pointerId);
+        } catch {}
+        activate();
+      }
+    };
+
+    btn.addEventListener("pointerdown", async (e) => {
+      await handleFirstGestureSetup();
+      activePointerId = e.pointerId;
       try {
-        btn.setPointerCapture(pointerId);
+        btn.setPointerCapture(e.pointerId);
       } catch {}
       activate();
-    }
-  };
+    });
 
-  btn.addEventListener("pointerdown", async (e) => {
-    await handleFirstGestureSetup();
-    activePointerId = e.pointerId;
-    try {
-      btn.setPointerCapture(e.pointerId);
-    } catch {}
-    activate();
-  });
+    btn.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== activePointerId) return;
 
-  btn.addEventListener("pointermove", (e) => {
-    if (e.pointerId !== activePointerId) return;
+      const targetBtnEl = getFaceButtonsUnderPoint(e.clientX, e.clientY);
+      if (targetBtnEl && targetBtnEl !== btn) {
+        switchToButton(targetBtnEl, e.pointerId);
+        activePointerId = null;
+      }
+    });
 
-    const targetBtnEl = getFaceButtonsUnderPoint(e.clientX, e.clientY);
-    if (targetBtnEl && targetBtnEl !== btn) {
-      switchToButton(targetBtnEl, e.pointerId);
+    function endPointer(e) {
+      if (e.pointerId !== activePointerId) return;
       activePointerId = null;
+      deactivate();
     }
-  });
 
-  function endPointer(e) {
-    if (e.pointerId !== activePointerId) return;
-    activePointerId = null;
-    deactivate();
+    btn.addEventListener("pointerup", endPointer);
+    btn.addEventListener("pointercancel", endPointer);
+
+    return {
+      el: btn,
+      setPosition({ left, right, bottom, top }) {
+        btn.style.left = left ?? "";
+        btn.style.right = right ?? "";
+        btn.style.bottom = bottom ?? "";
+        btn.style.top = top ?? "";
+      }
+    };
   }
-
-  btn.addEventListener("pointerup", endPointer);
-  btn.addEventListener("pointercancel", endPointer);
-
-  return {
-    el: btn,
-    setPosition({ left, right, bottom, top }) {
-      btn.style.left = left ?? "";
-      btn.style.right = right ?? "";
-      btn.style.bottom = bottom ?? "";
-      btn.style.top = top ?? "";
-    }
-  };
-}
 
   function createScanlineButton() {
-  const scanlineBtn = document.createElement("div");
-  scanlineBtn.textContent = "Scanlines";
-
-  Object.assign(scanlineBtn.style, {
-    position: "fixed",
-    top: "6px",
-    left: "6px",
-    padding: "4px 8px",
-    fontSize: "11px",
-    fontFamily: "monospace",
-    color: colorHex,
-    background: "transparent",
-    border: `1px solid ${rgba(themeColor, 0.7)}`,
-    borderRadius: "6px",
-    pointerEvents: "auto",
-    touchAction: "none",
-    zIndex: "999999",
-    userSelect: "none"
-  });
-
-  function syncScanlineButton() {
-    scanlineBtn.style.color = colorHex;
-    scanlineBtn.style.borderColor = rgba(themeColor, 0.7);
+    const scanlineBtn = document.createElement("div");
     scanlineBtn.textContent = "Scanlines";
-  }
 
-  document.body.appendChild(scanlineBtn);
+    Object.assign(scanlineBtn.style, {
+      position: "fixed",
+      top: "6px",
+      left: "6px",
+      padding: "4px 8px",
+      fontSize: "11px",
+      fontFamily: "monospace",
+      color: plateHex,
+      background: "transparent",
+      border: `1px solid ${rgba(plateColor, 0.7)}`,
+      borderRadius: "6px",
+      pointerEvents: "auto",
+      touchAction: "none",
+      zIndex: "999999",
+      userSelect: "none"
+    });
 
-  scanlineBtn.addEventListener("pointerdown", async () => {
-    await handleFirstGestureSetup();
-    scanlineBtn.style.borderColor = colorHex;
-    pressKey("2");
-  });
-
-  function end() {
-    syncScanlineButton();
-    releaseKey("2");
-  }
-
-  scanlineBtn.addEventListener("pointerup", end);
-  scanlineBtn.addEventListener("pointercancel", end);
-
-  syncScanlineButton();
-
-  return {
-    syncTheme: syncScanlineButton
-  };
-}
-
-  function createThemeButton() {
-  const themeBtn = document.createElement("div");
-  themeBtn.textContent = "Change Theme";
-
-  Object.assign(themeBtn.style, {
-    position: "fixed",
-    top: "36px",
-    left: "6px",
-    padding: "4px 8px",
-    fontSize: "11px",
-    fontFamily: "monospace",
-    color: colorHex,
-    background: "transparent",
-    border: `1px solid ${rgba(themeColor, 0.7)}`,
-    borderRadius: "6px",
-    pointerEvents: "auto",
-    touchAction: "none",
-    zIndex: "999999",
-    userSelect: "none"
-  });
-
-  document.body.appendChild(themeBtn);
-
-  function syncThemeButton() {
-    themeBtn.style.color = colorHex;
-    themeBtn.style.borderColor = rgba(themeColor, 0.7);
-    themeBtn.textContent = "Change Theme";
-  }
-
-  themeBtn.addEventListener("pointerdown", async () => {
-    await handleFirstGestureSetup();
-
-    const currentIndex = THEME_ORDER.indexOf(currentThemeName);
-    const nextIndex = (currentIndex + 1) % THEME_ORDER.length;
-    const nextTheme = THEME_ORDER[nextIndex];
-
-    applyThemeByName(nextTheme);
-    refreshThemeVisuals();
-    renderLayout();
-    syncThemeButton();
-
-    if (scanlineButtonApi) {
-      scanlineButtonApi.syncTheme();
+    function syncScanlineButton() {
+      scanlineBtn.style.color = plateHex;
+      scanlineBtn.style.borderColor = rgba(plateColor, 0.7);
+      scanlineBtn.textContent = "Scanlines";
     }
 
-    themeBtn.style.borderColor = colorHex;
-  });
+    document.body.appendChild(scanlineBtn);
 
-  function end() {
-    syncThemeButton();
+    scanlineBtn.addEventListener("pointerdown", async () => {
+      await handleFirstGestureSetup();
+      scanlineBtn.style.borderColor = plateHex;
+      pressKey("2");
+    });
+
+    function end() {
+      syncScanlineButton();
+      releaseKey("2");
+    }
+
+    scanlineBtn.addEventListener("pointerup", end);
+    scanlineBtn.addEventListener("pointercancel", end);
+
+    syncScanlineButton();
+
+    return {
+      syncTheme: syncScanlineButton
+    };
   }
 
-  themeBtn.addEventListener("pointerup", end);
-  themeBtn.addEventListener("pointercancel", end);
+  function createPlateColorButton() {
+    const plateBtn = document.createElement("div");
+    plateBtn.textContent = "Plate Color";
 
-  syncThemeButton();
+    Object.assign(plateBtn.style, {
+      position: "fixed",
+      top: "36px",
+      left: "6px",
+      padding: "4px 8px",
+      fontSize: "11px",
+      fontFamily: "monospace",
+      color: plateHex,
+      background: "transparent",
+      border: `1px solid ${rgba(plateColor, 0.7)}`,
+      borderRadius: "6px",
+      pointerEvents: "auto",
+      touchAction: "none",
+      zIndex: "999999",
+      userSelect: "none"
+    });
 
-  return {
-    syncTheme: syncThemeButton
-  };
-}
+    document.body.appendChild(plateBtn);
+
+    function syncPlateButton() {
+      plateBtn.style.color = plateHex;
+      plateBtn.style.borderColor = rgba(plateColor, 0.7);
+      plateBtn.textContent = "Plate Color";
+    }
+
+    plateBtn.addEventListener("pointerdown", async () => {
+      await handleFirstGestureSetup();
+
+      const currentIndex = COLOR_ORDER.indexOf(currentPlateColorName);
+      const nextIndex = (currentIndex + 1) % COLOR_ORDER.length;
+      const nextColor = COLOR_ORDER[nextIndex];
+
+      applyPlateColorByName(nextColor);
+      refreshThemeVisuals();
+      renderLayout();
+
+      syncPlateButton();
+
+      if (scanlineButtonApi) scanlineButtonApi.syncTheme();
+      if (glowColorButtonApi) glowColorButtonApi.syncTheme();
+
+      plateBtn.style.borderColor = plateHex;
+    });
+
+    function end() {
+      syncPlateButton();
+    }
+
+    plateBtn.addEventListener("pointerup", end);
+    plateBtn.addEventListener("pointercancel", end);
+
+    syncPlateButton();
+
+    return {
+      syncTheme: syncPlateButton
+    };
+  }
+
+  function createGlowColorButton() {
+    const glowBtn = document.createElement("div");
+    glowBtn.textContent = "Glow Color";
+
+    Object.assign(glowBtn.style, {
+      position: "fixed",
+      top: "66px",
+      left: "6px",
+      padding: "4px 8px",
+      fontSize: "11px",
+      fontFamily: "monospace",
+      color: plateHex,
+      background: "transparent",
+      border: `1px solid ${rgba(plateColor, 0.7)}`,
+      borderRadius: "6px",
+      pointerEvents: "auto",
+      touchAction: "none",
+      zIndex: "999999",
+      userSelect: "none"
+    });
+
+    document.body.appendChild(glowBtn);
+
+    function syncGlowButton() {
+      glowBtn.style.color = plateHex;
+      glowBtn.style.borderColor = rgba(plateColor, 0.7);
+      glowBtn.textContent = "Glow Color";
+    }
+
+    glowBtn.addEventListener("pointerdown", async () => {
+      await handleFirstGestureSetup();
+
+      const currentIndex = COLOR_ORDER.indexOf(currentGlowColorName);
+      const nextIndex = (currentIndex + 1) % COLOR_ORDER.length;
+      const nextColor = COLOR_ORDER[nextIndex];
+
+      applyGlowColorByName(nextColor);
+      refreshThemeVisuals();
+      renderLayout();
+
+      syncGlowButton();
+
+      if (scanlineButtonApi) scanlineButtonApi.syncTheme();
+      if (plateColorButtonApi) plateColorButtonApi.syncTheme();
+
+      glowBtn.style.borderColor = plateHex;
+    });
+
+    function end() {
+      syncGlowButton();
+    }
+
+    glowBtn.addEventListener("pointerup", end);
+    glowBtn.addEventListener("pointercancel", end);
+
+    syncGlowButton();
+
+    return {
+      syncTheme: syncGlowButton
+    };
+  }
 
   function clearControls() {
     controls.innerHTML = "";
   }
 
   function renderDefaultLayout() {
-  clearControls();
-  const m = getLayoutMetrics();
+    clearControls();
+    const m = getLayoutMetrics();
 
-  const leftPad = createRingDpad({
-    size: m.padSize,
-    map: {
-      up: keyMap.up,
-      down: keyMap.down,
-      left: keyMap.left,
-      right: keyMap.right
-    }
-  });
+    const leftPad = createRingDpad({
+      size: m.padSize,
+      map: {
+        up: keyMap.up,
+        down: keyMap.down,
+        left: keyMap.left,
+        right: keyMap.right
+      }
+    });
 
-  leftPad.setPosition({
-    left: `${m.padLeft}px`,
-    bottom: `${m.padBottom}px`
-  });
+    leftPad.setPosition({
+      left: `${m.padLeft}px`,
+      bottom: `${m.padBottom}px`
+    });
 
-  const yBtn = createFaceButton({ name: "y", label: buttonLabels.y, size: m.buttonSize });
-  const bBtn = createFaceButton({ name: "b", label: buttonLabels.b, size: m.buttonSize });
-  const xBtn = createFaceButton({ name: "x", label: buttonLabels.x, size: m.buttonSize });
-  const aBtn = createFaceButton({ name: "a", label: buttonLabels.a, size: m.buttonSize });
+    const yBtn = createFaceButton({ name: "y", label: buttonLabels.y, size: m.buttonSize });
+    const bBtn = createFaceButton({ name: "b", label: buttonLabels.b, size: m.buttonSize });
+    const xBtn = createFaceButton({ name: "x", label: buttonLabels.x, size: m.buttonSize });
+    const aBtn = createFaceButton({ name: "a", label: buttonLabels.a, size: m.buttonSize });
 
-  const groupRight = m.faceRight;
-  const baseBottom = m.faceBottom;
-  const gap = m.faceGap;
+    const groupRight = m.faceRight;
+    const baseBottom = m.faceBottom;
+    const gap = m.faceGap;
 
-  yBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom + gap * 2}px` });
-  bBtn.setPosition({ right: `${groupRight + gap * 2}px`, bottom: `${baseBottom + gap}px` });
-  xBtn.setPosition({ right: `${groupRight}px`, bottom: `${baseBottom + gap}px` });
-  aBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom}px` });
-}
+    yBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom + gap * 2}px` });
+    bBtn.setPosition({ right: `${groupRight + gap * 2}px`, bottom: `${baseBottom + gap}px` });
+    xBtn.setPosition({ right: `${groupRight}px`, bottom: `${baseBottom + gap}px` });
+    aBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom}px` });
+  }
 
   function renderDualDpadLayout() {
     clearControls();
@@ -1142,7 +1203,8 @@ svg.appendChild(path);
   }
 
   scanlineButtonApi = createScanlineButton();
-  themeButtonApi = createThemeButton();
+  plateColorButtonApi = createPlateColorButton();
+  glowColorButtonApi = createGlowColorButton();
   renderLayout();
   window.addEventListener("resize", renderLayout);
 }

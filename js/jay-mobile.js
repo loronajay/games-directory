@@ -509,16 +509,16 @@ function initController() {
       }
 
       centerCap.style.boxShadow = activeDirection
-        ? `0 0 ${16 + pressure * 12}px ${rgba(glowColor, 0.24 + pressure * 0.20)}`
-        : `0 0 10px ${rgba(glowColor, 0.18)}`;
+        ? `0 0 ${16 + pressure * 12}px ${rgba(glowColor, 0.28 + pressure * 0.22)}`
+        : `0 0 16px ${rgba(glowColor, 0.26)}`;
 
       el.style.boxShadow = thumbVisible
-        ? `0 0 ${12 + pressure * 22}px ${rgba(glowColor, 0.10 + pressure * 0.20)}`
-        : `0 0 0px ${rgba(glowColor, 0)}`;
+        ? `0 0 ${12 + pressure * 22}px ${rgba(glowColor, 0.12 + pressure * 0.22)}`
+        : `0 0 16px ${rgba(glowColor, 0.14)}`;
 
       energyLayer.style.opacity = thumbVisible
-        ? `${0.18 + pressure * 0.28}`
-        : "0.18";
+        ? `${0.24 + pressure * 0.30}`
+       : "0.28";
 
       energyLayer.style.filter = thumbVisible
         ? `drop-shadow(0 0 ${8 + pressure * 12}px ${rgba(glowColor, 0.10 + pressure * 0.18)})`
@@ -856,6 +856,7 @@ function initController() {
       fontSize: `${Math.max(20, size * 0.34)}px`,
       boxSizing: "border-box",
       backdropFilter: "blur(2px)",
+      boxShadow: `0 0 10px ${rgba(glowColor, 0.12)}`,
       transition: "transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease"
     });
 
@@ -876,7 +877,7 @@ function initController() {
       isPressed = false;
       btn.style.transform = "scale(1)";
       btn.style.background = rgba(plateColor, 0.08);
-      btn.style.boxShadow = "none";
+      btn.style.boxShadow = `0 0 10px ${rgba(glowColor, 0.12)}`;
       releaseKey(keyMap[name]);
     }
 
@@ -972,6 +973,7 @@ function initController() {
       scanlineBtn.style.color = plateHex;
       scanlineBtn.style.borderColor = rgba(plateColor, 0.7);
       scanlineBtn.textContent = "Scanlines";
+      scanlineBtn.style.boxShadow = `0 0 8px ${rgba(glowColor, 0.10)}`;
     }
 
     document.body.appendChild(scanlineBtn);
@@ -1024,6 +1026,7 @@ function initController() {
       plateBtn.style.color = plateHex;
       plateBtn.style.borderColor = rgba(plateColor, 0.7);
       plateBtn.textContent = "Plate Color";
+      plateBtn.style.boxShadow = `0 0 8px ${rgba(glowColor, 0.10)}`;
     }
 
     plateBtn.addEventListener("pointerdown", async () => {
@@ -1086,6 +1089,7 @@ function initController() {
       glowBtn.style.color = plateHex;
       glowBtn.style.borderColor = rgba(plateColor, 0.7);
       glowBtn.textContent = "Glow Color";
+      glowBtn.style.boxShadow = `0 0 8px ${rgba(glowColor, 0.10)}`;
     }
 
     glowBtn.addEventListener("pointerdown", async () => {

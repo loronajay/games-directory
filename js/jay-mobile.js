@@ -527,36 +527,41 @@ function initController() {
     });
     el.appendChild(arrowLayer);
 
-      const arrows = [
-      { symbol: "↑", angle: 270 },
-      { symbol: "↗", angle: 315 },
-      { symbol: "→", angle: 0 },
-      { symbol: "↘", angle: 45 },
-      { symbol: "↓", angle: 90 },
-      { symbol: "↙", angle: 135 },
-      { symbol: "←", angle: 180 },
-      { symbol: "↖", angle: 225 }
-    ];
+  const arrows = [
+  { angle: 270, rotate:   0 },
+  { angle: 315, rotate:  45 },
+  { angle: 0,   rotate:  90 },
+  { angle: 45,  rotate: 135 },
+  { angle: 90,  rotate: 180 },
+  { angle: 135, rotate: 225 },
+  { angle: 180, rotate: 270 },
+  { angle: 225, rotate: 315 }
+];
 
-    const arrowRadius = innerR + (outerR - innerR) * 0.50;
+const arrowRadius = innerR + (outerR - innerR) * 0.50;
 
-    for (const { symbol, angle } of arrows) {
-      const p = polarToCartesian(cx, cy, arrowRadius, angle);
-      const a = document.createElement("div");
-      a.textContent = symbol;
-      Object.assign(a.style, {
-        position: "absolute",
-        left: `${p.x}px`,
-        top: `${p.y}px`,
-        transform: "translate(-50%, -50%)",
-        color: "rgba(0,255,255,0.88)",
-        fontFamily: "monospace",
-        fontSize: `${Math.max(14, options.size * 0.10)}px`,
-        textShadow: "0 0 8px rgba(0,255,255,0.25)",
-        lineHeight: "1"
-      });
-      arrowLayer.appendChild(a);
-    }
+for (const { angle, rotate } of arrows) {
+  const p = polarToCartesian(cx, cy, arrowRadius, angle);
+  const a = document.createElement("div");
+  a.textContent = "↑";
+  Object.assign(a.style, {
+    position: "absolute",
+    left: `${p.x}px`,
+    top: `${p.y}px`,
+    transform: `translate(-50%, -50%) rotate(${rotate}deg)`,
+    color: "rgba(0,255,255,0.88)",
+    fontFamily: "monospace",
+    fontSize: `${Math.max(14, options.size * 0.10)}px`,
+    textShadow: "0 0 8px rgba(0,255,255,0.25)",
+    lineHeight: "1",
+    width: `${Math.max(18, options.size * 0.12)}px`,
+    height: `${Math.max(18, options.size * 0.12)}px`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+  });
+  arrowLayer.appendChild(a);
+}
 
     el.addEventListener("pointerdown", async (e) => {
       await handleFirstGestureSetup();

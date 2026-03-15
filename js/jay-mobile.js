@@ -1,13 +1,16 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v17.6
-   - no touch-to-start overlay
-   - controls visible immediately
-   - fullscreen/orientation on first control touch
+   JAY ARCADE MOBILE CONTROLLER v18.0
+   - layout-driven
+   - segmented 8-way ring d-pad
+   - responsive sizing
+   - portrait + landscape support
+   - dual-dpad support
    ========================================== */
 
 (function () {
+"use strict";
 
-const JAY_MOBILE_VERSION = "v17.6";
+const JAY_MOBILE_VERSION = "v18.0";
 
 function isMobile() {
   return (
@@ -30,426 +33,572 @@ function waitForVM(callback) {
 waitForVM(initController);
 
 function initController() {
+  const gameConfig = window.JAY_GAME_CONFIG || {};
+  const mobileConfig = gameConfig.mobile || {};
+  const layoutName = mobileConfig.layout || "default";
 
-/* =============================
-   VERSION BADGE
-   ============================= */
+  let keyMap = {
+    left: "a",
+    right: "d",
+    up: "w",
+    down: "s",
+    a: "c",
+    b: "v",
+    x: "b",
+    y: "f"
+  };
 
-const versionBadge = document.createElement("div");
-versionBadge.innerText = JAY_MOBILE_VERSION;
-Object.assign(versionBadge.style, {
-  position: "fixed",
-  top: "8px",
-  right: "12px",
-  color: "#00ffff",
-  fontFamily: "monospace",
-  fontSize: "14px",
-  opacity: "0.6",
-  zIndex: "999999"
-});
-document.body.appendChild(versionBadge);
-
-/* =============================
-   CONTROLS LAYER
-   ============================= */
-
-const controls = document.createElement("div");
-Object.assign(controls.style, {
-  position: "fixed",
-  inset: "0",
-  display: "block",
-  zIndex: "999997",
-  pointerEvents: "none",
-  userSelect: "none",
-  webkitUserSelect: "none",
-  webkitTouchCallout: "none"
-});
-document.body.appendChild(controls);
-
-/* =============================
-   DISABLE TEXT SELECTION / CALLOUT
-   ============================= */
-
-document.body.style.userSelect = "none";
-document.body.style.webkitUserSelect = "none";
-document.body.style.webkitTouchCallout = "none";
-document.body.style.webkitTapHighlightColor = "transparent";
-
-/* =============================
-   KEY MAP
-   ============================= */
-
-let keyMap = {
-  left: "a",
-  right: "d",
-  up: "w",
-  down: "s",
-  a: "c",
-  b: "v",
-  x: "b",
-  y: "f"
-};
-
-if (window.JAY_GAME_CONFIG?.keyOverrides) {
-  keyMap = { ...keyMap, ...window.JAY_GAME_CONFIG.keyOverrides };
-}
-
-/* =============================
-   VM INPUT
-   ============================= */
-
-const keyboard = window.vm.runtime.ioDevices.keyboard;
-
-function pressKey(key) {
-  keyboard.postData({ key, isDown: true });
-}
-
-function releaseKey(key) {
-  keyboard.postData({ key, isDown: false });
-}
-
-/* =============================
-   FIRST USER GESTURE SETUP
-   ============================= */
-
-let firstGestureDone = false;
-
-async function handleFirstGestureSetup() {
-  if (firstGestureDone) return;
-  firstGestureDone = true;
-
-  if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-    try {
-      await document.documentElement.requestFullscreen();
-    } catch {}
+  if (gameConfig.keyOverrides) {
+    keyMap = { ...keyMap, ...gameConfig.keyOverrides };
   }
 
-  if (screen.orientation?.lock) {
-    try {
-      await screen.orientation.lock("landscape");
-    } catch {}
+  const keyboard = window.vm.runtime.ioDevices.keyboard;
+  const pressedKeys = new Set();
+
+  function pressKey(key) {
+    if (!key || pressedKeys.has(key)) return;
+    pressedKeys.add(key);
+    keyboard.postData({ key, isDown: true });
   }
-}
 
-/* =============================
-   8-DIRECTION DIGITAL D-PAD
-   ============================= */
+  function releaseKey(key) {
+    if (!key || !pressedKeys.has(key)) return;
+    pressedKeys.delete(key);
+    keyboard.postData({ key, isDown: false });
+  }
 
-const dpad = document.createElement("div");
+  function releaseKeys(keys) {
+    for (const key of keys) releaseKey(key);
+  }
 
-Object.assign(dpad.style, {
-  position: "absolute",
-  bottom: "40px",
-  left: "40px",
-  width: "160px",
-  height: "160px",
-  borderRadius: "50%",
-  border: "2px solid rgba(0,255,255,0.7)",
-  boxShadow: "none",
-  background: "transparent",
-  backdropFilter: "blur(1px)",
-  touchAction: "none",
-  pointerEvents: "auto"
-});
-
-controls.appendChild(dpad);
-
-/* =============================
-   DPAD THUMB INDICATOR
-   ============================= */
-
-const thumb = document.createElement("div");
-
-Object.assign(thumb.style, {
-  position: "absolute",
-  width: "40px",
-  height: "40px",
-  borderRadius: "50%",
-  border: "2px solid rgba(0,255,255,0.9)",
-  boxShadow: "0 0 15px rgba(0,255,255,0.8)",
-  pointerEvents: "none",
-  transform: "translate(-50%, -50%)",
-  display: "block",
-  left: "50%",
-  top: "50%",
-  transition: "transform 0.15s ease-out"
-});
-
-dpad.appendChild(thumb);
-
-/* =============================
-   8-DIRECTION VISUAL ARROWS
-   ============================= */
-
-const arrowLayer = document.createElement("div");
-Object.assign(arrowLayer.style, {
-  position: "absolute",
-  inset: "0",
-  pointerEvents: "none"
-});
-
-dpad.appendChild(arrowLayer);
-
-function createArrow(symbol, left, top) {
-  const arrow = document.createElement("div");
-  arrow.innerText = symbol;
-
-  Object.assign(arrow.style, {
-    position: "absolute",
-    left: left,
-    top: top,
-    transform: "translate(-50%, -50%)",
-    fontSize: "20px",
+  const versionBadge = document.createElement("div");
+  versionBadge.innerText = JAY_MOBILE_VERSION;
+  Object.assign(versionBadge.style, {
+    position: "fixed",
+    top: "8px",
+    right: "12px",
+    color: "#00ffff",
     fontFamily: "monospace",
-    color: "rgba(0,255,255,0.85)",
-    userSelect: "none"
+    fontSize: "14px",
+    opacity: "0.6",
+    zIndex: "999999"
   });
+  document.body.appendChild(versionBadge);
 
-  arrowLayer.appendChild(arrow);
-}
+  const controls = document.createElement("div");
+  Object.assign(controls.style, {
+    position: "fixed",
+    inset: "0",
+    display: "block",
+    zIndex: "999997",
+    pointerEvents: "none",
+    userSelect: "none",
+    webkitUserSelect: "none",
+    webkitTouchCallout: "none"
+  });
+  document.body.appendChild(controls);
 
-createArrow("↑", "50%", "15%");
-createArrow("↓", "50%", "85%");
-createArrow("←", "15%", "50%");
-createArrow("→", "85%", "50%");
-createArrow("↖", "20%", "20%");
-createArrow("↗", "80%", "20%");
-createArrow("↙", "20%", "80%");
-createArrow("↘", "80%", "80%");
+  document.body.style.userSelect = "none";
+  document.body.style.webkitUserSelect = "none";
+  document.body.style.webkitTouchCallout = "none";
+  document.body.style.webkitTapHighlightColor = "transparent";
 
-let currentDirections = new Set();
-const DEAD_ZONE = 20;
-const AXIS_THRESHOLD = 25;
+  let firstGestureDone = false;
 
-function updateDpadDirection(x, y) {
-  const rect = dpad.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
+  async function handleFirstGestureSetup() {
+    if (firstGestureDone) return;
+    firstGestureDone = true;
 
-  const dx = x - cx;
-  const dy = y - cy;
+    if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+      try {
+        await document.documentElement.requestFullscreen();
+      } catch {}
+    }
 
-  const radius = rect.width / 2 - 20;
-
-  let limitedDx = dx;
-  let limitedDy = dy;
-
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  if (distance > radius) {
-    const angle = Math.atan2(dy, dx);
-    limitedDx = Math.cos(angle) * radius;
-    limitedDy = Math.sin(angle) * radius;
-  }
-
-  thumb.style.transform = `translate(calc(-50% + ${limitedDx}px), calc(-50% + ${limitedDy}px))`;
-
-  const newDirections = new Set();
-
-  if (Math.abs(dx) < DEAD_ZONE && Math.abs(dy) < DEAD_ZONE) {
-    applyDirections(newDirections);
-    return;
-  }
-
-  if (dx > AXIS_THRESHOLD) newDirections.add("right");
-  if (dx < -AXIS_THRESHOLD) newDirections.add("left");
-  if (dy > AXIS_THRESHOLD) newDirections.add("down");
-  if (dy < -AXIS_THRESHOLD) newDirections.add("up");
-
-  applyDirections(newDirections);
-}
-
-function applyDirections(newDirections) {
-  for (const dir of currentDirections) {
-    if (!newDirections.has(dir)) {
-      releaseKey(keyMap[dir]);
+    if (screen.orientation?.lock) {
+      try {
+        await screen.orientation.lock("landscape");
+      } catch {}
     }
   }
 
-  for (const dir of newDirections) {
-    if (!currentDirections.has(dir)) {
-      pressKey(keyMap[dir]);
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function getLayoutMetrics() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const portrait = vh > vw;
+    const shortSide = Math.min(vw, vh);
+
+    const padSize = clamp(shortSide * (portrait ? 0.26 : 0.22), 120, 220);
+    const buttonSize = clamp(shortSide * (portrait ? 0.12 : 0.10), 64, 110);
+    const edge = clamp(shortSide * 0.05, 16, 40);
+    const faceGap = clamp(buttonSize * 0.55, 28, 62);
+
+    return {
+      vw,
+      vh,
+      portrait,
+      padSize,
+      buttonSize,
+      edge,
+      faceGap
+    };
+  }
+
+  function makeBaseControl() {
+    const el = document.createElement("div");
+    Object.assign(el.style, {
+      position: "absolute",
+      pointerEvents: "auto",
+      touchAction: "none"
+    });
+    controls.appendChild(el);
+    return el;
+  }
+
+  function directionToKeys(direction, map) {
+    switch (direction) {
+      case "up": return [map.up];
+      case "up-right": return [map.up, map.right];
+      case "right": return [map.right];
+      case "down-right": return [map.down, map.right];
+      case "down": return [map.down];
+      case "down-left": return [map.down, map.left];
+      case "left": return [map.left];
+      case "up-left": return [map.up, map.left];
+      default: return [];
     }
   }
 
-  currentDirections = newDirections;
-}
-
-function clearDirections() {
-  for (const dir of currentDirections) {
-    releaseKey(keyMap[dir]);
-  }
-  currentDirections.clear();
-  thumb.style.transform = "translate(-50%, -50%)";
-}
-
-dpad.addEventListener("pointerdown", async e => {
-  await handleFirstGestureSetup();
-  dpad.setPointerCapture(e.pointerId);
-  updateDpadDirection(e.clientX, e.clientY);
-});
-
-dpad.addEventListener("pointermove", e => {
-  updateDpadDirection(e.clientX, e.clientY);
-});
-
-dpad.addEventListener("pointerup", clearDirections);
-dpad.addEventListener("pointercancel", clearDirections);
-
-function activateButton(btn) {
-  btn.style.transform = "scale(0.95)";
-  btn.style.boxShadow = "0 0 18px rgba(0,255,255,0.9)";
-  btn.style.borderColor = "#00ffff";
-}
-
-function deactivateButton(btn) {
-  btn.style.transform = "scale(1)";
-  btn.style.boxShadow = "none";
-  btn.style.borderColor = "rgba(0,255,255,0.8)";
-}
-
-/* =============================
-   FACE BUTTONS
-   ============================= */
-
-function createButton(name, label, bottom, left, right) {
-  const btn = document.createElement("div");
-  btn.dataset.name = name;
-  btn.innerText = label;
-
-  Object.assign(btn.style, {
-    position: "absolute",
-    bottom: bottom,
-    left: left,
-    right: right,
-    width: "74px",
-    height: "74px",
-    borderRadius: "50%",
-    background: "transparent",
-    border: "2px solid rgba(0,255,255,0.8)",
-    color: "rgba(0,255,255,0.9)",
-    backdropFilter: "blur(1px)",
-    fontWeight: "bold",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "22px",
-    touchAction: "none",
-    pointerEvents: "auto",
-    boxShadow: "none",
-    transition: "transform 0.05s ease"
-  });
-
-  controls.appendChild(btn);
-  return btn;
-}
-
-createButton("y", "Y", "160px", null, "100px");
-createButton("b", "B", "100px", null, "140px");
-createButton("x", "X", "100px", null, "60px");
-createButton("a", "A", "40px", null, "100px");
-
-/* =============================
-   TOGGLE SCANLINES BUTTON
-   ============================= */
-
-const scanlineBtn = document.createElement("div");
-scanlineBtn.innerText = "Scanlines";
-
-Object.assign(scanlineBtn.style, {
-  position: "fixed",
-  top: "6px",
-  left: "6px",
-  padding: "4px 8px",
-  fontSize: "11px",
-  fontFamily: "monospace",
-  color: "#00ffff",
-  background: "transparent",
-  border: "1px solid rgba(0,255,255,0.7)",
-  borderRadius: "4px",
-  pointerEvents: "auto",
-  touchAction: "none",
-  zIndex: "999999",
-  userSelect: "none"
-});
-
-document.body.appendChild(scanlineBtn);
-
-scanlineBtn.addEventListener("pointerdown", async () => {
-  await handleFirstGestureSetup();
-  scanlineBtn.style.borderColor = "#00ffff";
-  pressKey("2");
-});
-
-scanlineBtn.addEventListener("pointerup", () => {
-  scanlineBtn.style.borderColor = "rgba(0,255,255,0.7)";
-  releaseKey("2");
-});
-
-scanlineBtn.addEventListener("pointercancel", () => {
-  scanlineBtn.style.borderColor = "rgba(0,255,255,0.7)";
-  releaseKey("2");
-});
-
-/* =============================
-   MULTI-TOUCH LOGIC
-   ============================= */
-
-const activePointers = new Map();
-const buttonCounts = {};
-
-function pressFace(pointerId, name) {
-  if (!name) return;
-
-  const current = activePointers.get(pointerId);
-  if (current === name) return;
-
-  releaseFace(pointerId);
-
-  activePointers.set(pointerId, name);
-  buttonCounts[name] = (buttonCounts[name] || 0) + 1;
-
-  const btn = document.querySelector(`[data-name="${name}"]`);
-  if (btn) activateButton(btn);
-
-  if (buttonCounts[name] === 1) {
-    pressKey(keyMap[name]);
-  }
-}
-
-function releaseFace(pointerId) {
-  const name = activePointers.get(pointerId);
-  if (!name) return;
-
-  buttonCounts[name]--;
-
-  if (buttonCounts[name] <= 0) {
-    releaseKey(keyMap[name]);
-    buttonCounts[name] = 0;
-
-    const btn = document.querySelector(`[data-name="${name}"]`);
-    if (btn) deactivateButton(btn);
+  function angleToDirection(angle) {
+    const slice = Math.round(angle / 45) % 8;
+    const directions = [
+      "right",
+      "down-right",
+      "down",
+      "down-left",
+      "left",
+      "up-left",
+      "up",
+      "up-right"
+    ];
+    return directions[(slice + 8) % 8];
   }
 
-  activePointers.delete(pointerId);
+  function createRingDpad(options) {
+    const el = makeBaseControl();
+    const segments = [];
+    const dividers = [];
+    const centerCap = document.createElement("div");
+    const centerDot = document.createElement("div");
+
+    let activeDirection = null;
+    let activePointerId = null;
+
+    function applyDirection(nextDirection) {
+      if (nextDirection === activeDirection) return;
+
+      const prevKeys = directionToKeys(activeDirection, options.map);
+      const nextKeys = directionToKeys(nextDirection, options.map);
+
+      releaseKeys(prevKeys);
+      for (const key of nextKeys) pressKey(key);
+
+      activeDirection = nextDirection;
+      updateVisualState();
+    }
+
+    function clearDirection() {
+      applyDirection(null);
+    }
+
+    function updateVisualState() {
+      const order = [
+        "up",
+        "up-right",
+        "right",
+        "down-right",
+        "down",
+        "down-left",
+        "left",
+        "up-left"
+      ];
+
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        const isActive = order[i] === activeDirection;
+        seg.style.background = isActive
+          ? "rgba(0,255,255,0.20)"
+          : "rgba(0,255,255,0.06)";
+        seg.style.boxShadow = isActive
+          ? "inset 0 0 18px rgba(0,255,255,0.45), 0 0 18px rgba(0,255,255,0.25)"
+          : "none";
+      }
+
+      centerCap.style.boxShadow = activeDirection
+        ? "0 0 18px rgba(0,255,255,0.35)"
+        : "0 0 10px rgba(0,255,255,0.18)";
+    }
+
+    function updateFromPoint(clientX, clientY) {
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      const outerRadius = rect.width / 2;
+      const neutralRadius = outerRadius * 0.34;
+
+      if (distance < neutralRadius) {
+        clearDirection();
+        return;
+      }
+
+      const angleRad = Math.atan2(dy, dx);
+      const angleDeg = (angleRad * 180 / Math.PI + 360) % 360;
+      const snapped = angleToDirection(angleDeg);
+
+      applyDirection(snapped);
+    }
+
+    Object.assign(el.style, {
+      width: `${options.size}px`,
+      height: `${options.size}px`,
+      borderRadius: "50%",
+      background: "rgba(0,0,0,0.16)",
+      border: "3px solid rgba(0,255,255,0.88)",
+      boxSizing: "border-box",
+      overflow: "hidden",
+      backdropFilter: "blur(2px)"
+    });
+
+    for (let i = 0; i < 8; i++) {
+      const seg = document.createElement("div");
+      const start = i * 45 - 22.5;
+      const end = i * 45 + 22.5;
+
+      Object.assign(seg.style, {
+        position: "absolute",
+        inset: "0",
+        clipPath: `polygon(50% 50%, ${50 + 55 * Math.cos(start * Math.PI / 180)}% ${50 + 55 * Math.sin(start * Math.PI / 180)}%, ${50 + 55 * Math.cos(end * Math.PI / 180)}% ${50 + 55 * Math.sin(end * Math.PI / 180)}%)`,
+        background: "rgba(0,255,255,0.06)",
+        transition: "background 0.06s ease, box-shadow 0.06s ease"
+      });
+
+      el.appendChild(seg);
+      segments.push(seg);
+    }
+
+    for (let i = 0; i < 8; i++) {
+      const divider = document.createElement("div");
+      const angle = i * 45;
+      Object.assign(divider.style, {
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        width: "2px",
+        height: `${options.size * 0.44}px`,
+        background: "rgba(0,255,255,0.20)",
+        transformOrigin: "50% 0%",
+        transform: `translate(-50%, 0%) rotate(${angle}deg)`
+      });
+      el.appendChild(divider);
+      dividers.push(divider);
+    }
+
+    Object.assign(centerCap.style, {
+      position: "absolute",
+      left: "50%",
+      top: "50%",
+      width: `${options.size * 0.50}px`,
+      height: `${options.size * 0.50}px`,
+      transform: "translate(-50%, -50%)",
+      borderRadius: "42%",
+      border: "3px solid rgba(0,255,255,0.88)",
+      background: "rgba(0,0,0,0.18)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      boxShadow: "0 0 10px rgba(0,255,255,0.18)"
+    });
+
+    Object.assign(centerDot.style, {
+      width: `${options.size * 0.12}px`,
+      height: `${options.size * 0.12}px`,
+      borderRadius: "50%",
+      border: "2px solid rgba(0,255,255,0.75)",
+      color: "rgba(0,255,255,0.75)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: "monospace",
+      fontSize: `${Math.max(10, options.size * 0.06)}px`
+    });
+    centerDot.textContent = "×";
+
+    centerCap.appendChild(centerDot);
+    el.appendChild(centerCap);
+
+    const arrowLayer = document.createElement("div");
+    Object.assign(arrowLayer.style, {
+      position: "absolute",
+      inset: "0",
+      pointerEvents: "none"
+    });
+    el.appendChild(arrowLayer);
+
+    const arrows = [
+      ["↑", 50, 18],
+      ["↗", 78, 28],
+      ["→", 82, 50],
+      ["↘", 78, 72],
+      ["↓", 50, 82],
+      ["↙", 22, 72],
+      ["←", 18, 50],
+      ["↖", 22, 28]
+    ];
+
+    for (const [symbol, x, y] of arrows) {
+      const a = document.createElement("div");
+      a.textContent = symbol;
+      Object.assign(a.style, {
+        position: "absolute",
+        left: `${x}%`,
+        top: `${y}%`,
+        transform: "translate(-50%, -50%)",
+        color: "rgba(0,255,255,0.88)",
+        fontFamily: "monospace",
+        fontSize: `${Math.max(14, options.size * 0.10)}px`,
+        textShadow: "0 0 8px rgba(0,255,255,0.25)"
+      });
+      arrowLayer.appendChild(a);
+    }
+
+    el.addEventListener("pointerdown", async (e) => {
+      await handleFirstGestureSetup();
+      activePointerId = e.pointerId;
+      el.setPointerCapture(e.pointerId);
+      updateFromPoint(e.clientX, e.clientY);
+    });
+
+    el.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== activePointerId) return;
+      updateFromPoint(e.clientX, e.clientY);
+    });
+
+    function endPointer(e) {
+      if (e.pointerId !== activePointerId) return;
+      activePointerId = null;
+      clearDirection();
+    }
+
+    el.addEventListener("pointerup", endPointer);
+    el.addEventListener("pointercancel", endPointer);
+
+    updateVisualState();
+
+    return {
+      el,
+      setPosition({ left, right, bottom, top }) {
+        el.style.left = left ?? "";
+        el.style.right = right ?? "";
+        el.style.bottom = bottom ?? "";
+        el.style.top = top ?? "";
+      }
+    };
+  }
+
+  function createFaceButton({ name, label, size }) {
+    const btn = makeBaseControl();
+    let activePointerId = null;
+
+    Object.assign(btn.style, {
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "50%",
+      background: "rgba(0,255,255,0.08)",
+      border: "3px solid rgba(0,255,255,0.85)",
+      color: "rgba(0,255,255,0.92)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: "sans-serif",
+      fontWeight: "bold",
+      fontSize: `${Math.max(20, size * 0.34)}px`,
+      boxSizing: "border-box",
+      backdropFilter: "blur(2px)",
+      transition: "transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease"
+    });
+
+    btn.textContent = label;
+
+    function activate() {
+      btn.style.transform = "scale(0.95)";
+      btn.style.background = "rgba(0,255,255,0.18)";
+      btn.style.boxShadow = "0 0 20px rgba(0,255,255,0.35)";
+      pressKey(keyMap[name]);
+    }
+
+    function deactivate() {
+      btn.style.transform = "scale(1)";
+      btn.style.background = "rgba(0,255,255,0.08)";
+      btn.style.boxShadow = "none";
+      releaseKey(keyMap[name]);
+    }
+
+    btn.addEventListener("pointerdown", async (e) => {
+      await handleFirstGestureSetup();
+      activePointerId = e.pointerId;
+      btn.setPointerCapture(e.pointerId);
+      activate();
+    });
+
+    function endPointer(e) {
+      if (e.pointerId !== activePointerId) return;
+      activePointerId = null;
+      deactivate();
+    }
+
+    btn.addEventListener("pointerup", endPointer);
+    btn.addEventListener("pointercancel", endPointer);
+
+    return {
+      el: btn,
+      setPosition({ left, right, bottom, top }) {
+        btn.style.left = left ?? "";
+        btn.style.right = right ?? "";
+        btn.style.bottom = bottom ?? "";
+        btn.style.top = top ?? "";
+      }
+    };
+  }
+
+  function createScanlineButton() {
+    const scanlineBtn = document.createElement("div");
+    scanlineBtn.textContent = "Scanlines";
+
+    Object.assign(scanlineBtn.style, {
+      position: "fixed",
+      top: "6px",
+      left: "6px",
+      padding: "4px 8px",
+      fontSize: "11px",
+      fontFamily: "monospace",
+      color: "#00ffff",
+      background: "transparent",
+      border: "1px solid rgba(0,255,255,0.7)",
+      borderRadius: "6px",
+      pointerEvents: "auto",
+      touchAction: "none",
+      zIndex: "999999",
+      userSelect: "none"
+    });
+
+    document.body.appendChild(scanlineBtn);
+
+    scanlineBtn.addEventListener("pointerdown", async () => {
+      await handleFirstGestureSetup();
+      scanlineBtn.style.borderColor = "#00ffff";
+      pressKey("2");
+    });
+
+    function end() {
+      scanlineBtn.style.borderColor = "rgba(0,255,255,0.7)";
+      releaseKey("2");
+    }
+
+    scanlineBtn.addEventListener("pointerup", end);
+    scanlineBtn.addEventListener("pointercancel", end);
+  }
+
+  function clearControls() {
+    controls.innerHTML = "";
+  }
+
+  function renderDefaultLayout() {
+    clearControls();
+    const m = getLayoutMetrics();
+
+    const leftPad = createRingDpad({
+      size: m.padSize,
+      map: {
+        up: keyMap.up,
+        down: keyMap.down,
+        left: keyMap.left,
+        right: keyMap.right
+      }
+    });
+
+    leftPad.setPosition({
+      left: `${m.edge}px`,
+      bottom: `${m.edge}px`
+    });
+
+    const yBtn = createFaceButton({ name: "y", label: "Y", size: m.buttonSize });
+    const bBtn = createFaceButton({ name: "b", label: "B", size: m.buttonSize });
+    const xBtn = createFaceButton({ name: "x", label: "X", size: m.buttonSize });
+    const aBtn = createFaceButton({ name: "a", label: "A", size: m.buttonSize });
+
+    const groupRight = m.edge;
+    const baseBottom = m.edge;
+    const gap = m.faceGap;
+
+    yBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom + gap * 2}px` });
+    bBtn.setPosition({ right: `${groupRight + gap * 2}px`, bottom: `${baseBottom + gap}px` });
+    xBtn.setPosition({ right: `${groupRight}px`, bottom: `${baseBottom + gap}px` });
+    aBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom}px` });
+  }
+
+  function renderDualDpadLayout() {
+    clearControls();
+    const m = getLayoutMetrics();
+
+    const leftPad = createRingDpad({
+      size: m.padSize,
+      map: {
+        up: keyMap.up,
+        down: keyMap.down,
+        left: keyMap.left,
+        right: keyMap.right
+      }
+    });
+
+    leftPad.setPosition({
+      left: `${m.edge}px`,
+      bottom: `${m.edge}px`
+    });
+
+    const rightPad = createRingDpad({
+      size: m.padSize,
+      map: {
+        up: keyMap.y,
+        down: keyMap.a,
+        left: keyMap.b,
+        right: keyMap.x
+      }
+    });
+
+    rightPad.setPosition({
+      right: `${m.edge}px`,
+      bottom: `${m.edge}px`
+    });
+  }
+
+  function renderLayout() {
+    if (layoutName === "dual-dpad") {
+      renderDualDpadLayout();
+    } else {
+      renderDefaultLayout();
+    }
+  }
+
+  createScanlineButton();
+  renderLayout();
+  window.addEventListener("resize", renderLayout);
 }
-
-controls.addEventListener("pointerdown", async e => {
-  if (!e.target.dataset.name) return;
-  await handleFirstGestureSetup();
-  e.target.setPointerCapture(e.pointerId);
-  pressFace(e.pointerId, e.target.dataset.name);
-});
-
-controls.addEventListener("pointermove", e => {
-  const el = document.elementFromPoint(e.clientX, e.clientY);
-  const name = el?.dataset?.name;
-  if (name) pressFace(e.pointerId, name);
-});
-
-controls.addEventListener("pointerup", e => releaseFace(e.pointerId));
-controls.addEventListener("pointercancel", e => releaseFace(e.pointerId));
-
-}
-
 })();

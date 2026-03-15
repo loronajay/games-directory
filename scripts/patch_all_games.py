@@ -5,7 +5,7 @@ import re
 import subprocess
 import sys
 
-from control_overrides import GAME_OVERRIDES
+from control_overrides import GAME_CONFIGS
 
 # -------------------------
 # PROJECT PATHS
@@ -83,8 +83,8 @@ CONFIG_BLOCK_REGEX = re.compile(
 # HELPERS
 # -------------------------
 
-def build_config_block(overrides):
-    json_block = json.dumps({"keyOverrides": overrides}, indent=2)
+def build_config_block(config):
+    json_block = json.dumps(config, indent=2)
     return f"""{CONFIG_START}
 <script>
 window.JAY_GAME_CONFIG = {json_block};
@@ -291,37 +291,49 @@ def patch_control_overrides(html, folder_name, notes):
 
     original_html = html
     has_config_block = CONFIG_START in html and CONFIG_END in html
-    has_override_entry = folder_name in GAME_OVERRIDES
+    config = GAME_CONFIGS.get(folder_name)
 
     override_status = None
 
-    if has_override_entry:
-
-        config_block = build_config_block(GAME_OVERRIDES[folder_name])
+    if config:
+        config_block = build_config_block(config)
 
         if has_config_block:
-
             html = CONFIG_BLOCK_REGEX.sub(config_block, html, count=1)
-            notes.append("control overrides updated")
-
+            notes.append("game config updated")
             override_status = "updated"
-
         else:
-
             if JAY_MOBILE_SCRIPT in html:
-
                 html = html.replace(JAY_MOBILE_SCRIPT, config_block + "\n" + JAY_MOBILE_SCRIPT, 1)
-
-                notes.append("control overrides applied")
+                notes.append("game config applied")
                 override_status = "applied"
-
+            else:
+                notes.append("ERROR: could not insert game config before jay-mobile.js")
+                override_status = "error"
     else:
+        # Inject a default config only if no block exists yet
+        default_config = {
+            "keyOverrides": {},
+            "mobile": {
+                "layout": "default"
+            }
+        }
+        config_block = build_config_block(default_config)
 
-        override_status = "none"
-        notes.append("no control overrides configured")
+        if has_config_block:
+            notes.append("game config already present")
+            override_status = "none"
+        else:
+            if JAY_MOBILE_SCRIPT in html:
+                html = html.replace(JAY_MOBILE_SCRIPT, config_block + "\n" + JAY_MOBILE_SCRIPT, 1)
+                notes.append("default game config applied")
+                override_status = "applied"
+            else:
+                notes.append("ERROR: could not insert default game config before jay-mobile.js")
+                override_status = "error"
 
     return html, (html != original_html), override_status
-
+    
 
 def patch_html(index_path: Path, dry_run=False):
 

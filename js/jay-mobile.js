@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v18.7
+   JAY ARCADE MOBILE CONTROLLER v18.8
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -16,7 +16,7 @@
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v18.7";
+const JAY_MOBILE_VERSION = "v18.8";
 
 function isMobile() {
   return (
@@ -548,33 +548,36 @@ for (const { angle, rotate } of arrows) {
   const icon = document.createElement("div");
 
   Object.assign(icon.style,{
-    position:"absolute",
-    left:`${p.x}px`,
-    top:`${p.y}px`,
-    width:`${arrowSize}px`,
-    height:`${arrowSize}px`,
-    transform:`translate(-50%, -50%) rotate(${rotate}deg)`,
-    pointerEvents:"none"
-  });
+  position:"absolute",
+  left:`${p.x}px`,
+  top:`${p.y}px`,
+  width:`${arrowSize}px`,
+  height:`${arrowSize}px`,
+  transform:`translate(-50%, -50%) rotate(${rotate}deg)`,
+  transformOrigin:"50% 50%",
+  pointerEvents:"none",
+  display:"flex",
+  alignItems:"center",
+  justifyContent:"center"
+});
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+
   svg.setAttribute("viewBox","0 0 24 24");
+  svg.setAttribute("preserveAspectRatio","xMidYMid meet");
 
   Object.assign(svg.style,{
     width:"100%",
-    height:"100%"
-  });
+    height:"100%",
+    display:"block"
+});
 
-  const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+const path = document.createElementNS("http://www.w3.org/2000/svg","path");
 
-  path.setAttribute(
-    "d",
-    "M12 4 L20 18 H4 Z"
-  );
+path.setAttribute("d","M12 4 L20 18 H4 Z");
+path.setAttribute("fill","rgba(0,255,255,0.92)");
 
-  path.setAttribute("fill","rgba(0,255,255,0.92)");
-
-  svg.appendChild(path);
+svg.appendChild(path);
   icon.appendChild(svg);
   arrowLayer.appendChild(icon);
 }

@@ -29,7 +29,7 @@ SCREEN_ORIENTATION = '<meta name="screen-orientation" content="landscape">'
 # -------------------------
 
 # Correct path for games inside /games/
-JAY_MOBILE_SCRIPT = '<script src="../../js/jay-mobile.js?v=18_1"></script>'
+JAY_MOBILE_SCRIPT = '<script src="../../js/jay-mobile.js"></script>'
 
 # Legacy path used before the folder migration
 LEGACY_JAY_MOBILE_SCRIPTS = [

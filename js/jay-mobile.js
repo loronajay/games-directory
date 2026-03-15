@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v19.4
+   JAY ARCADE MOBILE CONTROLLER v19.5
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -16,7 +16,7 @@
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v19.4";
+const JAY_MOBILE_VERSION = "v19.5";
 
 function isMobile() {
   return (
@@ -69,6 +69,29 @@ const THEME_LABELS = {
 function getSavedThemeName() {
   const saved = localStorage.getItem("jayControllerTheme");
   return COLOR_PRESETS[saved] ? saved : "arcade-cyan";
+}
+
+function hexToRgb(hex) {
+  const clean = String(hex || "").replace("#", "");
+  const value = clean.length === 3
+    ? clean.split("").map(c => c + c).join("")
+    : clean;
+
+  const num = parseInt(value, 16);
+
+  if (Number.isNaN(num)) {
+    return { r: 0, g: 255, b: 255 };
+  }
+
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255
+  };
+}
+
+function rgba(rgb, alpha) {
+  return `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
 }
 
 let currentThemeName = getSavedThemeName();
@@ -897,7 +920,7 @@ svg.appendChild(path);
       padding: "4px 8px",
       fontSize: "11px",
       fontFamily: "monospace",
-      color: "colorHex",
+      color: colorHex,
       background: "transparent",
       border: `1px solid ${rgba(themeColor, 0.7)}`,
       borderRadius: "6px",

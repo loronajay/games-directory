@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v19.5
+   JAY ARCADE MOBILE CONTROLLER v19.6
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -16,7 +16,7 @@
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v19.5";
+const JAY_MOBILE_VERSION = "v19.6";
 
 function isMobile() {
   return (
@@ -42,6 +42,10 @@ function initController() {
   const gameConfig = window.JAY_GAME_CONFIG || {};
   const mobileConfig = gameConfig.mobile || {};
   const layoutName = mobileConfig.layout || "default";
+
+  let scanlineButtonApi = null;
+  let themeButtonApi = null;
+
   const COLOR_PRESETS = {
   "arcade-cyan": "#00ffff",
   "crt-amber": "#ffb000",
@@ -65,6 +69,8 @@ const THEME_LABELS = {
   "neon-pink": "Neon Pink",
   "ice-blue": "Ice Blue"
 };
+
+
 
 function getSavedThemeName() {
   const saved = localStorage.getItem("jayControllerTheme");
@@ -910,42 +916,54 @@ svg.appendChild(path);
 }
 
   function createScanlineButton() {
-    const scanlineBtn = document.createElement("div");
+  const scanlineBtn = document.createElement("div");
+  scanlineBtn.textContent = "Scanlines";
+
+  Object.assign(scanlineBtn.style, {
+    position: "fixed",
+    top: "6px",
+    left: "6px",
+    padding: "4px 8px",
+    fontSize: "11px",
+    fontFamily: "monospace",
+    color: colorHex,
+    background: "transparent",
+    border: `1px solid ${rgba(themeColor, 0.7)}`,
+    borderRadius: "6px",
+    pointerEvents: "auto",
+    touchAction: "none",
+    zIndex: "999999",
+    userSelect: "none"
+  });
+
+  function syncScanlineButton() {
+    scanlineBtn.style.color = colorHex;
+    scanlineBtn.style.borderColor = rgba(themeColor, 0.7);
     scanlineBtn.textContent = "Scanlines";
-
-    Object.assign(scanlineBtn.style, {
-      position: "fixed",
-      top: "6px",
-      left: "6px",
-      padding: "4px 8px",
-      fontSize: "11px",
-      fontFamily: "monospace",
-      color: colorHex,
-      background: "transparent",
-      border: `1px solid ${rgba(themeColor, 0.7)}`,
-      borderRadius: "6px",
-      pointerEvents: "auto",
-      touchAction: "none",
-      zIndex: "999999",
-      userSelect: "none"
-    });
-
-    document.body.appendChild(scanlineBtn);
-
-    scanlineBtn.addEventListener("pointerdown", async () => {
-      await handleFirstGestureSetup();
-      scanlineBtn.style.borderColor = colorHex;
-      pressKey("2");
-    });
-
-    function end() {
-      scanlineBtn.style.borderColor = rgba(themeColor, 0.7);
-      releaseKey("2");
-    }
-
-    scanlineBtn.addEventListener("pointerup", end);
-    scanlineBtn.addEventListener("pointercancel", end);
   }
+
+  document.body.appendChild(scanlineBtn);
+
+  scanlineBtn.addEventListener("pointerdown", async () => {
+    await handleFirstGestureSetup();
+    scanlineBtn.style.borderColor = colorHex;
+    pressKey("2");
+  });
+
+  function end() {
+    syncScanlineButton();
+    releaseKey("2");
+  }
+
+  scanlineBtn.addEventListener("pointerup", end);
+  scanlineBtn.addEventListener("pointercancel", end);
+
+  syncScanlineButton();
+
+  return {
+    syncTheme: syncScanlineButton
+  };
+}
 
   function createThemeButton() {
   const themeBtn = document.createElement("div");
@@ -986,10 +1004,13 @@ svg.appendChild(path);
     applyThemeByName(nextTheme);
     refreshThemeVisuals();
     renderLayout();
+    syncThemeButton();
 
-    themeBtn.style.color = colorHex;
+    if (scanlineButtonApi) {
+      scanlineButtonApi.syncTheme();
+    }
+
     themeBtn.style.borderColor = colorHex;
-    themeBtn.textContent = THEME_LABELS[currentThemeName] || "Change Theme";
   });
 
   function end() {
@@ -1000,6 +1021,10 @@ svg.appendChild(path);
   themeBtn.addEventListener("pointercancel", end);
 
   syncThemeButton();
+
+  return {
+    syncTheme: syncThemeButton
+  };
 }
 
   function clearControls() {
@@ -1083,8 +1108,8 @@ svg.appendChild(path);
     }
   }
 
-  createScanlineButton();
-  createThemeButton();
+  scanlineButtonApi = createScanlineButton();
+  themeButtonApi = createThemeButton();
   renderLayout();
   window.addEventListener("resize", renderLayout);
 }

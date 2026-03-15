@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v18.3
+   JAY ARCADE MOBILE CONTROLLER v18.4
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -8,12 +8,14 @@
    - upgraded Genesis-style d-pad feel
    - corrected visual/input alignment
    - curved segmented highlight regions
+   - aligned wedge boundaries
+   - smooth raw-touch thumb cursor
    ========================================== */
 
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v18.3";
+const JAY_MOBILE_VERSION = "v18.4";
 
 function isMobile() {
   return (
@@ -266,17 +268,20 @@ function initController() {
   function createRingDpad(options) {
     const el = makeBaseControl();
     const segments = [];
-    const dividers = [];
     const centerCap = document.createElement("div");
     const centerDot = document.createElement("div");
     const thumb = document.createElement("div");
+
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
     const segmentGroup = document.createElementNS(svgNS, "g");
+    const dividerGroup = document.createElementNS(svgNS, "g");
 
     let activeDirection = null;
     let activePointerId = null;
-    let visualAngle = null;
+    let thumbX = 0;
+    let thumbY = 0;
+    let thumbVisible = false;
 
     const visualZones = [
       { dir: "right", center: 0, half: 26 },
@@ -288,6 +293,12 @@ function initController() {
       { dir: "up", center: 270, half: 26 },
       { dir: "up-right", center: 315, half: 18 }
     ];
+
+    const cx = options.size / 2;
+    const cy = options.size / 2;
+    const outerR = options.size * 0.485;
+    const innerR = options.size * 0.20;
+    const thumbMaxR = outerR * 0.92;
 
     function applyDirection(nextDirection) {
       if (nextDirection === activeDirection) return;
@@ -303,7 +314,9 @@ function initController() {
     }
 
     function clearDirection() {
-      visualAngle = null;
+      thumbVisible = false;
+      thumbX = 0;
+      thumbY = 0;
       applyDirection(null);
     }
 
@@ -327,16 +340,12 @@ function initController() {
         ? "0 0 18px rgba(0,255,255,0.35)"
         : "0 0 10px rgba(0,255,255,0.18)";
 
-      if (visualAngle == null) {
+      if (!thumbVisible) {
         thumb.style.opacity = "0";
         thumb.style.transform = "translate(-50%, -50%)";
       } else {
-        const radius = options.size * 0.30;
-        const rad = visualAngle * Math.PI / 180;
-        const x = Math.cos(rad) * radius;
-        const y = Math.sin(rad) * radius;
         thumb.style.opacity = "1";
-        thumb.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+        thumb.style.transform = `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px))`;
       }
     }
 
@@ -369,20 +378,31 @@ function initController() {
 
     function updateFromPoint(clientX, clientY) {
       const rect = el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = clientX - cx;
-      const dy = clientY - cy;
+      const padCx = rect.left + rect.width / 2;
+      const padCy = rect.top + rect.height / 2;
+      const dx = clientX - padCx;
+      const dy = clientY - padCy;
       const distance = Math.hypot(dx, dy);
 
       const outerRadius = rect.width / 2;
       const angleRad = Math.atan2(dy, dx);
       const angleDeg = normalizeAngle(angleRad * 180 / Math.PI);
 
-      visualAngle = angleDeg;
+      thumbVisible = true;
+
+      if (distance > 0) {
+        const clamped = Math.min(distance, thumbMaxR);
+        const scale = clamped / distance;
+        thumbX = dx * scale;
+        thumbY = dy * scale;
+      } else {
+        thumbX = 0;
+        thumbY = 0;
+      }
 
       const nextDirection = resolveDirection(angleDeg, distance, outerRadius);
       applyDirection(nextDirection);
+      updateVisualState();
     }
 
     Object.assign(el.style, {
@@ -407,12 +427,8 @@ function initController() {
 
     svg.setAttribute("viewBox", `0 0 ${options.size} ${options.size}`);
     svg.appendChild(segmentGroup);
+    svg.appendChild(dividerGroup);
     el.appendChild(svg);
-
-    const cx = options.size / 2;
-    const cy = options.size / 2;
-    const outerR = options.size * 0.485;
-    const innerR = options.size * 0.20;
 
     for (const zone of visualZones) {
       const seg = document.createElementNS(svgNS, "path");
@@ -431,37 +447,41 @@ function initController() {
       segments.push(seg);
     }
 
-    for (let i = 0; i < 8; i++) {
-      const divider = document.createElement("div");
-      const angle = i * 45;
-      Object.assign(divider.style, {
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        width: "2px",
-        height: `${options.size * 0.44}px`,
-        background: "rgba(0,255,255,0.20)",
-        transformOrigin: "50% 0%",
-        transform: `translate(-50%, 0%) rotate(${angle}deg)`
-      });
-      el.appendChild(divider);
-      dividers.push(divider);
+    const boundaryAngles = [];
+    for (const zone of visualZones) {
+      boundaryAngles.push(zone.center - zone.half);
+      boundaryAngles.push(zone.center + zone.half);
+    }
+
+    for (const angle of boundaryAngles) {
+      const p1 = polarToCartesian(cx, cy, innerR, angle);
+      const p2 = polarToCartesian(cx, cy, outerR, angle);
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", p1.x);
+      line.setAttribute("y1", p1.y);
+      line.setAttribute("x2", p2.x);
+      line.setAttribute("y2", p2.y);
+      line.setAttribute("stroke", "rgba(0,255,255,0.22)");
+      line.setAttribute("stroke-width", Math.max(1.5, options.size * 0.010));
+      line.setAttribute("stroke-linecap", "round");
+      dividerGroup.appendChild(line);
     }
 
     Object.assign(centerCap.style, {
       position: "absolute",
       left: "50%",
       top: "50%",
-      width: `${options.size * 0.46}px`,
-      height: `${options.size * 0.46}px`,
+      width: `${innerR * 2}px`,
+      height: `${innerR * 2}px`,
       transform: "translate(-50%, -50%)",
-      borderRadius: "38%",
+      borderRadius: "50%",
       border: "3px solid rgba(0,255,255,0.88)",
       background: "rgba(0,0,0,0.22)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      boxShadow: "0 0 10px rgba(0,255,255,0.18)"
+      boxShadow: "0 0 10px rgba(0,255,255,0.18)",
+      boxSizing: "border-box"
     });
 
     Object.assign(centerDot.style, {
@@ -491,7 +511,7 @@ function initController() {
       pointerEvents: "none",
       opacity: "0",
       transform: "translate(-50%, -50%)",
-      transition: "transform 0.03s linear, opacity 0.03s linear"
+      transition: "opacity 0.03s linear"
     });
 
     centerCap.appendChild(centerDot);

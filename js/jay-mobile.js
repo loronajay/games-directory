@@ -149,9 +149,9 @@ document.head.appendChild(style);
     const shortSide = Math.min(vw, vh);
 
     const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27), 145, 250);
-    const buttonSize = clamp(shortSide * (portrait ? 0.135 : 0.115), 70, 118);
+    const buttonSize = clamp(shortSide * (portrait ? 0.105 : 0.115), 60, 110);
     const edge = clamp(shortSide * 0.055, 16, 42);
-    const faceGap = clamp(buttonSize * 0.78, 42, 82);
+    const faceGap = clamp(buttonSize * (portrait ? 0.70 : 0.78), 38, 82);
 
     return {
       vw,
@@ -332,37 +332,62 @@ document.head.appendChild(style);
     }
 
     function updateVisualState() {
-      for (let i = 0; i < segments.length; i++) {
-        const seg = segments[i];
-        const zone = visualZones[i];
-        const isActive = zone.dir === activeDirection;
+    const pressure = thumbVisible
+      ? Math.min(1, Math.hypot(thumbX, thumbY) / thumbMaxR)
+      : 0;
 
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i];
+      const zone = visualZones[i];
+      const isActive = zone.dir === activeDirection;
+
+      if (isActive) {
         seg.setAttribute(
           "fill",
-          isActive ? "rgba(0,255,255,0.24)" : "rgba(0,255,255,0.05)"
+          `rgba(0,255,255,${0.16 + pressure * 0.16})`
         );
-        seg.style.filter = isActive
-          ? "drop-shadow(0 0 8px rgba(0,255,255,0.35))"
-          : "none";
-        seg.setAttribute("opacity", isActive ? "1" : "0.92");
-      }
-
-      centerCap.style.boxShadow = activeDirection
-        ? "0 0 18px rgba(0,255,255,0.35)"
-        : "0 0 10px rgba(0,255,255,0.18)";
-
-      if (!thumbVisible) {
-        thumb.style.opacity = "0";
-        thumb.style.transform = "translate(-50%, -50%)";
+        seg.style.filter =
+          `drop-shadow(0 0 ${8 + pressure * 10}px rgba(0,255,255,${0.22 + pressure * 0.22}))`;
+        seg.setAttribute("opacity", `${0.95 + pressure * 0.05}`);
       } else {
-        thumb.style.opacity = "1";
-        const pressure = Math.min(1, Math.hypot(thumbX, thumbY) / thumbMaxR);
-        const sizeScale = 0.85 + pressure * 0.35;
-
-        thumb.style.transform =
-        `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px)) scale(${sizeScale})`;
+        seg.setAttribute("fill", "rgba(0,255,255,0.045)");
+        seg.style.filter = "none";
+        seg.setAttribute("opacity", "0.90");
       }
-    }
+  }
+
+  centerCap.style.boxShadow = activeDirection
+    ? `0 0 ${16 + pressure * 12}px rgba(0,255,255,${0.24 + pressure * 0.20})`
+    : "0 0 10px rgba(0,255,255,0.18)";
+
+  el.style.boxShadow = thumbVisible
+    ? `0 0 ${12 + pressure * 22}px rgba(0,255,255,${0.10 + pressure * 0.20})`
+    : "0 0 0px rgba(0,255,255,0)";
+
+  energyLayer.style.opacity = thumbVisible
+    ? `${0.18 + pressure * 0.28}`
+    : "0.18";
+
+  energyLayer.style.filter = thumbVisible
+    ? `drop-shadow(0 0 ${8 + pressure * 12}px rgba(0,255,255,${0.10 + pressure * 0.18}))`
+    : "none";  
+
+  if (!thumbVisible) {
+    thumb.style.opacity = "0";
+    thumb.style.transform = "translate(-50%, -50%)";
+  } else {
+    thumb.style.opacity = "1";
+    const sizeScale = 0.85 + pressure * 0.35;
+
+    thumb.style.transform =
+      `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px)) scale(${sizeScale})`;
+
+    thumb.style.boxShadow =
+      `0 0 ${10 + pressure * 14}px rgba(0,255,255,${0.22 + pressure * 0.28})`;
+    thumb.style.background =
+      `rgba(0,255,255,${0.10 + pressure * 0.14})`;
+  }
+}
 
     function resolveDirection(angleDeg, distance, outerRadius) {
       const ringStart = outerRadius * 0.24;
@@ -445,6 +470,21 @@ document.head.appendChild(style);
       background: "linear-gradient(135deg, rgba(255,255,255,0.05), transparent 40%)"
     });
   el.appendChild(glass);
+
+    const energyLayer = document.createElement("div");
+    Object.assign(energyLayer.style, {
+      position: "absolute",
+      inset: "0",
+      borderRadius: "50%",
+      pointerEvents: "none",
+      opacity: "0.22",
+      background: `
+        radial-gradient(circle at 50% 50%, rgba(0,255,255,0.10), transparent 42%),
+        radial-gradient(circle at 50% 50%, rgba(0,255,255,0.05), transparent 68%)
+      `,
+      transition: "opacity 0.04s linear, filter 0.04s linear"
+    });
+el.appendChild(energyLayer);
 
     Object.assign(svg.style, {
       position: "absolute",
@@ -567,8 +607,8 @@ document.head.appendChild(style);
   { angle: 225, rotate: 315 }
 ];
 
-const arrowRadius = innerR + (outerR - innerR) * 0.50;
-const arrowSize = options.size * 0.07;
+const arrowRadius = innerR + (outerR - innerR) * 0.58;
+const arrowSize = options.size * 0.062;
 
 for (const { angle, rotate } of arrows) {
 
@@ -754,28 +794,62 @@ svg.appendChild(path);
   }
 
   function renderDefaultLayout() {
-    clearControls();
-    const m = getLayoutMetrics();
+  clearControls();
+  const m = getLayoutMetrics();
 
-    const leftPad = createRingDpad({
-      size: m.padSize,
-      map: {
-        up: keyMap.up,
-        down: keyMap.down,
-        left: keyMap.left,
-        right: keyMap.right
-      }
+  const leftPad = createRingDpad({
+    size: m.padSize,
+    map: {
+      up: keyMap.up,
+      down: keyMap.down,
+      left: keyMap.left,
+      right: keyMap.right
+    }
+  });
+
+  const yBtn = createFaceButton({ name: "y", label: "Y", size: m.buttonSize });
+  const bBtn = createFaceButton({ name: "b", label: "B", size: m.buttonSize });
+  const xBtn = createFaceButton({ name: "x", label: "X", size: m.buttonSize });
+  const aBtn = createFaceButton({ name: "a", label: "A", size: m.buttonSize });
+
+  if (m.portrait) {
+    const padBottom = Math.max(22, m.edge + 8);
+    const padLeft = Math.max(12, m.edge + 2);
+
+    leftPad.setPosition({
+      left: `${padLeft}px`,
+      bottom: `${padBottom}px`
     });
 
+    const portraitRight = Math.max(18, m.edge + 8);
+    const portraitBottom = Math.max(28, m.edge + 6);
+    const hGap = m.buttonSize * 0.92;
+    const vGap = m.buttonSize * 0.86;
+
+    yBtn.setPosition({
+      right: `${portraitRight + hGap * 0.95}px`,
+      bottom: `${portraitBottom + vGap * 2.0}px`
+    });
+
+    bBtn.setPosition({
+      right: `${portraitRight + hGap * 1.95}px`,
+      bottom: `${portraitBottom + vGap * 1.0}px`
+    });
+
+    xBtn.setPosition({
+      right: `${portraitRight}px`,
+      bottom: `${portraitBottom + vGap * 1.0}px`
+    });
+
+    aBtn.setPosition({
+      right: `${portraitRight + hGap * 0.95}px`,
+      bottom: `${portraitBottom}px`
+    });
+  } else {
     leftPad.setPosition({
       left: `${m.edge}px`,
       bottom: `${m.edge}px`
     });
-
-    const yBtn = createFaceButton({ name: "y", label: "Y", size: m.buttonSize });
-    const bBtn = createFaceButton({ name: "b", label: "B", size: m.buttonSize });
-    const xBtn = createFaceButton({ name: "x", label: "X", size: m.buttonSize });
-    const aBtn = createFaceButton({ name: "a", label: "A", size: m.buttonSize });
 
     const groupRight = m.edge;
     const baseBottom = m.edge;
@@ -786,6 +860,7 @@ svg.appendChild(path);
     xBtn.setPosition({ right: `${groupRight}px`, bottom: `${baseBottom + gap}px` });
     aBtn.setPosition({ right: `${groupRight + gap}px`, bottom: `${baseBottom}px` });
   }
+}
 
   function renderDualDpadLayout() {
     clearControls();

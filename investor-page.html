@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jay's Retro Arcade - Investor Overview</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:'Press Start 2P',cursive;
+  background:url('images/background.png') center center fixed;
+  background-size:cover;
+  color:white;
+  text-align:center;
+  overflow-x:hidden;
+  animation:crtFlicker 6s infinite;
+  min-height:100vh;
+}
+
+/* ===== OVERLAY ===== */
+#arcadeOverlay{
+  position:fixed;
+  inset:0;
+  background:black;
+  opacity:1;
+  z-index:9999;
+  pointer-events:none;
+  transition:opacity .45s ease;
+}
+
+/* ===== CRT COLLAPSE ===== */
+.crt-collapse{
+  animation:crtCollapse .6s forwards;
+}
+
+@keyframes crtCollapse{
+  0%{
+    transform:scaleY(1);
+    filter:brightness(1);
+  }
+  60%{
+    transform:scaleY(0.02);
+    filter:brightness(1.5);
+  }
+  100%{
+    transform:scaleY(0);
+    filter:brightness(0);
+    background:black;
+  }
+}
+
+/* ===== CRT FLASH LINE ===== */
+#crtFlash{
+  position:fixed;
+  left:0;
+  width:100%;
+  height:4px;
+  background:white;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:0;
+  z-index:10000;
+  pointer-events:none;
+}
+
+.flash-active{
+  animation:flashLine .15s ease-out forwards;
+}
+
+@keyframes flashLine{
+  0%{opacity:1;height:6px;}
+  100%{opacity:0;height:2px;}
+}
+
+@keyframes crtFlicker{
+  0%,100%{opacity:1;}
+  50%{opacity:.985;}
+}
+
+/* ===== CRT FX ===== */
+.scanlines{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1000;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,.25) 0px,
+    rgba(0,0,0,.25) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.crt-overlay{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999;
+  background:radial-gradient(circle at center,
+    rgba(0,0,0,0) 60%,
+    rgba(0,0,0,.45) 100%);
+}
+
+/* ===== BOOT ===== */
+#loadingScreen{
+  position:fixed;
+  inset:0;
+  background:black;
+  color:#00ff66;
+  font-family:'VT323', monospace;
+  padding:40px;
+  font-size:22px;
+  letter-spacing:1px;
+  white-space:pre-line;
+  z-index:3000;
+}
+
+.bios-cursor{
+  display:inline;
+  animation:blinkCursor 1s steps(1) infinite;
+}
+
+@keyframes blinkCursor{
+  50%{opacity:0;}
+}
+
+/* ===== START ===== */
+#startScreen{
+  position:fixed;
+  inset:0;
+  background:black;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  cursor:pointer;
+  z-index:2500;
+  padding:20px;
+}
+
+.arcade-title{
+  font-size:1.5rem;
+  color:#ff00ff;
+  text-shadow:0 0 25px #ff00ff;
+  line-height:1.8;
+}
+
+.press-start{
+  margin-top:50px;
+  color:#00ffff;
+  animation:blink 1s infinite;
+  text-shadow:0 0 20px #00ffff;
+  font-size:.9rem;
+}
+
+@keyframes blink{50%{opacity:0;}}
+
+/* ===== MAIN ===== */
+#mainContent{
+  display:none;
+  position:relative;
+  z-index:2;
+  padding:40px 20px 100px;
+}
+
+.hero-wrap{
+  max-width:1180px;
+  margin:0 auto;
+}
+
+.title-box{
+  margin-top:50px;
+  padding:30px 24px;
+  background:rgba(0,0,0,.78);
+  display:inline-block;
+  border:3px solid #00ffff;
+  box-shadow:0 0 40px #00ffff;
+}
+
+.title-box h1{
+  color:#ff00ff;
+  text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
+  line-height:1.5;
+  font-size:1.4rem;
+}
+
+.subtitle{
+  margin-top:20px;
+  max-width:920px;
+  margin-left:auto;
+  margin-right:auto;
+  background:rgba(0,0,0,.72);
+  border:2px solid #ff00ff;
+  box-shadow:0 0 24px rgba(255,0,255,.5);
+  padding:20px;
+  color:#00ffff;
+  text-shadow:0 0 8px #00ffff;
+  font-size:.7rem;
+  line-height:2.2;
+}
+
+.hero-actions{
+  margin-top:28px;
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+.arcade-btn{
+  display:inline-block;
+  text-decoration:none;
+  color:#00ffff;
+  background:rgba(0,0,0,.82);
+  border:3px solid #00ffff;
+  padding:16px 20px;
+  min-width:220px;
+  box-shadow:0 0 18px rgba(0,255,255,.45);
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  font-size:.6rem;
+}
+
+.arcade-btn:hover,
+.arcade-btn:focus{
+  transform:perspective(800px) rotateX(6deg) scale(1.05);
+  box-shadow:0 0 32px #ff00ff, 0 0 16px #00ffff inset;
+  border-color:#ff00ff;
+  color:#ffccff;
+}
+
+.section{
+  max-width:1180px;
+  margin:50px auto 0;
+  background:rgba(0,0,0,.78);
+  border:3px solid #ff00ff;
+  box-shadow:0 0 34px rgba(255,0,255,.35);
+  padding:28px 20px 30px;
+}
+
+.section-title{
+  color:#ff00ff;
+  text-shadow:0 0 18px #ff00ff;
+  font-size:.95rem;
+  margin-bottom:22px;
+  line-height:1.8;
+}
+
+.section-subtitle{
+  font-family:'VT323', monospace;
+  color:#00ffff;
+  font-size:1.8rem;
+  margin-bottom:18px;
+  text-shadow:0 0 10px #00ffff;
+}
+
+.section-text{
+  max-width:1000px;
+  margin:0 auto;
+  color:#dffcff;
+  font-size:.68rem;
+  line-height:2.2;
+}
+
+.grid-2,
+.grid-3,
+.grid-4{
+  display:grid;
+  gap:22px;
+  margin-top:28px;
+}
+
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+
+.info-card{
+  background:rgba(0,0,0,.84);
+  border:2px solid #00ffff;
+  box-shadow:0 0 20px rgba(0,255,255,.24);
+  padding:20px 18px;
+  text-align:left;
+  transition:transform .22s ease, box-shadow .22s ease;
+}
+
+.info-card:hover{
+  transform:translateY(-4px) scale(1.02);
+  box-shadow:0 0 28px rgba(255,0,255,.45);
+}
+
+.info-card h3{
+  color:#00ffff;
+  text-shadow:0 0 10px #00ffff;
+  font-size:.62rem;
+  line-height:1.8;
+  margin-bottom:14px;
+}
+
+.info-card p{
+  font-family:'VT323', monospace;
+  color:#f4f4f4;
+  font-size:1.5rem;
+  line-height:1.45;
+}
+
+.info-card ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+
+.info-card li{
+  font-family:'VT323', monospace;
+  color:#f4f4f4;
+  font-size:1.5rem;
+  line-height:1.45;
+  margin:8px 0;
+}
+
+.metric{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:180px;
+}
+
+.metric-number{
+  color:#00ffff;
+  font-size:1.2rem;
+  text-shadow:0 0 16px #00ffff;
+  margin-bottom:16px;
+}
+
+.metric-label{
+  color:#ffffff;
+  font-size:.52rem;
+  line-height:1.8;
+}
+
+.timeline{
+  display:grid;
+  gap:16px;
+  margin-top:24px;
+}
+
+.timeline-step{
+  background:rgba(0,0,0,.84);
+  border-left:5px solid #00ffff;
+  border-top:2px solid rgba(255,0,255,.6);
+  border-right:2px solid rgba(255,0,255,.25);
+  border-bottom:2px solid rgba(255,0,255,.25);
+  padding:18px;
+  text-align:left;
+}
+
+.timeline-step h3{
+  color:#00ffff;
+  text-shadow:0 0 10px #00ffff;
+  font-size:.6rem;
+  line-height:1.8;
+  margin-bottom:10px;
+}
+
+.timeline-step p{
+  font-family:'VT323', monospace;
+  font-size:1.45rem;
+  line-height:1.45;
+  color:#f7f7f7;
+}
+
+.quote-box{
+  margin-top:25px;
+  padding:24px;
+  border:2px solid #00ffff;
+  box-shadow:0 0 18px rgba(0,255,255,.3) inset;
+  background:rgba(0,0,0,.75);
+}
+
+.quote-box p{
+  font-family:'VT323', monospace;
+  color:#ffffff;
+  font-size:1.9rem;
+  line-height:1.4;
+}
+
+.quote-box .quote-credit{
+  margin-top:16px;
+  color:#00ffff;
+  font-size:.55rem;
+}
+
+/* ===== FEATURED ARCADE GRID ===== */
+.featured-grid{
+  margin:28px auto 0;
+  max-width:1100px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+
+.featured-card{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  background:rgba(0,0,0,.85);
+  border:3px solid #ff00ff;
+  padding:15px;
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.featured-card:hover{
+  transform:perspective(800px) rotateX(6deg) scale(1.05);
+  box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
+  border-color:#00ffff;
+}
+
+.featured-card video{
+  width:100%;
+  height:185px;
+  object-fit:cover;
+  border:2px solid #00ffff;
+  background:black;
+}
+
+.featured-title{
+  margin-top:15px;
+  font-size:.75rem;
+  color:#00ffff;
+  text-shadow:0 0 12px #00ffff;
+  line-height:1.8;
+}
+
+.featured-desc{
+  margin-top:12px;
+  font-family:'VT323', monospace;
+  color:#f2f2f2;
+  font-size:1.35rem;
+  line-height:1.35;
+  min-height:74px;
+}
+
+.featured-meta{
+  margin-top:12px;
+  font-size:.5rem;
+  color:#ffccff;
+  text-shadow:0 0 8px #ff00ff;
+  opacity:.95;
+}
+
+.cta-panel{
+  background:rgba(0,0,0,.85);
+  border:3px solid #00ffff;
+  box-shadow:0 0 40px rgba(0,255,255,.3);
+  padding:28px 20px;
+}
+
+.cta-panel p{
+  font-family:'VT323', monospace;
+  color:#ffffff;
+  font-size:1.7rem;
+  line-height:1.45;
+  max-width:900px;
+  margin:0 auto 24px;
+}
+
+.footer-note{
+  margin-top:30px;
+  color:#00ffff;
+  font-size:.5rem;
+  opacity:.9;
+  line-height:1.8;
+}
+
+/* CRT Power On */
+.crt-boot{
+  animation:crtBoot .6s forwards;
+}
+
+@keyframes crtBoot{
+  0%{
+    transform:scaleY(0);
+    filter:brightness(3);
+  }
+  40%{
+    transform:scaleY(0.05);
+    filter:brightness(2);
+  }
+  100%{
+    transform:scaleY(1);
+    filter:brightness(1);
+  }
+}
+
+@media(max-width:1000px){
+  .grid-4{grid-template-columns:repeat(2,1fr);}
+  .grid-3{grid-template-columns:repeat(2,1fr);}
+  .featured-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+@media(max-width:760px){
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .featured-grid{
+    grid-template-columns:1fr;
+  }
+
+  .title-box h1{
+    font-size:1rem;
+  }
+
+  .arcade-title{
+    font-size:1.05rem;
+  }
+
+  .section-title{
+    font-size:.72rem;
+  }
+
+  .subtitle,
+  .section-text{
+    font-size:.58rem;
+  }
+
+  .arcade-btn{
+    min-width:100%;
+  }
+
+  #mainContent{
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  .featured-desc{
+    min-height:auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="arcadeOverlay"></div>
+<div id="crtFlash"></div>
+<div id="loadingScreen"></div>
+
+<div id="startScreen">
+  <div class="arcade-title">JAY'S RETRO ARCADE<br>INVESTOR OVERVIEW</div>
+  <div class="press-start">PRESS START</div>
+</div>
+
+<div class="scanlines"></div>
+<div class="crt-overlay"></div>
+
+<audio id="hoverSound" preload="auto">
+  <source src="music/hovered.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="shutdownSound" preload="auto">
+  <source src="music/crt-shutdown.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="bgMusic" loop preload="auto">
+  <source src="music/background.mp3" type="audio/mpeg">
+</audio>
+
+<div id="mainContent">
+
+  <div class="hero-wrap">
+    <div class="title-box">
+      <h1>JAY'S RETRO ARCADE</h1>
+    </div>
+
+    <div class="subtitle">
+      A modern competitive arcade ecosystem built around original games, replayable score-chasing gameplay, future connected cabinets, and community-driven tournaments.
+    </div>
+
+    <div class="hero-actions">
+      <a class="arcade-btn arcade-link" href="index.html">RETURN TO ARCADE</a>
+      <a class="arcade-btn" href="#vision">VIEW VISION</a>
+      <a class="arcade-btn" href="#contact">INVESTOR CONTACT</a>
+    </div>
+  </div>
+
+  <section class="section" id="vision">
+    <div class="section-title">01 // THE VISION</div>
+    <div class="section-subtitle">Build the next generation of competitive arcade gaming.</div>
+    <div class="section-text">
+      Jay’s Retro Arcade is designed to modernize the competitive spirit of classic arcades by combining a browser-based arcade platform, a growing library of original arcade-style games, player identity systems, global leaderboards, tournaments, and future connected arcade hardware. The long-term goal is to build a scalable arcade network where digital play and physical arcade culture reinforce each other.
+    </div>
+
+    <div class="quote-box">
+      <p>
+        Arcades were the original competitive gaming platform. Jay’s Retro Arcade is built to bring that culture into the internet age.
+      </p>
+      <div class="quote-credit">FOUNDER THESIS</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">02 // THE OPPORTUNITY</div>
+    <div class="section-subtitle">A gap exists between modern online gaming and classic arcade competition.</div>
+    <div class="grid-3">
+      <div class="info-card">
+        <h3>ARCADES CREATED COMPETITIVE GAMING CULTURE</h3>
+        <p>High scores, local recognition, repeated play, rivalry, and social competition were all central to classic arcade success.</p>
+      </div>
+      <div class="info-card">
+        <h3>MODERN ONLINE GAMES LOST ARCADE SIMPLICITY</h3>
+        <p>Many modern games are deep, but they often lack instant accessibility, quick restart loops, and highly visible score-driven competition.</p>
+      </div>
+      <div class="info-card">
+        <h3>CONNECTED TECHNOLOGY CHANGES THE MODEL</h3>
+        <p>Today, player profiles, cloud rankings, online tournaments, and connected cabinets can turn local arcade culture into a global network.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">03 // FEATURED ARCADE</div>
+    <div class="section-subtitle">A preview of the playable ecosystem already taking shape.</div>
+
+    <div class="featured-grid">
+      <a class="featured-card arcade-link" href="games/apple-catcher/index.html">
+        <video muted loop preload="metadata">
+          <source src="previews/apple-catcher.mp4" type="video/mp4">
+        </video>
+        <div class="featured-title">APPLE CATCHER</div>
+        <div class="featured-desc">Fast reaction-driven arcade play built around instant restarts and easy-to-understand competitive appeal.</div>
+        <div class="featured-meta">QUICK-PLAY / REPLAYABLE / ARCADE FIRST</div>
+      </a>
+
+      <a class="featured-card arcade-link" href="games/art-of-war/index.html">
+        <video muted loop preload="metadata">
+          <source src="previews/art-of-war.mp4" type="video/mp4">
+        </video>
+        <div class="featured-title">ART OF WAR</div>
+        <div class="featured-desc">A compact original title with arcade flavor, readable action, and room for repeat-session mastery.</div>
+        <div class="featured-meta">CHARM / STRATEGY / SHORT SESSIONS</div>
+      </a>
+
+      <a class="featured-card arcade-link" href="games/bird-duty/index.html">
+        <video muted loop preload="metadata">
+          <source src="previews/bird-duty.mp4" type="video/mp4">
+        </video>
+        <div class="featured-title">BIRD DUTY</div>
+        <div class="featured-desc">Lightweight arcade action that fits the platform’s focus on approachable design and fast replay loops.</div>
+        <div class="featured-meta">ACCESSIBLE / FAST / REPEATABLE</div>
+      </a>
+
+      <a class="featured-card arcade-link" href="games/blade-and-block/index.html">
+        <video muted loop preload="metadata">
+          <source src="previews/blade-and-block.mp4" type="video/mp4">
+        </video>
+        <div class="featured-title">BLADE &amp; BLOCK</div>
+        <div class="featured-desc">A satisfying action concept built around direct inputs, short rounds, and immediate feedback.</div>
+        <div class="featured-meta">ACTION / SKILL / HIGH RETRY VALUE</div>
+      </a>
+
+      <a class="featured-card arcade-link" href="games/sumorai/index.html">
+        <video muted loop preload="metadata">
+          <source src="previews/sumorai.mp4" type="video/mp4">
+        </video>
+        <div class="featured-title">SUMORAI</div>
+        <div class="featured-desc">One of the strongest competitive centerpieces on the platform, with clear tournament and spectator potential.</div>
+        <div class="featured-meta">COMPETITIVE / SPECTATOR / TOURNAMENT READY</div>
+      </a>
+
+      <a class="featured-card arcade-link" href="games/x-pong/index.html">
+        <video muted loop preload="metadata">
+          <source src="previews/x-pong.mp4" type="video/mp4">
+        </video>
+        <div class="featured-title">X-PONG</div>
+        <div class="featured-desc">A simple-to-read concept with strong arcade DNA and immediate understandability for players and viewers.</div>
+        <div class="featured-meta">CLASSIC FEEL / EASY TO READ / HARD TO MASTER</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">04 // THE PLATFORM</div>
+    <div class="section-subtitle">A software-first arcade ecosystem.</div>
+    <div class="grid-4">
+      <div class="info-card">
+        <h3>ARCADE OS</h3>
+        <ul>
+          <li>Browser-based arcade interface</li>
+          <li>Controller-friendly navigation</li>
+          <li>Modular game library</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>ORIGINAL GAMES</h3>
+        <ul>
+          <li>High-score systems</li>
+          <li>Speedrun potential</li>
+          <li>Short replayable sessions</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>COMPETITIVE LAYER</h3>
+        <ul>
+          <li>Leaderboards</li>
+          <li>Player profiles</li>
+          <li>Tournament support</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>FUTURE HARDWARE</h3>
+        <ul>
+          <li>Offline-first cabinets</li>
+          <li>Connected update layer</li>
+          <li>Global arcade network vision</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">05 // WHY THIS CAN WIN</div>
+    <div class="section-subtitle">Jay’s Retro Arcade is not just a game. It is a scalable system.</div>
+    <div class="grid-2">
+      <div class="info-card">
+        <h3>PLATFORM-FIRST ARCHITECTURE</h3>
+        <p>Instead of building one cabinet around one title, Jay’s Retro Arcade is designed as an Arcade OS that can support multiple games, player systems, and future hardware products.</p>
+      </div>
+      <div class="info-card">
+        <h3>COMPETITIVE GAME DESIGN PHILOSOPHY</h3>
+        <p>The game library focuses on score chasing, survival, speedruns, and repeatable short-session gameplay, the same loops that historically made arcade games sticky and social.</p>
+      </div>
+      <div class="info-card">
+        <h3>SOFTWARE-NATIVE EXPANSION</h3>
+        <p>Because the platform is software-first, new games and features can be added more efficiently than in traditional arcade hardware models.</p>
+      </div>
+      <div class="info-card">
+        <h3>COMMUNITY-BUILT ADVANTAGE</h3>
+        <p>The founder brings nearly two decades of grassroots competitive gaming experience, giving the platform a real understanding of how rivalries, events, and player communities actually grow.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">06 // BUSINESS MODEL</div>
+    <div class="section-subtitle">Multiple long-term revenue paths.</div>
+    <div class="grid-3">
+      <div class="info-card">
+        <h3>WEB PLATFORM</h3>
+        <ul>
+          <li>Traffic growth</li>
+          <li>Partnerships</li>
+          <li>Sponsorships</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>CONNECTED CABINETS</h3>
+        <ul>
+          <li>Cabinet sales</li>
+          <li>Optional monthly update service</li>
+          <li>Operator support opportunities</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>COMPETITIVE ECOSYSTEM</h3>
+        <ul>
+          <li>Tournaments</li>
+          <li>Streaming</li>
+          <li>Merchandise and brand expansion</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">07 // GO-TO-MARKET</div>
+    <div class="section-subtitle">Grow community first, then scale hardware.</div>
+    <div class="timeline">
+      <div class="timeline-step">
+        <h3>PHASE 1 // DIGITAL PLATFORM TRACTION</h3>
+        <p>Grow the online arcade platform through weekly competition, leaderboard-driven engagement, and community building.</p>
+      </div>
+      <div class="timeline-step">
+        <h3>PHASE 2 // TOURNAMENT CULTURE</h3>
+        <p>Develop recurring events, named challenges, and visible player identity systems that turn the platform into a real competitive destination.</p>
+      </div>
+      <div class="timeline-step">
+        <h3>PHASE 3 // PROTOTYPE CABINETS</h3>
+        <p>Deploy early hardware prototypes for demonstrations, events, local tournaments, and proof of concept.</p>
+      </div>
+      <div class="timeline-step">
+        <h3>PHASE 4 // NETWORKED ARCADE ECOSYSTEM</h3>
+        <p>Scale toward connected cabinets, broader competitive infrastructure, and a larger community spanning both online and physical spaces.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">08 // FOUNDER</div>
+    <div class="section-subtitle">Built by someone who has already spent years building competitive gaming communities.</div>
+    <div class="section-text">
+      Jay Lorona has spent nearly twenty years participating in and organizing grassroots competitive gaming communities, especially through the Super Smash Bros. Melee scene. He hosted tournaments from his own apartment, helped grow local tournament culture in Sacramento, and later ran beginner-friendly competitive events that brought large numbers of new players into the scene. Over time, his apartment also became a miniature arcade hub where players gathered for retro game nights built around simple but deeply competitive games. Jay’s Retro Arcade is the direct evolution of that experience.
+    </div>
+
+    <div class="grid-3">
+      <div class="info-card metric">
+        <div class="metric-number">20+</div>
+        <div class="metric-label">YEARS AROUND COMPETITIVE GAMING CULTURE</div>
+      </div>
+      <div class="info-card metric">
+        <div class="metric-number">100+</div>
+        <div class="metric-label">ENTRANTS AT A MAJOR BEGINNER-FOCUSED EVENT</div>
+      </div>
+      <div class="info-card metric">
+        <div class="metric-number">$1</div>
+        <div class="metric-label">ENTRY MODEL THAT HELPED MAKE TOURNAMENTS ACCESSIBLE</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">09 // LONG-TERM GOAL</div>
+    <div class="section-subtitle">A global community built around charm, competition, and quick-play arcade design.</div>
+    <div class="section-text">
+      In the long term, Jay’s Retro Arcade aims to become a recognizable home for original arcade-style games, competitive leaderboard chasing, game-specific subcommunities, recurring online and live tournaments, and future cabinets that extend the platform into the physical world. The project is designed not only as a business, but as a lasting ecosystem that can grow across generations.
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="section-title">10 // INVESTOR CONTACT</div>
+    <div class="section-subtitle">Interested in the vision?</div>
+
+    <div class="cta-panel">
+      <p>
+        Jay’s Retro Arcade is currently in early platform development and open to future investor conversations, strategic partnerships, and opportunities that help accelerate product growth, competition systems, and hardware development.
+      </p>
+
+      <div class="hero-actions">
+        <a class="arcade-btn arcade-link" href="index.html">RETURN TO ARCADE</a>
+        <a class="arcade-btn" href="mailto:leojaylorona@gmail.com">EMAIL JAY ARCADE</a>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      JAY'S RETRO ARCADE // INVESTOR OVERVIEW // EARLY STAGE PLATFORM DEVELOPMENT
+    </div>
+  </section>
+
+</div>
+
+<script>
+const overlay = document.getElementById("arcadeOverlay");
+const shutdownSound = document.getElementById("shutdownSound");
+const hoverSound = document.getElementById("hoverSound");
+const bgMusic = document.getElementById("bgMusic");
+
+/* Fade in */
+window.addEventListener("load", () => {
+  setTimeout(() => { overlay.style.opacity = "0"; }, 200);
+});
+
+/* Boot */
+const bootText =
+"JAY SYSTEMS BIOS v2.3\n" +
+"Loading Investor Overview...\n" +
+"Initializing Arcade Vision...\n" +
+"System Ready.";
+
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loadingScreen");
+  loader.innerHTML = '<span id="biosText"></span><span class="bios-cursor">_</span>';
+
+  const textElement = document.getElementById("biosText");
+  let i = 0;
+
+  function typeCharacter(){
+    if(i < bootText.length){
+      textElement.textContent += bootText[i];
+
+      if(bootText[i] === "\n"){
+        i++;
+        setTimeout(typeCharacter, 350);
+        return;
+      }
+
+      i++;
+      setTimeout(typeCharacter, 18);
+    } else {
+      setTimeout(() => {
+        loader.style.display = "none";
+        document.getElementById("startScreen").style.display = "flex";
+      }, 800);
+    }
+  }
+
+  typeCharacter();
+});
+
+/* Start */
+const startScreen = document.getElementById("startScreen");
+const mainContent = document.getElementById("mainContent");
+let startScreenDismissed = false;
+
+function startArcade(){
+  if(startScreenDismissed) return;
+  startScreenDismissed = true;
+  startScreen.style.display = "none";
+  mainContent.style.display = "block";
+  bgMusic.play().catch(() => {});
+}
+
+startScreen.addEventListener("click", startArcade);
+
+document.addEventListener("keydown", (e) => {
+  if(!startScreenDismissed && (e.key === "Enter" || e.key === " ")){
+    e.preventDefault();
+    startArcade();
+  }
+});
+
+/* Button hover sound */
+document.querySelectorAll(".arcade-btn").forEach(btn => {
+  btn.addEventListener("mouseenter", () => {
+    hoverSound.currentTime = 0;
+    hoverSound.play().catch(() => {});
+  });
+});
+
+/* Featured videos */
+document.querySelectorAll(".featured-card").forEach(card => {
+  const video = card.querySelector("video");
+  if (!video) return;
+
+  card.addEventListener("mouseenter", () => {
+    video.play().catch(() => {});
+  });
+
+  card.addEventListener("mouseleave", () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+});
+
+/* Arcade-link shutdown transition */
+document.querySelectorAll(".arcade-link").forEach(link => {
+  link.addEventListener("click", e => {
+    const href = link.getAttribute("href");
+    if(!href || href.startsWith("#") || href.startsWith("mailto:")) return;
+
+    e.preventDefault();
+
+    shutdownSound.currentTime = 0;
+    shutdownSound.play().catch(() => {});
+
+    document.body.classList.add("crt-collapse");
+    document.getElementById("crtFlash").classList.add("flash-active");
+
+    overlay.style.transition = "opacity 0.3s ease";
+    overlay.style.opacity = "1";
+
+    setTimeout(() => {
+      window.location.href = href;
+    }, 650);
+  });
+});
+
+/* Force hard reload when returning via back button */
+window.addEventListener("pageshow", function(event) {
+  if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+    window.location.reload();
+  }
+});
+
+/* Detect back button navigation */
+window.addEventListener("pageshow", function(event) {
+  const navType = performance.getEntriesByType("navigation")[0]?.type;
+
+  if (event.persisted || navType === "back_forward") {
+    document.body.style.transform = "scaleY(0)";
+    document.body.style.filter = "brightness(3)";
+
+    setTimeout(() => {
+      document.body.classList.add("crt-boot");
+    }, 50);
+  }
+});
+</script>
+
+</body>
+</html>

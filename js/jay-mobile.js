@@ -50,32 +50,6 @@ document.body.appendChild(versionBadge);
    START OVERLAY
    ============================= */
 
-const startOverlay = document.createElement("div");
-Object.assign(startOverlay.style, {
-  position: "fixed",
-  inset: "0",
-  background: "black",
-  color: "#00ffff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexDirection: "column",
-  fontFamily: "monospace",
-  zIndex: "999998"
-});
-
-const entryTitle =
-  window.JAY_GAME_CONFIG?.entryTitle || "INSERT COIN";
-
-const entrySub =
-  window.JAY_GAME_CONFIG?.entrySub || "TAP TO START";
-
-startOverlay.innerHTML = `
-  <h2 style="margin:0 0 20px 0;">${entryTitle}</h2>
-  <p style="margin:0;">${entrySub}</p>
-`;
-
-document.body.appendChild(startOverlay);
 
 /* =============================
    CONTROLS LAYER

@@ -1,5 +1,5 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v18.2
+   JAY ARCADE MOBILE CONTROLLER v18.3
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
@@ -7,12 +7,13 @@
    - dual-dpad support
    - upgraded Genesis-style d-pad feel
    - corrected visual/input alignment
+   - curved segmented highlight regions
    ========================================== */
 
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v18.2";
+const JAY_MOBILE_VERSION = "v18.3";
 
 function isMobile() {
   return (
@@ -236,6 +237,32 @@ function initController() {
     return bestDir;
   }
 
+  function polarToCartesian(cx, cy, r, angleDeg) {
+    const rad = angleDeg * Math.PI / 180;
+    return {
+      x: cx + Math.cos(rad) * r,
+      y: cy + Math.sin(rad) * r
+    };
+  }
+
+  function describeRingSegmentPath(cx, cy, innerR, outerR, startDeg, endDeg) {
+    const startOuter = polarToCartesian(cx, cy, outerR, startDeg);
+    const endOuter = polarToCartesian(cx, cy, outerR, endDeg);
+    const startInner = polarToCartesian(cx, cy, innerR, endDeg);
+    const endInner = polarToCartesian(cx, cy, innerR, startDeg);
+
+    const sweep = ((endDeg - startDeg) % 360 + 360) % 360;
+    const largeArc = sweep > 180 ? 1 : 0;
+
+    return [
+      `M ${startOuter.x} ${startOuter.y}`,
+      `A ${outerR} ${outerR} 0 ${largeArc} 1 ${endOuter.x} ${endOuter.y}`,
+      `L ${startInner.x} ${startInner.y}`,
+      `A ${innerR} ${innerR} 0 ${largeArc} 0 ${endInner.x} ${endInner.y}`,
+      "Z"
+    ].join(" ");
+  }
+
   function createRingDpad(options) {
     const el = makeBaseControl();
     const segments = [];
@@ -243,6 +270,9 @@ function initController() {
     const centerCap = document.createElement("div");
     const centerDot = document.createElement("div");
     const thumb = document.createElement("div");
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    const segmentGroup = document.createElementNS(svgNS, "g");
 
     let activeDirection = null;
     let activePointerId = null;
@@ -283,15 +313,14 @@ function initController() {
         const zone = visualZones[i];
         const isActive = zone.dir === activeDirection;
 
-        seg.style.background = isActive
-          ? "rgba(0,255,255,0.24)"
-          : "rgba(0,255,255,0.05)";
-
-        seg.style.boxShadow = isActive
-          ? "inset 0 0 18px rgba(0,255,255,0.50), 0 0 14px rgba(0,255,255,0.22)"
+        seg.setAttribute(
+          "fill",
+          isActive ? "rgba(0,255,255,0.24)" : "rgba(0,255,255,0.05)"
+        );
+        seg.style.filter = isActive
+          ? "drop-shadow(0 0 8px rgba(0,255,255,0.35))"
           : "none";
-
-        seg.style.opacity = isActive ? "1" : "0.92";
+        seg.setAttribute("opacity", isActive ? "1" : "0.92");
       }
 
       centerCap.style.boxShadow = activeDirection
@@ -367,25 +396,38 @@ function initController() {
       backdropFilter: "blur(2px)"
     });
 
+    Object.assign(svg.style, {
+      position: "absolute",
+      inset: "0",
+      width: "100%",
+      height: "100%",
+      pointerEvents: "none",
+      overflow: "visible"
+    });
+
+    svg.setAttribute("viewBox", `0 0 ${options.size} ${options.size}`);
+    svg.appendChild(segmentGroup);
+    el.appendChild(svg);
+
+    const cx = options.size / 2;
+    const cy = options.size / 2;
+    const outerR = options.size * 0.485;
+    const innerR = options.size * 0.20;
+
     for (const zone of visualZones) {
-      const seg = document.createElement("div");
-      const start = (zone.center - zone.half) * Math.PI / 180;
-      const end = (zone.center + zone.half) * Math.PI / 180;
+      const seg = document.createElementNS(svgNS, "path");
+      const startDeg = zone.center - zone.half;
+      const endDeg = zone.center + zone.half;
 
-      Object.assign(seg.style, {
-        position: "absolute",
-        inset: "0",
-        clipPath: `polygon(
-          50% 50%,
-          ${50 + 50 * Math.cos(start)}% ${50 + 50 * Math.sin(start)}%,
-          ${50 + 50 * Math.cos(end)}% ${50 + 50 * Math.sin(end)}%
-        )`,
-        background: "rgba(0,255,255,0.05)",
-        opacity: "0.92",
-        transition: "background 0.04s linear, box-shadow 0.04s linear, opacity 0.04s linear"
-      });
+      seg.setAttribute(
+        "d",
+        describeRingSegmentPath(cx, cy, innerR, outerR, startDeg, endDeg)
+      );
+      seg.setAttribute("fill", "rgba(0,255,255,0.05)");
+      seg.setAttribute("opacity", "0.92");
+      seg.style.transition = "fill 0.04s linear, opacity 0.04s linear, filter 0.04s linear";
 
-      el.appendChild(seg);
+      segmentGroup.appendChild(seg);
       segments.push(seg);
     }
 

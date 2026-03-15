@@ -29,11 +29,12 @@ SCREEN_ORIENTATION = '<meta name="screen-orientation" content="landscape">'
 # -------------------------
 
 # Correct path for games inside /games/
-JAY_MOBILE_SCRIPT = '<script src="../../js/jay-mobile.js"></script>'
+JAY_MOBILE_SCRIPT = '<script src="../../js/jay-mobile.js?v=18_1"></script>'
 
 # Legacy path used before the folder migration
 LEGACY_JAY_MOBILE_SCRIPTS = [
-    '<script src="../js/jay-mobile.js"></script>'
+    '<script src="../js/jay-mobile.js"></script>',
+    '<script src="././js/jay-mobile.js"></script>'
 ]
 
 GOATCOUNTER_BLOCK = """<script>
@@ -333,7 +334,7 @@ def patch_control_overrides(html, folder_name, notes):
                 override_status = "error"
 
     return html, (html != original_html), override_status
-    
+
 
 def patch_html(index_path: Path, dry_run=False):
 

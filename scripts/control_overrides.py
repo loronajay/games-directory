@@ -1,20 +1,33 @@
-GAME_OVERRIDES = {
-
+GAME_CONFIGS = {
     "blade-and-block": {
-        "up": "j",
-        "b": "c",
-        "a": "w"
+        "keyOverrides": {
+            "up": "j",
+            "b": "c",
+            "a": "w"
+        },
+        "mobile": {
+            "layout": "default"
+        }
     },
 
     "apple-catcher": {
-        "b": "ArrowLeft",
-        "x": "ArrowRight"
+        "keyOverrides": {
+            "b": "ArrowLeft",
+            "x": "ArrowRight"
+        },
+        "mobile": {
+            "layout": "dual-dpad"
+        }
     },
 
     "x-pong": {
-        "y": "k",
-        "a": ",",
-        "x": "ArrowDown"
+        "keyOverrides": {
+            "y": "k",
+            "a": ",",
+            "x": "ArrowDown"
+        },
+        "mobile": {
+            "layout": "default"
+        }
     }
-
 }

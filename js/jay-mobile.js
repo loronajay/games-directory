@@ -47,19 +47,52 @@ function initController() {
   let themeButtonApi = null;
 
   const COLOR_PRESETS = {
+
   "arcade-cyan": "#00ffff",
   "crt-amber": "#ffb000",
   "genesis-green": "#5aff87",
   "neon-pink": "#ff4fd8",
-  "ice-blue": "#7fdcff"
+  "ice-blue": "#7fdcff",
+
+  "arcade-red": "#ff4040",
+  "laser-purple": "#b46cff",
+  "electric-lime": "#b8ff2c",
+  "deep-gold": "#ffd34d",
+  "terminal-green": "#33ff66",
+  "plasma-blue": "#2fa7ff",
+  "vaporwave-purple": "#a66bff",
+  "matrix-green": "#00ff5e",
+  "retro-orange": "#ff7a1a",
+  "hot-magenta": "#ff2fa7",
+  "arctic-blue": "#5fd6ff",
+  "crt-yellow": "#ffe34d",
+  "electric-indigo": "#6c7bff"
+
 };
 
 const THEME_ORDER = [
+
   "arcade-cyan",
   "crt-amber",
   "genesis-green",
   "neon-pink",
-  "ice-blue"
+  "ice-blue",
+
+  "arcade-red",
+  "laser-purple",
+  "electric-lime",
+  "deep-gold",
+  "terminal-green",
+  "plasma-blue",
+  "vaporwave-purple",
+  "matrix-green",
+  "retro-orange",
+  "hot-magenta",
+  "arctic-blue",
+  "crt-yellow",
+  "electric-indigo"
+  
+
 ];
 
 const THEME_LABELS = {

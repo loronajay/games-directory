@@ -1,17 +1,18 @@
 /* ==========================================
-   JAY ARCADE MOBILE CONTROLLER v18.1
+   JAY ARCADE MOBILE CONTROLLER v18.2
    - layout-driven
    - segmented 8-way ring d-pad
    - responsive sizing
    - portrait + landscape support
    - dual-dpad support
    - upgraded Genesis-style d-pad feel
+   - corrected visual/input alignment
    ========================================== */
 
 (function () {
 "use strict";
 
-const JAY_MOBILE_VERSION = "v18.1";
+const JAY_MOBILE_VERSION = "v18.2";
 
 function isMobile() {
   return (
@@ -133,10 +134,10 @@ function initController() {
     const portrait = vh > vw;
     const shortSide = Math.min(vw, vh);
 
-    const padSize = clamp(shortSide * (portrait ? 0.26 : 0.22), 120, 220);
-    const buttonSize = clamp(shortSide * (portrait ? 0.12 : 0.10), 64, 110);
-    const edge = clamp(shortSide * 0.05, 16, 40);
-    const faceGap = clamp(buttonSize * 0.55, 28, 62);
+    const padSize = clamp(shortSide * (portrait ? 0.31 : 0.27), 145, 250);
+    const buttonSize = clamp(shortSide * (portrait ? 0.135 : 0.115), 70, 118);
+    const edge = clamp(shortSide * 0.055, 16, 42);
+    const faceGap = clamp(buttonSize * 0.78, 42, 82);
 
     return {
       vw,
@@ -247,6 +248,17 @@ function initController() {
     let activePointerId = null;
     let visualAngle = null;
 
+    const visualZones = [
+      { dir: "right", center: 0, half: 26 },
+      { dir: "down-right", center: 45, half: 18 },
+      { dir: "down", center: 90, half: 26 },
+      { dir: "down-left", center: 135, half: 18 },
+      { dir: "left", center: 180, half: 26 },
+      { dir: "up-left", center: 225, half: 18 },
+      { dir: "up", center: 270, half: 26 },
+      { dir: "up-right", center: 315, half: 18 }
+    ];
+
     function applyDirection(nextDirection) {
       if (nextDirection === activeDirection) return;
 
@@ -266,21 +278,10 @@ function initController() {
     }
 
     function updateVisualState() {
-      const order = [
-        "up",
-        "up-right",
-        "right",
-        "down-right",
-        "down",
-        "down-left",
-        "left",
-        "up-left"
-      ];
-
       for (let i = 0; i < segments.length; i++) {
         const seg = segments[i];
-        const dir = order[i];
-        const isActive = dir === activeDirection;
+        const zone = visualZones[i];
+        const isActive = zone.dir === activeDirection;
 
         seg.style.background = isActive
           ? "rgba(0,255,255,0.24)"
@@ -301,7 +302,7 @@ function initController() {
         thumb.style.opacity = "0";
         thumb.style.transform = "translate(-50%, -50%)";
       } else {
-        const radius = options.size * 0.23;
+        const radius = options.size * 0.30;
         const rad = visualAngle * Math.PI / 180;
         const x = Math.cos(rad) * radius;
         const y = Math.sin(rad) * radius;
@@ -311,8 +312,8 @@ function initController() {
     }
 
     function resolveDirection(angleDeg, distance, outerRadius) {
-      const ringStart = outerRadius * 0.36;
-      const ringEnd = outerRadius * 0.98;
+      const ringStart = outerRadius * 0.24;
+      const ringEnd = outerRadius * 1.08;
 
       if (distance < ringStart) return null;
       if (distance > ringEnd) return activeDirection;
@@ -366,11 +367,10 @@ function initController() {
       backdropFilter: "blur(2px)"
     });
 
-    for (let i = 0; i < 8; i++) {
+    for (const zone of visualZones) {
       const seg = document.createElement("div");
-      const center = i * 45;
-      const start = (center - 22.5) * Math.PI / 180;
-      const end = (center + 22.5) * Math.PI / 180;
+      const start = (zone.center - zone.half) * Math.PI / 180;
+      const end = (zone.center + zone.half) * Math.PI / 180;
 
       Object.assign(seg.style, {
         position: "absolute",
@@ -381,6 +381,7 @@ function initController() {
           ${50 + 50 * Math.cos(end)}% ${50 + 50 * Math.sin(end)}%
         )`,
         background: "rgba(0,255,255,0.05)",
+        opacity: "0.92",
         transition: "background 0.04s linear, box-shadow 0.04s linear, opacity 0.04s linear"
       });
 

@@ -175,6 +175,7 @@ def delete_processed_zips(zip_files):
             print(f"  ERROR deleting {zip_path.name}: {e}")
             raise
 
+
 # -------------------------
 # MAIN
 # -------------------------
@@ -251,6 +252,8 @@ def main():
     failed_games = []
     successful_zip_files = []
 
+    print("\nSTEP 1/4 — Import Games")
+
     for zip_path in zip_files:
         game_name, ok = import_one_zip(zip_path, dry_run=False)
         if ok:
@@ -258,6 +261,20 @@ def main():
             successful_zip_files.append(zip_path)
         else:
             failed_games.append(game_name)
+
+    # -------------------------
+    # BUILD FAILURE GUARD
+    # -------------------------
+
+    if failed_games:
+        print("\nBUILD FAILED")
+        print("The following games failed to import:\n")
+
+        for game in failed_games:
+            print(f"  - {game}")
+
+        print("\nFix the export files and run the build again.")
+        sys.exit(1)
 
     print("\n=== IMPORT SUMMARY ===")
     print(f"Imported: {len(imported_games)}")
@@ -273,20 +290,18 @@ def main():
         for name in failed_games:
             print(f"  - {name}")
 
-    if failed_games:
-        print("\nBuild stopped because one or more imports failed.")
-        sys.exit(1)
-
-    print("\nRunning patcher on all games...")
+    print("\nSTEP 2/4 — Patch Games")
     run_patcher(
-      [],
-      dry_run=False,
-      commit=False,
-      push=False
+        [],
+        dry_run=False,
+        commit=False,
+        push=False
     )
 
-    print("\nRegenerating grid...")
+    print("\nSTEP 3/4 — Generate Grid")
     run_grid_generator(dry_run=False)
+
+    print("\nSTEP 4/4 — Git Commit & Push")
 
     if args.commit:
         print("\nCommitting changes...")
@@ -300,7 +315,22 @@ def main():
     if args.clean_exports:
         delete_processed_zips(successful_zip_files)
 
-    print("\nArcade build complete.")
+    # -------------------------
+    # BUILD SUMMARY
+    # -------------------------
+
+    print("\n==============================")
+    print("JAY ARCADE BUILD SUMMARY")
+    print("==============================\n")
+
+    print(f"Games imported: {len(imported_games)}")
+    print(f"Games patched: {len(imported_games)}")
+    print("Grid regenerated: YES")
+    print(f"Commit: {'YES' if args.commit else 'NO'}")
+    print(f"Push: {'YES' if args.push else 'NO'}")
+    print(f"Clean exports: {'YES' if args.clean_exports else 'NO'}")
+
+    print("\nBUILD SUCCESS\n")
 
 
 if __name__ == "__main__":

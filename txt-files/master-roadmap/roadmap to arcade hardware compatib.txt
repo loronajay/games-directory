@@ -1,0 +1,448 @@
+roadmap to arcade hardware compatibility
+
+
+
+Yes — that direction makes sense, and it turns your project into a serious arcade platform roadmap.
+
+What you’re describing is basically a 3-stage system:
+
+Stage 1: perfect the live web OS
+Stage 2: make a cabinet-safe local mirror that can survive internet loss
+Stage 3: adapt that platform to commercial arcade hardware standards
+
+That is a very smart order.
+
+What you’re really trying to build
+
+Not just a website.
+
+You’re building:
+
+a cloud arcade OS
+
+a local offline arcade OS
+
+a future commercial cabinet runtime
+
+That’s the right foundation if you want your arcade to exist both:
+
+on the public web
+
+inside physical cabinets
+
+eventually in venues
+
+Part 1: Local fallback version for cabinets
+
+This is the easier of the two goals, and honestly the most important next one after the site is polished.
+
+The cabinet should not “visit your website” the way a normal browser does.
+It should run a local installed copy of your arcade OS, and then sync/update from the web whenever internet is available.
+
+So the model should be:
+
+Cabinet boots
+→ launches local arcade OS
+→ checks internet
+→ if online, checks for updates/assets
+→ syncs changed files
+→ keeps running locally either way
+
+That is much better than making the cabinet depend on a live website.
+
+Best architecture for that
+
+Keep your current site structure mostly intact, then add one cabinet-specific layer:
+
+Web version remains your public source of truth
+
+Local cabinet package is a mirrored deployable build
+
+Sync/update service pulls changes from your hosted source
+
+Fallback mode always prefers local files first
+
+In practical terms, your cabinet should have:
+
+local index.html
+
+local grid.html
+
+local game folders
+
+local JS/CSS/assets
+
+local previews/media
+
+a local manifest/version file
+
+Then when connected, it compares versions and updates only what changed.
+
+The simplest good version
+
+Use a manifest-based updater.
+
+Example idea:
+
+{
+  "version": "2026.03.16.1",
+  "files": {
+    "index.html": "hash123",
+    "grid.html": "hash456",
+    "games/apple-catcher/index.html": "hash789"
+  }
+}
+
+Cabinet flow:
+
+read local manifest
+
+fetch remote manifest
+
+compare hashes
+
+download changed files
+
+swap to updated version safely
+
+That gives you:
+
+offline safety
+
+automatic updates
+
+no full reinstall every time
+
+predictable rollback behavior
+
+Important design rule
+
+For cabinets, local should always be primary.
+Internet should only improve/update the cabinet, never be required for it to function.
+
+That means:
+
+no critical dependency on live APIs unless cached
+
+no game launch that requires network
+
+no page routing that breaks if DNS is down
+
+no essential asset hosted only remotely
+
+Part 2: How web + local should relate
+
+You said you want the local version to automatically match the web version if connected.
+
+That’s right, but I’d frame it more precisely:
+
+The web version should be the publishing source, and the cabinet version should be the stable deployed runtime.
+
+So not:
+
+“cabinet mirrors website live every second”
+
+More like:
+
+“cabinet checks for approved updates and installs them safely”
+
+That distinction matters a lot.
+
+Because for cabinets, you want:
+
+atomic updates
+
+version pinning
+
+rollback support
+
+no partial broken installs
+
+no surprise behavior mid-day in a venue
+
+A good cabinet update cycle would be:
+
+boot
+
+check for approved release
+
+download in background or before attract mode
+
+validate
+
+activate on next restart
+
+Part 3: Preparing for modern arcade hardware
+
+This is the bigger leap, but your architecture is actually moving in the right direction already.
+
+You’ll need to separate your platform into 3 hardware layers:
+
+1. Presentation layer
+
+What the player sees:
+
+boot UI
+
+menu OS
+
+game grid
+
+overlays
+
+attract mode
+
+score screens
+
+You already have a strong start here.
+
+2. Runtime layer
+
+What launches and runs games:
+
+Chromium/kiosk app or packaged browser shell
+
+local asset loader
+
+update service
+
+process supervisor
+
+logging/crash recovery
+
+You do not fully have this yet, but your current web OS can become it.
+
+3. I/O hardware layer
+
+What talks to physical hardware:
+
+joysticks
+
+buttons
+
+coin/start inputs
+
+service/admin buttons
+
+test mode
+
+ticket/redemption hardware if ever needed
+
+lighting/audio/external peripherals
+
+This is where the “website” becomes “arcade software.”
+
+What changes when you move to real cabinets
+
+A public website can tolerate:
+
+browser quirks
+
+occasional refreshes
+
+manual maintenance
+
+user-controlled input devices
+
+A venue cabinet cannot.
+
+Commercial cabinets need to behave more like appliances:
+
+boot straight into your system
+
+recover from power loss
+
+resume without keyboard/mouse
+
+ignore OS clutter
+
+handle disconnected internet
+
+survive long uptime
+
+be easy for staff to restart
+
+log faults clearly
+
+So eventually your platform has to become a kiosk-grade system.
+
+What adaptation path makes the most sense for you
+
+Given your current setup, the cleanest path is:
+
+Phase A — finish website OS
+
+Keep doing what you’re doing now:
+
+selector flow
+
+grid polish
+
+game launch consistency
+
+input consistency
+
+mobile/controller stability
+
+Phase B — create cabinet edition
+
+Build a local packaged version of the same arcade OS.
+
+This version should add:
+
+kiosk boot
+
+offline-first assets
+
+update checker
+
+local storage for config/logs
+
+watchdog/restart behavior
+
+Phase C — abstract physical controls
+
+Make a hardware input adapter that translates cabinet controls into the same actions your platform already understands.
+
+Right now you already have a strong concept in arcade-input.js:
+
+left
+
+right
+
+up
+
+down
+
+select
+
+That’s great.
+
+Later, cabinet buttons should feed that same action bus.
+
+So your architecture becomes:
+
+physical joystick/buttons
+→ hardware adapter
+→ arcade action layer
+→ menu/game navigation
+
+That is exactly how to avoid rewriting the whole platform later.
+
+Phase D — commercial operator features
+
+Before venue placement, you’ll likely need:
+
+operator settings menu
+
+diagnostics/test mode
+
+game uptime/crash logs
+
+easy update workflow
+
+cabinet ID / machine ID
+
+configurable attract mode
+
+pricing/session logic if applicable
+
+lockouts/admin access
+
+That’s the bridge from “cool cabinet” to “venue-ready product.”
+
+About places like Dave & Buster’s
+
+Breaking into a place like that is usually less about “can it run” and more about whether the system feels commercially reliable.
+
+They would care about things like:
+
+uptime
+
+safety
+
+durability
+
+ease of servicing
+
+consistency
+
+repeat earnings or retention
+
+clear value versus traditional arcade units
+
+So your goal should not just be “run my website in a cabinet.”
+
+Your goal should be:
+
+turn Jay’s Retro Arcade into a dependable cabinet platform that feels like purpose-built arcade software.
+
+That means you’ll eventually want:
+
+locked-down cabinet OS
+
+stable update/release process
+
+standardized controls
+
+possibly cabinet-specific launcher mode
+
+operator/maintenance workflow
+
+analytics and reliability tracking
+
+The good news
+
+Your current architecture already supports this better than most hobby web projects because you have:
+
+isolated games
+
+a patch pipeline
+
+a standardized launcher structure
+
+input abstraction
+
+a distinct platform identity
+
+Those are exactly the kinds of things that make cabinet adaptation possible later.
+
+The biggest recommendation I’d make right now
+
+As you continue building, start treating your system as three targets even if only one exists today:
+
+Web target
+
+Cabinet local target
+
+Commercial hardware target
+
+Even if the codebase stays mostly shared, this mindset will help you avoid painting yourself into a corner.
+
+For example:
+
+don’t make routing depend purely on domain names forever
+
+don’t assume internet is always present
+
+don’t assume touch/mobile and cabinet controls are the same environment
+
+don’t assume browser refresh/reload is acceptable recovery behavior
+
+My honest read
+
+This is a real path.
+
+But the next milestone is not yet “Dave & Buster’s.”
+
+The next milestone is:
+
+build a cabinet-safe offline-synced edition of your arcade OS without breaking your current architecture.
+
+That is the right bridge between your current web platform and a venue-ready system.
+
+The best next thing I can do is map this into a concrete technical roadmap for you, like:
+
+Website OS → Offline Cabinet OS → Cabinet Hardware Layer → Commercial Readiness
+
+with recommended components, folder structure, update flow, and input architecture that fit your current project without unnecessary restructuring.

@@ -41,8 +41,10 @@ GOATCOUNTER_BLOCK = """<script>
 window.goatcounter = {
   path: function(p) {
     return (p || location.pathname || "/")
-      .replace(/index\\.html$/, "")
-      .replace(/\\/?$/, "/");
+     .replace(/^\/games-directory/, "")
+     .replace(/index\.html$/, "")
+     .replace(/\/?$/, "/")
+     .split("?")[0];
   }
 };
 </script>"""

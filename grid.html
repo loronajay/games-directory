@@ -175,11 +175,65 @@ body{
   text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
 }
 
+
 .visitor-box{
   margin-top:20px;
   font-size:.8rem;
   color:#00ffff;
   text-shadow:0 0 10px #00ffff;
+}
+
+.popular-box{
+  margin:22px auto 0;
+  max-width:720px;
+  padding:18px 20px;
+  background:rgba(0,0,0,.78);
+  border:2px solid #ff00ff;
+  box-shadow:0 0 24px rgba(255,0,255,.35), 0 0 14px rgba(0,255,255,.18) inset;
+  color:#00ffff;
+  text-shadow:0 0 8px #00ffff;
+}
+
+.popular-label{
+  font-size:.6rem;
+  color:#ffccff;
+  text-shadow:0 0 8px #ff00ff;
+  margin-bottom:12px;
+}
+
+.popular-title{
+  font-size:.95rem;
+  line-height:1.6;
+  color:#00ffff;
+  text-shadow:0 0 12px #00ffff;
+}
+
+.popular-meta{
+  margin-top:12px;
+  font-size:.62rem;
+  opacity:.9;
+  line-height:1.7;
+}
+
+.popular-link{
+  display:inline-block;
+  margin-top:14px;
+  text-decoration:none;
+  color:#00ffff;
+  border:2px solid #00ffff;
+  padding:10px 14px;
+  background:rgba(0,0,0,.6);
+  box-shadow:0 0 14px rgba(0,255,255,.25);
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  font-size:.55rem;
+}
+
+.popular-link:hover,
+.popular-link.gamepad-selected{
+  transform:perspective(800px) rotateX(6deg) scale(1.04);
+  box-shadow:0 0 24px #ff00ff, 0 0 14px #00ffff inset;
+  border-color:#ff00ff;
+  color:#ffccff;
 }
 
 /* ===== GRID ===== */
@@ -302,6 +356,13 @@ body{
     <div class="visitor-box">
       VISITORS: <span id="visitorCount">000000</span>
     </div>
+  </div>
+
+  <div class="popular-box" id="popularBox" style="display:none;">
+  <div class="popular-label">MOST POPULAR RIGHT NOW</div>
+  <div class="popular-title" id="popularTitle">LOADING...</div>
+  <div class="popular-meta" id="popularMeta">CHECKING GOATCOUNTER DATA...</div>
+  <a class="popular-link arcade-link" id="popularLink" href="#">LAUNCH TITLE</a>
   </div>
 
   <div class="game-grid">
@@ -515,24 +576,77 @@ fetch("https://loronajay.goatcounter.com/counter/TOTAL.json")
 })
 .catch(()=>{});
 
-/* Per game */
-document.querySelectorAll(".game-card").forEach(card => {
-
-  const url = new URL(card.href, window.location.origin);
-
-  const goatPath = url.pathname
+/* Per game + most popular */
+function normalizeGoatPath(pathname) {
+  return (pathname || "/")
     .replace(/index\.html$/, "")
-    .replace(/\/?$/, "/");
+    .replace(/\/?$/, "/")
+    .split("?")[0];
+}
 
-  fetch(`https://loronajay.goatcounter.com/counter${goatPath}.json`)
-    .then(res => res.json())
-    .then(data => {
-      card.querySelector(".playCount").textContent =
-        formatArcadeNumber(data.count || 0);
-    })
-    .catch(() => {
-      console.log("Counter error for:", goatPath);
-    });
+function buildLegacyGoatPath(pathname) {
+  const normalized = normalizeGoatPath(pathname);
+  return normalized.startsWith("/games/")
+    ? "/games-directory" + normalized
+    : normalized;
+}
+
+async function fetchGoatCount(path) {
+  try {
+    const res = await fetch(`https://loronajay.goatcounter.com/counter${path}.json`);
+    const data = await res.json();
+    return Number(data.count || 0);
+  } catch (err) {
+    console.log("Counter error for:", path);
+    return 0;
+  }
+}
+
+const gameCards = Array.from(document.querySelectorAll(".game-card"));
+
+const popularBox = document.getElementById("popularBox");
+const popularTitle = document.getElementById("popularTitle");
+const popularMeta = document.getElementById("popularMeta");
+const popularLink = document.getElementById("popularLink");
+
+Promise.all(
+  gameCards.map(async (card, index) => {
+    const url = new URL(card.href, window.location.origin);
+
+    const newPath = normalizeGoatPath(url.pathname);
+    const legacyPath = buildLegacyGoatPath(url.pathname);
+
+    const [newCount, legacyCount] = await Promise.all([
+      fetchGoatCount(newPath),
+      legacyPath !== newPath ? fetchGoatCount(legacyPath) : Promise.resolve(0)
+    ]);
+
+    const totalCount = newCount + legacyCount;
+
+    card.querySelector(".playCount").textContent = formatArcadeNumber(totalCount);
+
+    return {
+      card,
+      index,
+      href: card.href,
+      title: card.querySelector(".game-title")?.textContent?.trim() || "UNKNOWN TITLE",
+      count: totalCount
+    };
+  })
+).then(results => {
+  if (!results.length) return;
+
+  results.sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count;
+    return a.index - b.index;
+  });
+
+  const winner = results[0];
+
+  popularTitle.textContent = winner.title;
+  popularMeta.textContent = `PLAYS: ${formatArcadeNumber(winner.count)}`;
+  popularLink.href = winner.href;
+  popularBox.style.display = "block";
 });
 
 /* Force hard reload when returning via back button */

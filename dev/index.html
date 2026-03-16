@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jay's Retro Arcade - Founder Console</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{scroll-behavior:smooth;}
+
+body{
+font-family:'Press Start 2P',cursive;
+background:url('../images/background.png') center center fixed;
+background-size:cover;
+color:white;
+text-align:center;
+overflow-x:hidden;
+animation:crtFlicker 6s infinite;
+min-height:100vh;
+}
+
+@keyframes crtFlicker{
+0%,100%{opacity:1;}
+50%{opacity:.985;}
+}
+
+.scanlines{
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:1000;
+background:repeating-linear-gradient(
+to bottom,
+rgba(0,0,0,.25) 0px,
+rgba(0,0,0,.25) 1px,
+transparent 1px,
+transparent 4px
+);
+}
+
+.crt-overlay{
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:999;
+background:radial-gradient(circle at center,
+rgba(0,0,0,0) 60%,
+rgba(0,0,0,.45) 100%);
+}
+
+/* ===== BIOS SCREEN ===== */
+
+#loadingScreen{
+position:fixed;
+inset:0;
+background:black;
+color:#00ff66;
+font-family:'VT323', monospace;
+padding:40px;
+font-size:22px;
+letter-spacing:1px;
+white-space:pre-line;
+z-index:3000;
+}
+
+.bios-cursor{
+display:inline;
+animation:blinkCursor 1s steps(1) infinite;
+}
+
+@keyframes blinkCursor{
+50%{opacity:0;}
+}
+
+/* ===== START SCREEN ===== */
+
+#startScreen{
+position:fixed;
+inset:0;
+background:black;
+display:none;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+cursor:pointer;
+z-index:2500;
+padding:20px;
+}
+
+.arcade-title{
+font-size:1.4rem;
+color:#ff00ff;
+text-shadow:0 0 25px #ff00ff;
+line-height:1.8;
+}
+
+.press-start{
+margin-top:50px;
+color:#00ffff;
+animation:blink 1s infinite;
+text-shadow:0 0 20px #00ffff;
+font-size:.9rem;
+}
+
+@keyframes blink{50%{opacity:0;}}
+
+/* ===== MAIN CONTENT ===== */
+
+#mainContent{
+display:none;
+position:relative;
+z-index:2;
+padding:40px 20px 100px;
+}
+
+.hero-wrap{
+max-width:1180px;
+margin:0 auto;
+}
+
+.title-box{
+margin-top:50px;
+padding:30px 24px;
+background:rgba(0,0,0,.78);
+display:inline-block;
+border:3px solid #00ffff;
+box-shadow:0 0 40px #00ffff;
+}
+
+.title-box h1{
+color:#ff00ff;
+text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
+line-height:1.5;
+font-size:1.3rem;
+}
+
+.subtitle{
+margin-top:20px;
+max-width:940px;
+margin-left:auto;
+margin-right:auto;
+background:rgba(0,0,0,.72);
+border:2px solid #ff00ff;
+box-shadow:0 0 24px rgba(255,0,255,.5);
+padding:20px;
+color:#00ffff;
+text-shadow:0 0 8px #00ffff;
+font-size:.65rem;
+line-height:2.2;
+}
+
+/* ===== SYSTEM STATUS ===== */
+
+.status-panel{
+margin-top:30px;
+border:2px solid #00ffff;
+padding:20px;
+background:rgba(0,0,0,.75);
+max-width:900px;
+margin-left:auto;
+margin-right:auto;
+}
+
+.status-line{
+font-family:'VT323', monospace;
+font-size:1.6rem;
+line-height:1.6;
+text-align:left;
+color:#ffffff;
+}
+
+.status-line span{
+color:#00ffff;
+}
+
+/* ===== SECTIONS ===== */
+
+.section{
+max-width:1180px;
+margin:50px auto 0;
+background:rgba(0,0,0,.78);
+border:3px solid #ff00ff;
+box-shadow:0 0 34px rgba(255,0,255,.35);
+padding:28px 20px 30px;
+}
+
+.section-title{
+color:#ff00ff;
+text-shadow:0 0 18px #ff00ff;
+font-size:.9rem;
+margin-bottom:22px;
+line-height:1.8;
+}
+
+.section-subtitle{
+font-family:'VT323', monospace;
+color:#00ffff;
+font-size:1.8rem;
+margin-bottom:18px;
+text-shadow:0 0 10px #00ffff;
+}
+
+.section-text{
+max-width:1000px;
+margin:0 auto;
+color:#dffcff;
+font-size:.65rem;
+line-height:2.2;
+}
+
+.grid-2,
+.grid-3{
+display:grid;
+gap:22px;
+margin-top:28px;
+}
+
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+
+/* ===== INFO CARDS ===== */
+
+.info-card{
+background:rgba(0,0,0,.84);
+border:2px solid #00ffff;
+box-shadow:0 0 20px rgba(0,255,255,.24);
+padding:20px 18px;
+text-align:left;
+}
+
+.info-card h3{
+color:#00ffff;
+text-shadow:0 0 10px #00ffff;
+font-size:.6rem;
+margin-bottom:14px;
+line-height:1.8;
+}
+
+.info-card p{
+font-family:'VT323', monospace;
+color:#f4f4f4;
+font-size:1.45rem;
+line-height:1.45;
+}
+
+/* ===== TIMELINE ===== */
+
+.timeline{
+display:grid;
+gap:16px;
+margin-top:24px;
+}
+
+.timeline-step{
+background:rgba(0,0,0,.84);
+border-left:5px solid #00ffff;
+padding:18px;
+text-align:left;
+}
+
+.timeline-step h3{
+color:#00ffff;
+font-size:.6rem;
+margin-bottom:10px;
+}
+
+.timeline-step p{
+font-family:'VT323', monospace;
+font-size:1.45rem;
+}
+
+/* ===== FOOTER ===== */
+
+.footer-note{
+margin-top:30px;
+color:#00ffff;
+font-size:.5rem;
+opacity:.9;
+line-height:1.8;
+}
+
+@media(max-width:760px){
+
+.grid-2,
+.grid-3{
+grid-template-columns:1fr;
+}
+
+.subtitle{
+font-size:.55rem;
+}
+
+}
+</style>
+</head>
+<body>
+
+<div id="loadingScreen"></div>
+
+<div id="startScreen">
+<div class="arcade-title">JAY'S RETRO ARCADE<br>FOUNDER CONSOLE</div>
+<div class="press-start">PRESS START</div>
+</div>
+
+<div class="scanlines"></div>
+<div class="crt-overlay"></div>
+
+<div id="mainContent">
+
+<div class="hero-wrap">
+
+<div class="title-box">
+<h1>JAY'S RETRO ARCADE</h1>
+</div>
+
+<div class="subtitle">
+Founder roadmap, platform architecture, and development direction for building a modern competitive arcade ecosystem.
+</div>
+
+<div class="status-panel">
+
+<div class="status-line"><span>SYSTEM STATUS:</span> ACTIVE DEVELOPMENT</div>
+<div class="status-line"><span>DOMAIN:</span> JAYARCADE.COM ONLINE</div>
+<div class="status-line"><span>INPUT SYSTEM:</span> MOBILE / GAMEPAD / KEYBOARD / MOUSE</div>
+<div class="status-line"><span>PIPELINE:</span> AUTOMATED GAME UPDATE WORKFLOW</div>
+<div class="status-line"><span>BUILD STATUS:</span> PLATFORM FOUNDATION COMPLETE</div>
+
+</div>
+
+</div>
+
+<section class="section">
+<div class="section-title">01 // FOUNDER VISION</div>
+<div class="section-subtitle">Build a modern arcade platform with classic competition.</div>
+
+<div class="section-text">
+Jay’s Retro Arcade is designed as a platform rather than a single release. The goal is to create a recognizable arcade ecosystem built around quick-play original games, competitive replay loops, and strong community identity. The web arcade is the first step toward a larger system that can eventually exist both online and in physical arcade spaces.
+</div>
+
+</section>
+
+<section class="section">
+
+<div class="section-title">02 // WHAT ALREADY EXISTS</div>
+<div class="section-subtitle">The platform already has real systems.</div>
+
+<div class="grid-3">
+
+<div class="info-card">
+<h3>LIVE DOMAIN</h3>
+<p>JayArcade.com is live and serving the arcade platform.</p>
+</div>
+
+<div class="info-card">
+<h3>MULTI-INPUT CONTROL SYSTEM</h3>
+<p>Mobile touch, gamepad, keyboard, and mouse controls are fully supported.</p>
+</div>
+
+<div class="info-card">
+<h3>WORKING GAME LIBRARY</h3>
+<p>A growing library of original playable arcade games already exists.</p>
+</div>
+
+<div class="info-card">
+<h3>ARCADE WEBSITE SYSTEM</h3>
+<p>CRT presentation, boot sequences, animated navigation, and arcade-style UX.</p>
+</div>
+
+<div class="info-card">
+<h3>AUTOMATED PIPELINE</h3>
+<p>Games can be added or updated through an automated workflow script.</p>
+</div>
+
+<div class="info-card">
+<h3>PLATFORM ARCHITECTURE</h3>
+<p>Games operate as isolated modules within the arcade framework.</p>
+</div>
+
+</div>
+</section>
+
+<section class="section">
+
+<div class="section-title">03 // DESIGN PRINCIPLES</div>
+
+<div class="grid-2">
+
+<div class="info-card">
+<h3>INSTANT UNDERSTANDING</h3>
+<p>Players should understand a game within seconds.</p>
+</div>
+
+<div class="info-card">
+<h3>REPLAY LOOPS</h3>
+<p>Sessions should encourage repeated play.</p>
+</div>
+
+<div class="info-card">
+<h3>COMPETITION FIRST</h3>
+<p>Score chasing and mastery drive engagement.</p>
+</div>
+
+<div class="info-card">
+<h3>CHARM MATTERS</h3>
+<p>The arcade should have personality and identity.</p>
+</div>
+
+</div>
+</section>
+
+<section class="section">
+
+<div class="section-title">04 // CURRENT PRIORITIES</div>
+
+<div class="timeline">
+
+<div class="timeline-step">
+<h3>PLATFORM POLISH</h3>
+<p>Finalize site routing, presentation cohesion, and arcade navigation.</p>
+</div>
+
+<div class="timeline-step">
+<h3>GAME LIBRARY EXPANSION</h3>
+<p>Strengthen the arcade with additional titles and gameplay depth.</p>
+</div>
+
+<div class="timeline-step">
+<h3>COMMUNITY STRUCTURE</h3>
+<p>Design the first competition loops and replay challenges.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<div class="section-title">05 // REVENUE ROADMAP</div>
+
+<div class="grid-3">
+
+<div class="info-card">
+<h3>ATTENTION</h3>
+<p>Grow the arcade audience and platform identity.</p>
+</div>
+
+<div class="info-card">
+<h3>RETENTION</h3>
+<p>Introduce leaderboards, challenges, and recurring events.</p>
+</div>
+
+<div class="info-card">
+<h3>MONETIZATION</h3>
+<p>Partnerships, merch, sponsorships, and eventual cabinet products.</p>
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<div class="section-title">06 // LONG-TERM VISION</div>
+
+<div class="section-text">
+The ultimate goal is to build a recognizable arcade platform that can exist both online and in physical form through connected cabinets and competitive events.
+</div>
+
+</section>
+
+<div class="footer-note">
+SYSTEM STATUS: ACTIVE DEVELOPMENT<br>
+LAST UPDATED: MARCH 2026
+</div>
+
+</div>
+
+<script>
+
+const bootText =
+"JAY SYSTEMS BIOS v2.4\n" +
+"Loading Founder Console...\n" +
+"Initializing Arcade Platform...\n" +
+"System Ready.";
+
+window.onload = function(){
+
+const loader = document.getElementById("loadingScreen");
+loader.innerHTML='<span id="biosText"></span><span class="bios-cursor">_</span>';
+
+const text = document.getElementById("biosText");
+let i=0;
+
+function type(){
+if(i<bootText.length){
+
+text.textContent += bootText[i];
+
+if(bootText[i]==="\n"){
+i++;
+setTimeout(type,350);
+return;
+}
+
+i++;
+setTimeout(type,18);
+
+}else{
+
+setTimeout(()=>{
+loader.style.display="none";
+document.getElementById("startScreen").style.display="flex";
+},800);
+
+}
+
+}
+
+type();
+
+}
+
+const startScreen=document.getElementById("startScreen");
+const main=document.getElementById("mainContent");
+
+startScreen.onclick=()=>{
+startScreen.style.display="none";
+main.style.display="block";
+};
+
+</script>
+
+</body>
+</html>

@@ -17,7 +17,7 @@ html{
 
 body{
   font-family:'Press Start 2P',cursive;
-  background:url('images/background.png') center center fixed;
+  background:url('../images/background.png') center center fixed;
   background-size:cover;
   color:white;
   text-align:center;
@@ -289,12 +289,6 @@ body{
   box-shadow:0 0 20px rgba(0,255,255,.24);
   padding:20px 18px;
   text-align:left;
-  transition:transform .22s ease, box-shadow .22s ease;
-}
-
-.info-card:hover{
-  transform:translateY(-4px) scale(1.02);
-  box-shadow:0 0 28px rgba(255,0,255,.45);
 }
 
 .info-card h3{
@@ -399,7 +393,7 @@ body{
   font-size:.55rem;
 }
 
-/* ===== FEATURED ARCADE GRID ===== */
+/* ===== WORKING TITLES GRID ===== */
 .featured-grid{
   margin:28px auto 0;
   max-width:1100px;
@@ -562,15 +556,15 @@ body{
 <div class="crt-overlay"></div>
 
 <audio id="hoverSound" preload="auto">
-  <source src="music/hovered.mp3" type="audio/mpeg">
+  <source src="../music/hovered.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="shutdownSound" preload="auto">
-  <source src="music/crt-shutdown.mp3" type="audio/mpeg">
+  <source src="../music/crt-shutdown.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="bgMusic" loop preload="auto">
-  <source src="music/background.mp3" type="audio/mpeg">
+  <source src="../music/background.mp3" type="audio/mpeg">
 </audio>
 
 <div id="mainContent">
@@ -585,8 +579,8 @@ body{
     </div>
 
     <div class="hero-actions">
-      <a class="arcade-btn arcade-link" href="index.html">RETURN TO ARCADE</a>
-      <a class="arcade-btn" href="#vision">VIEW VISION</a>
+      <a class="arcade-btn arcade-link" href="../index.html">RETURN TO ARCADE</a>
+      <a class="arcade-btn" href="#working-titles">WORKING TITLES</a>
       <a class="arcade-btn" href="#contact">INVESTOR CONTACT</a>
     </div>
   </div>
@@ -625,59 +619,59 @@ body{
     </div>
   </section>
 
-  <section class="section">
-    <div class="section-title">03 // FEATURED ARCADE</div>
+  <section class="section" id="working-titles">
+    <div class="section-title">03 // WORKING TITLES</div>
     <div class="section-subtitle">A preview of the playable ecosystem already taking shape.</div>
 
     <div class="featured-grid">
-      <a class="featured-card arcade-link" href="games/apple-catcher/index.html">
+      <a class="featured-card arcade-link" href="../games/apple-catcher/index.html">
         <video muted loop preload="metadata">
-          <source src="previews/apple-catcher.mp4" type="video/mp4">
+          <source src="../previews/apple-catcher.mp4" type="video/mp4">
         </video>
         <div class="featured-title">APPLE CATCHER</div>
         <div class="featured-desc">Fast reaction-driven arcade play built around instant restarts and easy-to-understand competitive appeal.</div>
         <div class="featured-meta">QUICK-PLAY / REPLAYABLE / ARCADE FIRST</div>
       </a>
 
-      <a class="featured-card arcade-link" href="games/art-of-war/index.html">
+      <a class="featured-card arcade-link" href="../games/art-of-war/index.html">
         <video muted loop preload="metadata">
-          <source src="previews/art-of-war.mp4" type="video/mp4">
+          <source src="../previews/art-of-war.mp4" type="video/mp4">
         </video>
         <div class="featured-title">ART OF WAR</div>
         <div class="featured-desc">A compact original title with arcade flavor, readable action, and room for repeat-session mastery.</div>
         <div class="featured-meta">CHARM / STRATEGY / SHORT SESSIONS</div>
       </a>
 
-      <a class="featured-card arcade-link" href="games/bird-duty/index.html">
+      <a class="featured-card arcade-link" href="../games/bird-duty/index.html">
         <video muted loop preload="metadata">
-          <source src="previews/bird-duty.mp4" type="video/mp4">
+          <source src="../previews/bird-duty.mp4" type="video/mp4">
         </video>
         <div class="featured-title">BIRD DUTY</div>
         <div class="featured-desc">Lightweight arcade action that fits the platform’s focus on approachable design and fast replay loops.</div>
         <div class="featured-meta">ACCESSIBLE / FAST / REPEATABLE</div>
       </a>
 
-      <a class="featured-card arcade-link" href="games/blade-and-block/index.html">
+      <a class="featured-card arcade-link" href="../games/blade-and-block/index.html">
         <video muted loop preload="metadata">
-          <source src="previews/blade-and-block.mp4" type="video/mp4">
+          <source src="../previews/blade-and-block.mp4" type="video/mp4">
         </video>
         <div class="featured-title">BLADE &amp; BLOCK</div>
         <div class="featured-desc">A satisfying action concept built around direct inputs, short rounds, and immediate feedback.</div>
         <div class="featured-meta">ACTION / SKILL / HIGH RETRY VALUE</div>
       </a>
 
-      <a class="featured-card arcade-link" href="games/sumorai/index.html">
+      <a class="featured-card arcade-link" href="../games/sumorai/index.html">
         <video muted loop preload="metadata">
-          <source src="previews/sumorai.mp4" type="video/mp4">
+          <source src="../previews/sumorai.mp4" type="video/mp4">
         </video>
         <div class="featured-title">SUMORAI</div>
         <div class="featured-desc">One of the strongest competitive centerpieces on the platform, with clear tournament and spectator potential.</div>
         <div class="featured-meta">COMPETITIVE / SPECTATOR / TOURNAMENT READY</div>
       </a>
 
-      <a class="featured-card arcade-link" href="games/x-pong/index.html">
+      <a class="featured-card arcade-link" href="../games/x-pong/index.html">
         <video muted loop preload="metadata">
-          <source src="previews/x-pong.mp4" type="video/mp4">
+          <source src="../previews/x-pong.mp4" type="video/mp4">
         </video>
         <div class="featured-title">X-PONG</div>
         <div class="featured-desc">A simple-to-read concept with strong arcade DNA and immediate understandability for players and viewers.</div>
@@ -843,7 +837,7 @@ body{
       </p>
 
       <div class="hero-actions">
-        <a class="arcade-btn arcade-link" href="index.html">RETURN TO ARCADE</a>
+        <a class="arcade-btn arcade-link" href="../index.html">RETURN TO ARCADE</a>
         <a class="arcade-btn" href="mailto:leojaylorona@gmail.com">EMAIL JAY ARCADE</a>
       </div>
     </div>
@@ -925,9 +919,9 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-/* Button hover sound */
-document.querySelectorAll(".arcade-btn").forEach(btn => {
-  btn.addEventListener("mouseenter", () => {
+/* Hover sound for actual interactive elements only */
+document.querySelectorAll(".arcade-btn, .featured-card").forEach(item => {
+  item.addEventListener("mouseenter", () => {
     hoverSound.currentTime = 0;
     hoverSound.play().catch(() => {});
   });

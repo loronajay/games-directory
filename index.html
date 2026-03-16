@@ -7,6 +7,28 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
+<script>
+if (location.hostname === "loronajay.github.io") {
+  location.replace("https://jayarcade.com");
+}
+</script>
+
+<script>
+const host = location.hostname;
+
+if (host.startsWith("play.")) {
+  location.replace("/games-directory/");
+}
+
+if (host.startsWith("dev.")) {
+  location.replace("/dev/");
+}
+
+if (host.startsWith("invest.")) {
+  location.replace("/invest/");
+}
+</script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 

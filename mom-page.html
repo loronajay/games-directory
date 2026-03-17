@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taxes by Rosanna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #12304a;
+      --navy-dark: #0c2235;
+      --gold: #d4a94f;
+      --gold-soft: #f3e4bf;
+      --bg: #f7f9fc;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --white: #ffffff;
+      --border: #e5e7eb;
+      --shadow: 0 18px 50px rgba(18, 48, 74, 0.12);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1150px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(229, 231, 235, 0.85);
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--navy), #1f5a87);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      box-shadow: var(--shadow);
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 1rem;
+      color: var(--navy);
+    }
+
+    .brand-text span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .nav-links span {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(212, 169, 79, 0.18), transparent 35%),
+        radial-gradient(circle at right, rgba(31, 90, 135, 0.14), transparent 30%),
+        linear-gradient(135deg, #fdfefe 0%, #eef4fb 100%);
+      padding: 5.5rem 0 4rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      background: rgba(212, 169, 79, 0.16);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.7rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      color: var(--navy-dark);
+      margin-bottom: 1rem;
+      max-width: 12ch;
+    }
+
+    .hero p {
+      font-size: 1.08rem;
+      color: var(--muted);
+      max-width: 58ch;
+      margin-bottom: 1.6rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0.9rem 1.3rem;
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid transparent;
+      cursor: default;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--navy), #1f5a87);
+      color: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      border-color: var(--border);
+      color: var(--navy);
+    }
+
+    .hero-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .hero-points span {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border);
+      padding: 0.65rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .hero-card {
+      background: var(--white);
+      border: 1px solid rgba(229, 231, 235, 0.95);
+      border-radius: 28px;
+      padding: 1.6rem;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+
+    .hero-card-top strong {
+      color: var(--navy);
+      font-size: 1.05rem;
+    }
+
+    .status-pill {
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      background: #ecfdf3;
+      color: #166534;
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .checklist div {
+      padding: 0.9rem 1rem;
+      border-radius: 16px;
+      background: #f8fbff;
+      border: 1px solid #e6eef8;
+    }
+
+    .checklist strong {
+      display: block;
+      color: var(--navy-dark);
+      margin-bottom: 0.2rem;
+    }
+
+    .checklist span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .mini-note {
+      background: linear-gradient(135deg, rgba(212, 169, 79, 0.18), rgba(212, 169, 79, 0.05));
+      border: 1px solid rgba(212, 169, 79, 0.35);
+      padding: 1rem;
+      border-radius: 18px;
+      color: var(--navy-dark);
+      font-weight: 600;
+    }
+
+    section {
+      padding: 4.8rem 0;
+    }
+
+    .section-head {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .section-head h2 {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      color: var(--navy-dark);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      max-width: 62ch;
+      margin: 0 auto;
+    }
+
+    .services-grid,
+    .why-grid,
+    .steps-grid,
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.45rem;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.05);
+    }
+
+    .card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, rgba(18,48,74,0.12), rgba(212,169,79,0.18));
+    }
+
+    .card h3 {
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      font-size: 1.12rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .accent-band {
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+      color: var(--white);
+    }
+
+    .accent-band .section-head h2,
+    .accent-band .section-head p,
+    .accent-band .card h3,
+    .accent-band .card p,
+    .accent-band .bullet-list li {
+      color: var(--white);
+    }
+
+    .accent-band .card {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(8px);
+    }
+
+    .process-card {
+      position: relative;
+      padding-top: 4.25rem;
+    }
+
+    .step-number {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: var(--navy-dark);
+      background: linear-gradient(135deg, #fff2cf, #e9c26a);
+    }
+
+    .testimonial {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.2rem;
+      align-items: stretch;
+    }
+
+    .quote-box,
+    .cta-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .quote-box blockquote {
+      font-size: 1.18rem;
+      color: var(--navy-dark);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .quote-box p,
+    .cta-box p {
+      color: var(--muted);
+    }
+
+    .bullet-list {
+      margin-top: 1rem;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .bullet-list li {
+      color: var(--text);
+    }
+
+    .contact-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+
+    .contact-card,
+    .form-mock {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 1.8rem;
+      box-shadow: var(--shadow);
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .contact-item {
+      padding: 1rem;
+      border-radius: 18px;
+      background: #f8fbff;
+      border: 1px solid #e6eef8;
+    }
+
+    .contact-item strong {
+      display: block;
+      color: var(--navy);
+      margin-bottom: 0.2rem;
+    }
+
+    .contact-item span {
+      color: var(--muted);
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 0.45rem;
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 0.95rem;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0.95rem 1rem;
+      font: inherit;
+      background: #fafcff;
+    }
+
+    .field textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .disclaimer {
+      margin-top: 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    footer {
+      padding: 2rem 0 3rem;
+      background: #f1f5f9;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-wrap {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      color: var(--muted);
+    }
+
+    .footer-wrap strong {
+      color: var(--navy);
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid,
+      .testimonial,
+      .contact-panel,
+      .services-grid,
+      .why-grid,
+      .steps-grid,
+      .faq-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 4rem;
+      }
+
+      .hero h1 {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        gap: 0.8rem;
+      }
+
+      section {
+        padding: 4rem 0;
+      }
+
+      .hero-actions,
+      .hero-points {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .hero-card-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#">
+        <div class="brand-badge">TR</div>
+        <div class="brand-text">
+          <strong>Taxes by Rosanna</strong>
+          <span>Personal, professional tax preparation you can trust</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <span>Home</span>
+        <span>Services</span>
+        <span>About</span>
+        <span>FAQs</span>
+        <span>Contact</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow">Helping individuals, families, and small businesses feel confident at tax time</div>
+        <h1>Tax help that feels personal, honest, and dependable.</h1>
+        <p>
+          Welcome to <strong>Taxes by Rosanna</strong>, where clients are treated with care, respect, and personal attention. Whether you need help with your personal taxes, support for your small business, or simply someone who can guide you through the process clearly, Rosanna is here to make things feel more manageable from start to finish.
+        </p>
+        <p>
+          Taxes can feel overwhelming, but they do not have to. With the right support, the process can feel organized, straightforward, and a lot less stressful.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#">Book a Consultation</a>
+          <a class="btn btn-secondary" href="#">View Services</a>
+        </div>
+        <div class="hero-points">
+          <span>Personal Tax Returns</span>
+          <span>Small Business Support</span>
+          <span>Friendly Guidance Year-Round</span>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-card-top">
+          <strong>What working with Rosanna feels like</strong>
+          <span class="status-pill">Now Accepting Clients</span>
+        </div>
+        <div class="checklist">
+          <div>
+            <strong>A warm, personal experience</strong>
+            <span>Clients are never treated like just another number. Every situation is given the time and care it deserves.</span>
+          </div>
+          <div>
+            <strong>Clear answers and real support</strong>
+            <span>Questions are welcomed, and everything is explained in a way that feels simple, helpful, and easy to understand.</span>
+          </div>
+          <div>
+            <strong>Professional service you can rely on</strong>
+            <span>Returns are handled carefully, thoroughly, and with the kind of attention that builds trust.</span>
+          </div>
+        </div>
+        <div class="mini-note">
+          This page is meant to feel like a real business already in motion — professional, approachable, and built on trust.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <h2>Services tailored to real life and real needs</h2>
+        <p>
+          No two clients are exactly the same. Rosanna works with individuals, families, and small business owners who want careful, reliable tax support from someone who truly cares about doing things right.
+        </p>
+      </div>
+      <div class="services-grid">
+        <div class="card">
+          <div class="card-icon">📄</div>
+          <h3>Personal Tax Preparation</h3>
+          <p>Thoughtful, accurate tax preparation for individuals and families who want the process handled with care and attention to detail.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💼</div>
+          <h3>Small Business & Self-Employed Taxes</h3>
+          <p>Support for freelancers, independent contractors, and small business owners who need dependable help navigating their taxes.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧾</div>
+          <h3>Amended Returns</h3>
+          <p>Help correcting previously filed returns when something needs to be updated, adjusted, or reviewed more closely.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📚</div>
+          <h3>Tax Planning Guidance</h3>
+          <p>Planning ahead can ease stress later. Rosanna helps clients better understand their situation and prepare for what is ahead.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🤝</div>
+          <h3>Year-Round Support</h3>
+          <p>Questions do not stop once tax season ends. Rosanna is here to provide guidance whenever clients need help or clarity.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔒</div>
+          <h3>Confidential, Respectful Service</h3>
+          <p>Tax information is personal. Every client is treated with professionalism, discretion, and the respect they deserve.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="accent-band">
+    <div class="container">
+      <div class="section-head">
+        <h2>Why clients choose Rosanna</h2>
+        <p>
+          When it comes to taxes, people want more than just a service. They want someone they can trust, someone who listens, and someone who makes the process feel less intimidating.
+        </p>
+      </div>
+      <div class="why-grid">
+        <div class="card">
+          <h3>She takes the time to care</h3>
+          <p>Clients feel heard, respected, and supported instead of rushed through the process.</p>
+        </div>
+        <div class="card">
+          <h3>She keeps things clear</h3>
+          <p>Complicated tax language is broken down into explanations that feel simple and understandable.</p>
+        </div>
+        <div class="card">
+          <h3>She believes trust matters</h3>
+          <p>The goal is not just to prepare a return — it is to build confidence and long-term client relationships.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <h2>How the process works</h2>
+        <p>
+          Getting started should feel easy. This process is designed to help clients feel informed, comfortable, and organized from the very beginning.
+        </p>
+      </div>
+      <div class="steps-grid">
+        <div class="card process-card">
+          <div class="step-number">1</div>
+          <h3>Initial Conversation</h3>
+          <p>Start with a simple conversation about your tax needs, your questions, and what kind of support would be most helpful.</p>
+        </div>
+        <div class="card process-card">
+          <div class="step-number">2</div>
+          <h3>Review of Your Documents</h3>
+          <p>Your information is gathered carefully and reviewed thoroughly so everything can be prepared the right way.</p>
+        </div>
+        <div class="card process-card">
+          <div class="step-number">3</div>
+          <h3>Preparation & Filing</h3>
+          <p>Your return is completed with care, reviewed with you, and prepared for filing once everything is in place.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container testimonial">
+      <div class="quote-box">
+        <div class="section-head" style="text-align:left; margin-bottom:1rem;">
+          <h2 style="margin-bottom:0.5rem;">The kind of experience clients remember</h2>
+          <p style="margin:0;">This space can later be replaced with real reviews, but even now it helps show the tone of the business.</p>
+        </div>
+        <blockquote>
+          “Rosanna made everything feel so much easier. She was kind, patient, and made sure I understood every step of the process.”
+        </blockquote>
+        <p>Sample testimonial placeholder for future client reviews.</p>
+      </div>
+      <div class="cta-box">
+        <div class="section-head" style="text-align:left; margin-bottom:1rem;">
+          <h2 style="margin-bottom:0.5rem;">More than just tax preparation</h2>
+          <p style="margin:0;">This gives the business a more personal and grounded identity.</p>
+        </div>
+        <p>
+          Rosanna believes people deserve tax help that feels honest, respectful, and personal. Her goal is to make clients feel comfortable asking questions, confident in the process, and supported year after year.
+        </p>
+        <ul class="bullet-list">
+          <li>A welcoming and professional experience</li>
+          <li>Thoughtful support from start to finish</li>
+          <li>A business built on trust, care, and consistency</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <h2>About Rosanna</h2>
+        <p>
+          The heart of this business is simple: help people feel less stressed, more informed, and more confident when it comes to their taxes.
+        </p>
+      </div>
+      <div class="card" style="max-width: 900px; margin: 0 auto; padding: 2rem;">
+        <h3 style="font-size:1.35rem; margin-bottom:0.85rem;">A personal approach rooted in trust</h3>
+        <p>
+          Rosanna understands that taxes can feel confusing, stressful, or easy to put off. That is why she believes in offering a service that feels approachable, dependable, and respectful from the very first conversation.
+        </p>
+        <br>
+        <p>
+          She takes pride in helping clients feel taken care of — whether they are filing a simple return, managing small business taxes, or just trying to make sense of what comes next. Her focus is always on clear communication, careful work, and making sure clients feel they are in good hands.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <h2>Frequently asked questions</h2>
+        <p>
+          A few helpful answers can go a long way in making new clients feel comfortable reaching out.
+        </p>
+      </div>
+      <div class="faq-grid">
+        <div class="card">
+          <h3>What documents should I prepare?</h3>
+          <p>Most clients will need income forms, identification, prior tax returns, and any paperwork related to deductions or expenses. Rosanna can help guide you through exactly what is needed.</p>
+        </div>
+        <div class="card">
+          <h3>Do you work with small businesses?</h3>
+          <p>Yes. Rosanna works with freelancers, contractors, and small business owners who want dependable help handling their tax responsibilities.</p>
+        </div>
+        <div class="card">
+          <h3>Can I ask questions before getting started?</h3>
+          <p>Of course. Clients should always feel comfortable reaching out, asking questions, and getting clarity before moving forward.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container contact-panel">
+      <div class="contact-card">
+        <div class="section-head" style="text-align:left; margin-bottom:1rem;">
+          <h2 style="margin-bottom:0.5rem;">Contact & business information</h2>
+          <p style="margin:0;">A simple, welcoming place for future clients to reach out.</p>
+        </div>
+        <div class="contact-list">
+          <div class="contact-item">
+            <strong>Phone</strong>
+            <span>(000) 000-0000</span>
+          </div>
+          <div class="contact-item">
+            <strong>Email</strong>
+            <span>rosanna@example.com</span>
+          </div>
+          <div class="contact-item">
+            <strong>Office Hours</strong>
+            <span>Monday–Friday · 9:00 AM–6:00 PM</span>
+          </div>
+          <div class="contact-item">
+            <strong>Service Area</strong>
+            <span>Local and remote tax preparation services available</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-mock">
+        <div class="section-head" style="text-align:left; margin-bottom:1rem;">
+          <h2 style="margin-bottom:0.5rem;">Request a consultation</h2>
+          <p style="margin:0;">A simple first step for future clients who are ready to get started.</p>
+        </div>
+        <form>
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" placeholder="Enter your full name" />
+          </div>
+          <div class="field">
+            <label>Email Address</label>
+            <input type="email" placeholder="Enter your email" />
+          </div>
+          <div class="field">
+            <label>Type of Service</label>
+            <select>
+              <option>Personal Tax Preparation</option>
+              <option>Small Business Tax Support</option>
+              <option>Amended Return</option>
+              <option>General Consultation</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>How can we help?</label>
+            <textarea placeholder="Tell us a little about what you need"></textarea>
+          </div>
+          <a class="btn btn-primary" href="#" style="width:100%;">Request Consultation</a>
+        </form>
+        <p class="disclaimer">Placeholder only. No submission or live functionality has been added yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-wrap">
+      <div>
+        <strong>Taxes by Rosanna</strong><br>
+        Personal, professional tax preparation with care.
+      </div>
+      <div>
+        Home · Services · About · FAQs · Contact
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

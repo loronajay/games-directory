@@ -1,5 +1,5 @@
 GAME_CONFIGS = {
-    "blade-and-block": {
+    "blade-and-sphere": {
         "keyOverrides": {
             "up": "j",
             "b": "c",
@@ -20,7 +20,7 @@ GAME_CONFIGS = {
         }
     },
 
-    "x-pong": {
+    "paddle-battle": {
         "keyOverrides": {
             "y": "k",
             "a": ",",

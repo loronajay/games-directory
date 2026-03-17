@@ -1,0 +1,20 @@
+Overrides format
+
+
+GAME_CONFIGS = {
+  "<game-slug>": {
+    "keyOverrides": {
+      "up": "",
+      "down": "",
+      "left": "",
+      "right": "",
+      "a": "",
+      "b": "",
+      "x": "",
+      "y": ""
+    },
+    "mobile": {
+      "layout": "default"
+    }
+  }
+}

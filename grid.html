@@ -441,29 +441,18 @@ body{
 
 @media (max-width:600px){
   .grid-shell{
-    padding:0 16px 84px;
     margin:56px auto 72px;
+    padding:0 52px;
   }
 
   .grid-nav{
-    top:auto;
-    bottom:0;
-    transform:none;
-    width:48px;
-    height:48px;
+    width:42px;
+    height:42px;
   }
 
   .grid-nav:hover,
   .grid-nav.gamepad-selected{
-    transform:scale(1.06);
-  }
-
-  .grid-nav-left{
-    left:calc(50% - 58px);
-  }
-
-  .grid-nav-right{
-    right:calc(50% - 58px);
+    transform:translateY(-50%) scale(1.06);
   }
 
   .game-grid{
@@ -474,6 +463,24 @@ body{
 }
 
 @media (max-width:600px) and (orientation:portrait){
+  .grid-shell{
+    padding:0 54px;
+  }
+
+  .grid-nav{
+    top:50%;
+    bottom:auto;
+    transform:translateY(-50%);
+  }
+
+  .grid-nav-left{
+    left:2px;
+  }
+
+  .grid-nav-right{
+    right:2px;
+  }
+
   .game-card video,
   .future-card-media{
     height:160px;
@@ -950,11 +957,11 @@ function isMobilePortraitMode() {
 }
 
 function getAllCardsForBasePage(page) {
-  return Array.from(page.querySelectorAll(".game-card")).filter(isVisibleElement);
+  return Array.from(page.querySelectorAll(".game-card"));
 }
 
 function getLinkCardsForBasePage(page) {
-  return Array.from(page.querySelectorAll(".arcade-link")).filter(isVisibleElement);
+  return Array.from(page.querySelectorAll(".arcade-link"));
 }
 
 function buildVirtualPages() {
@@ -995,6 +1002,7 @@ function buildVirtualPages() {
 
 function applyVirtualPageVisibility() {
   const activePage = virtualPages[currentPage];
+  const mobilePortrait = isMobilePortraitMode();
 
   gridPages.forEach((page, basePageIndex) => {
     const cards = Array.from(page.querySelectorAll(".game-card"));
@@ -1003,7 +1011,7 @@ function applyVirtualPageVisibility() {
       card.style.display = "";
     });
 
-    if (!isMobilePortraitMode()) return;
+    if (!mobilePortrait) return;
 
     if (!activePage || basePageIndex !== activePage.basePageIndex) {
       cards.forEach(card => {
@@ -1013,11 +1021,7 @@ function applyVirtualPageVisibility() {
     }
 
     cards.forEach(card => {
-      if (activePage.visibleCards.includes(card)) {
-        card.style.display = "";
-      } else {
-        card.style.display = "none";
-      }
+      card.style.display = activePage.visibleCards.includes(card) ? "" : "none";
     });
   });
 }

@@ -89,23 +89,30 @@ def discover_games() -> list[dict]:
 
 
 def build_card_html(game: dict) -> str:
-    extra_classes = " ".join(
-        cls for cls in game["card_classes"] if isinstance(cls, str) and cls.strip()
-    )
+    card_classes = [
+        cls for cls in (game.get("card_classes") or [])
+        if isinstance(cls, str) and cls.strip()
+    ]
 
-    class_attr = "game-card arcade-link"
-    if extra_classes:
-        class_attr += f" {extra_classes}"
+    desktop_only = "desktop-only" in card_classes
+    class_tokens = ["game-card", "arcade-link", *card_classes]
+    class_attr = " ".join(class_tokens)
 
     preview_src = f"previews/{game['preview_filename']}"
+    mobile_replacement_attr = "true" if desktop_only else "false"
 
-    return f"""            <a class="{escape_html(class_attr)}" href="games/{escape_html(game['slug'])}/index.html">
+    return f"""            <a class="{escape_html(class_attr)}" href="games/{escape_html(game['slug'])}/index.html" data-mobile-replacement="{mobile_replacement_attr}">
               <video muted loop preload="metadata">
                 <source src="{escape_html(preview_src)}" type="video/mp4">
               </video>
               <div class="game-title">{escape_html(game['title'])}</div>
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
+              </div>
+              <div class="mobile-card-replacement" aria-hidden="true">
+                <div class="future-card-media">COMING SOON</div>
+                <div class="game-title">Future Title</div>
+                <div class="game-play-count">JAY ARCADE EXPANDING</div>
               </div>
             </a>"""
 
@@ -122,10 +129,6 @@ def build_future_card_html(extra_classes: str = "") -> str:
             </div>"""
 
 
-def build_mobile_replacement_card_html() -> str:
-    return build_future_card_html("mobile-only-card mobile-replacement-card")
-
-
 def chunk_games(games: list[dict], chunk_size: int) -> list[list[dict]]:
     return [games[i:i + chunk_size] for i in range(0, len(games), chunk_size)]
 
@@ -135,10 +138,6 @@ def build_page_html(page_games: list[dict]) -> str:
 
     for game in page_games:
         cards.append(build_card_html(game))
-
-        card_classes = game.get("card_classes") or []
-        if "desktop-only" in card_classes:
-            cards.append(build_mobile_replacement_card_html())
 
     visible_card_count = len(page_games)
 

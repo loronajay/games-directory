@@ -399,10 +399,6 @@ body{
   display:none;
 }
 
-.game-card[data-mobile-replacement="true"] .mobile-card-replacement{
-  display:none;
-}
-
 .future-card-media{
   width:100%;
   height:180px;
@@ -1041,20 +1037,21 @@ function isEmptyPageTarget(target) {
   return !!target && target.type === "empty-page";
 }
 
-function isMobileReplacementCard(card) {
-  return isDomSelectableTarget(card) && card.dataset.mobileReplacement === "true" && window.innerWidth <= 900;
+function getAllCardsForBasePage(page) {
+  return Array.from(page.querySelectorAll(".game-grid > .game-card"));
 }
 
-function getAllCardsForBasePage(page) {
-  return Array.from(page.querySelectorAll(".game-card")).filter(isVisibleElement);
+function isCardSelectableOnCurrentViewport(card) {
+  if (!(card instanceof Element)) return false;
+  if (!card.classList.contains("arcade-link")) return false;
+  if (card.dataset.mobileReplacement === "true" && window.innerWidth <= 900) return false;
+  return true;
 }
 
 function getLinkCardsForBasePage(page) {
-  return Array.from(page.querySelectorAll(".arcade-link")).filter(card => {
-    if (!isVisibleElement(card)) return false;
-    if (isMobileReplacementCard(card)) return false;
-    return true;
-  });
+  return Array.from(page.querySelectorAll(".game-grid > .arcade-link")).filter(
+    isCardSelectableOnCurrentViewport
+  );
 }
 
 function buildVirtualPages() {
@@ -1082,9 +1079,7 @@ function buildVirtualPages() {
       const start = i * MOBILE_PORTRAIT_PAGE_SIZE;
       const end = start + MOBILE_PORTRAIT_PAGE_SIZE;
       const visibleCards = allCards.slice(start, end);
-      const selectableItems = visibleCards.filter(card =>
-        card.classList.contains("arcade-link") && !isMobileReplacementCard(card)
-      );
+      const selectableItems = visibleCards.filter(isCardSelectableOnCurrentViewport);
 
       pages.push({
         basePageIndex,
@@ -1196,6 +1191,9 @@ function stopNonSelectedVideos() {
 }
 
 function centerOnTarget(target) {
+  const scroller = document.scrollingElement || document.documentElement;
+  if (!scroller) return;
+
   let element = null;
 
   if (isDomSelectableTarget(target)) {
@@ -1209,7 +1207,7 @@ function centerOnTarget(target) {
   const rect = element.getBoundingClientRect();
   const currentTop = window.scrollY || window.pageYOffset;
   const targetTop = currentTop + rect.top - ((window.innerHeight - rect.height) / 2);
-  const maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const maxTop = Math.max(0, scroller.scrollHeight - window.innerHeight);
   const clampedTop = Math.max(0, Math.min(targetTop, maxTop));
 
   window.scrollTo({ top: clampedTop, behavior: "auto" });
@@ -1262,6 +1260,8 @@ function rememberGridSelection(target = null) {
   if (isEmptyPageTarget(resolvedTarget)) {
     const existing = lastGridSelectionByBasePage.get(page.basePageIndex);
     if (existing && existing.type !== "empty-page") return;
+    lastGridSelectionByBasePage.set(page.basePageIndex, resolvedTarget);
+    return;
   }
 
   lastGridSelectionByBasePage.set(page.basePageIndex, resolvedTarget);
@@ -1340,6 +1340,7 @@ function getPageTargetSelectedIndex(pageIndex, selection = "clamp", previousElem
 
   if (selection === "restore-grid" && page) {
     const remembered = lastGridSelectionByBasePage.get(page.basePageIndex);
+
     if (remembered) {
       const rememberedIndex = pageTargets.indexOf(remembered);
       if (rememberedIndex !== -1) {
@@ -1389,6 +1390,7 @@ function setPage(index, options = {}) {
   }
 
   selectedIndex = getPageTargetSelectedIndex(currentPage, selection, previousElement);
+
   setSelectedIndex(selectedIndex, playSound, { center });
   stopNonSelectedVideos();
 }
@@ -1434,7 +1436,7 @@ function rebuildPagedView(options = {}) {
     }
 
     const activePage = virtualPages[currentPage];
-    const preferRestore = preserveSelection && activePage && previousTarget && !isPopularSelectedElement(previousTarget);
+    const preferRestore = preserveSelection && activePage && !isPopularSelectedElement(previousTarget);
     const selectionMode = preferRestore ? "restore-grid" : "clamp";
 
     selectedIndex = getPageTargetSelectedIndex(currentPage, selectionMode, null);
@@ -1594,7 +1596,7 @@ function moveSelection(direction, source) {
   }
 }
 
-/* Nav buttons *//* Nav buttons */
+/* Nav buttons */
 navLeft.addEventListener("click", () => {
   const current = getVisibleGamepadItems()[selectedIndex] || null;
   const previousElement = isDomSelectableTarget(current) && !isPopularSelectedElement(current) ? current : null;

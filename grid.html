@@ -441,12 +441,13 @@ body{
 
 @media (max-width:600px){
   .grid-shell{
-    padding:0 16px;
+    padding:0 16px 84px;
+    margin:56px auto 72px;
   }
 
   .grid-nav{
     top:auto;
-    bottom:-18px;
+    bottom:0;
     transform:none;
     width:48px;
     height:48px;
@@ -467,6 +468,15 @@ body{
 
   .game-grid{
     grid-template-columns:1fr;
+    gap:22px;
+    padding:12px;
+  }
+}
+
+@media (max-width:600px) and (orientation:portrait){
+  .game-card video,
+  .future-card-media{
+    height:160px;
   }
 }
 </style>
@@ -723,7 +733,7 @@ window.addEventListener("load",()=>{
     } else {
       setTimeout(()=>{
         loader.style.display="none";
-        document.getElementById("startScreen").style.display="flex";
+        revealStartScreen();
       },800);
     }
   }
@@ -736,10 +746,17 @@ const startScreen = document.getElementById("startScreen");
 const mainContent = document.getElementById("mainContent");
 const bgMusic = document.getElementById("bgMusic");
 
+let startScreenVisible = false;
 let startScreenDismissed = false;
 let gamepadEnabled = false;
 
+function revealStartScreen() {
+  startScreen.style.display = "flex";
+  startScreenVisible = true;
+}
+
 function startArcade() {
+  if (!startScreenVisible) return;
   if (startScreenDismissed) return;
 
   startScreenDismissed = true;
@@ -749,8 +766,8 @@ function startArcade() {
 
   gamepadEnabled = true;
 
-  setSelectedIndex(0, false);
-  stopNonSelectedVideos();
+  rebuildPagedView({ preserveSelection: false });
+  setPage(0, { selection: "first", playSound: false });
 }
 
 startScreen.addEventListener("click", () => {
@@ -909,6 +926,9 @@ window.addEventListener("pageshow", function(event) {
 
 /* ===== PAGED GRID NAVIGATION (REPLACEMENT) ===== */
 
+const MOBILE_PORTRAIT_BREAKPOINT = 600;
+const MOBILE_PORTRAIT_PAGE_SIZE = 3;
+
 const gridTrack = document.getElementById("gridTrack");
 const gridPages = Array.from(document.querySelectorAll(".grid-page"));
 const navLeft = document.getElementById("gridNavLeft");
@@ -916,61 +936,94 @@ const navRight = document.getElementById("gridNavRight");
 
 let currentPage = 0;
 let selectedIndex = 0;
+let virtualPages = [];
 
-/* Build page → items map */
-function getPageItems() {
-  return gridPages.map(page => {
-    return Array.from(page.querySelectorAll(".arcade-link")).filter(item => {
-      const style = window.getComputedStyle(item);
-      return style.display !== "none" && style.visibility !== "hidden";
+function isVisibleElement(el) {
+  const style = window.getComputedStyle(el);
+  return style.display !== "none" && style.visibility !== "hidden";
+}
+
+function isMobilePortraitMode() {
+  return window.matchMedia(
+    `(max-width:${MOBILE_PORTRAIT_BREAKPOINT}px) and (orientation:portrait)`
+  ).matches;
+}
+
+function getAllCardsForBasePage(page) {
+  return Array.from(page.querySelectorAll(".game-card")).filter(isVisibleElement);
+}
+
+function getLinkCardsForBasePage(page) {
+  return Array.from(page.querySelectorAll(".arcade-link")).filter(isVisibleElement);
+}
+
+function buildVirtualPages() {
+  const mobilePortrait = isMobilePortraitMode();
+  const pages = [];
+
+  gridPages.forEach((page, basePageIndex) => {
+    const allCards = getAllCardsForBasePage(page);
+    const linkCards = getLinkCardsForBasePage(page);
+
+    if (!mobilePortrait) {
+      pages.push({
+        basePageIndex,
+        visibleCards: allCards,
+        selectableItems: linkCards
+      });
+      return;
+    }
+
+    const sliceCount = Math.max(1, Math.ceil(allCards.length / MOBILE_PORTRAIT_PAGE_SIZE));
+
+    for (let i = 0; i < sliceCount; i++) {
+      const start = i * MOBILE_PORTRAIT_PAGE_SIZE;
+      const end = start + MOBILE_PORTRAIT_PAGE_SIZE;
+      const visibleCards = allCards.slice(start, end);
+      const selectableItems = visibleCards.filter(card => card.classList.contains("arcade-link"));
+
+      pages.push({
+        basePageIndex,
+        visibleCards,
+        selectableItems
+      });
+    }
+  });
+
+  return pages;
+}
+
+function applyVirtualPageVisibility() {
+  const activePage = virtualPages[currentPage];
+
+  gridPages.forEach((page, basePageIndex) => {
+    const cards = Array.from(page.querySelectorAll(".game-card"));
+
+    cards.forEach(card => {
+      card.style.display = "";
+    });
+
+    if (!isMobilePortraitMode()) return;
+
+    if (!activePage || basePageIndex !== activePage.basePageIndex) {
+      cards.forEach(card => {
+        card.style.display = "none";
+      });
+      return;
+    }
+
+    cards.forEach(card => {
+      if (activePage.visibleCards.includes(card)) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
     });
   });
 }
 
-let pageItems = getPageItems();
-
-/* ===== PAGE CONTROL ===== */
-
-function updatePagePosition() {
-  gridTrack.style.transform = `translateX(-${currentPage * 100}%)`;
-
-  navLeft.style.display = currentPage > 0 ? "block" : "none";
-  navRight.style.display = currentPage < gridPages.length - 1 ? "block" : "none";
-}
-
-function setPage(index) {
-  const clamped = Math.max(0, Math.min(index, gridPages.length - 1));
-  if (clamped === currentPage) return;
-
-  currentPage = clamped;
-  updatePagePosition();
-
-  const items = getVisibleGamepadItems();
-  if (!items.length) return;
-
-  selectedIndex = Math.min(selectedIndex, items.length - 1);
-
-  setSelectedIndex(selectedIndex, false);
-  stopNonSelectedVideos();
-}
-
-/* Nav buttons */
-navLeft.addEventListener("click", () => {
-  hoverSound.currentTime = 0;
-  hoverSound.play().catch(() => {});
-  setPage(currentPage - 1);
-});
-
-navRight.addEventListener("click", () => {
-  hoverSound.currentTime = 0;
-  hoverSound.play().catch(() => {});
-  setPage(currentPage + 1);
-});
-
-/* ===== SELECTION SYSTEM ===== */
-
 function getVisibleGamepadItems() {
-  return pageItems[currentPage] || [];
+  return virtualPages[currentPage]?.selectableItems || [];
 }
 
 function clearGamepadSelection() {
@@ -979,11 +1032,34 @@ function clearGamepadSelection() {
   });
 }
 
+function stopNonSelectedVideos() {
+  const items = Array.from(document.querySelectorAll(".arcade-link"));
+  const visibleItems = getVisibleGamepadItems();
+  const selected = visibleItems[selectedIndex];
+
+  items.forEach(item => {
+    const vid = item.querySelector("video");
+    if (!vid) return;
+
+    if (item === selected) {
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+      vid.currentTime = 0;
+    }
+  });
+}
+
 function setSelectedIndex(index, playSound = true) {
   const items = getVisibleGamepadItems();
-  if (!items.length) return;
 
   clearGamepadSelection();
+
+  if (!items.length) {
+    selectedIndex = 0;
+    stopNonSelectedVideos();
+    return;
+  }
 
   selectedIndex = ((index % items.length) + items.length) % items.length;
 
@@ -1011,21 +1087,86 @@ function scrollSelectedIntoView() {
   });
 }
 
-function stopNonSelectedVideos() {
+function updatePagePosition() {
+  const activePage = virtualPages[currentPage];
+  const basePageIndex = activePage ? activePage.basePageIndex : 0;
+
+  applyVirtualPageVisibility();
+  gridTrack.style.transform = `translateX(-${basePageIndex * 100}%)`;
+
+  navLeft.style.display = currentPage > 0 ? "block" : "none";
+  navRight.style.display = currentPage < virtualPages.length - 1 ? "block" : "none";
+}
+
+function setPage(index, options = {}) {
+  const {
+    selection = "clamp",
+    playSound = false
+  } = options;
+
+  if (!virtualPages.length) return;
+
+  const clamped = Math.max(0, Math.min(index, virtualPages.length - 1));
+  currentPage = clamped;
+
+  updatePagePosition();
+
   const items = getVisibleGamepadItems();
-  const selected = items[selectedIndex];
 
-  items.forEach(item => {
-    const vid = item.querySelector("video");
-    if (!vid) return;
+  if (!items.length) {
+    clearGamepadSelection();
+    stopNonSelectedVideos();
+    return;
+  }
 
-    if (item === selected) {
-      vid.play().catch(() => {});
-    } else {
-      vid.pause();
-      vid.currentTime = 0;
+  if (selection === "first") {
+    selectedIndex = 0;
+  } else if (selection === "last") {
+    selectedIndex = items.length - 1;
+  } else {
+    selectedIndex = Math.min(selectedIndex, items.length - 1);
+  }
+
+  setSelectedIndex(selectedIndex, playSound);
+  stopNonSelectedVideos();
+}
+
+function rebuildPagedView(options = {}) {
+  const {
+    preserveSelection = true
+  } = options;
+
+  virtualPages = buildVirtualPages();
+
+  if (!virtualPages.length) {
+    virtualPages = [{
+      basePageIndex: 0,
+      visibleCards: [],
+      selectableItems: []
+    }];
+  }
+
+  currentPage = Math.max(0, Math.min(currentPage, virtualPages.length - 1));
+
+  if (!preserveSelection) {
+    selectedIndex = 0;
+  }
+
+  updatePagePosition();
+
+  if (startScreenDismissed) {
+    const items = getVisibleGamepadItems();
+
+    if (!items.length) {
+      clearGamepadSelection();
+      stopNonSelectedVideos();
+      return;
     }
-  });
+
+    selectedIndex = Math.min(selectedIndex, items.length - 1);
+    setSelectedIndex(selectedIndex, false);
+    stopNonSelectedVideos();
+  }
 }
 
 function activateSelectedItem() {
@@ -1035,8 +1176,6 @@ function activateSelectedItem() {
 
   selected.click();
 }
-
-/* ===== MOVEMENT ===== */
 
 function getClosestIndexInDirection(direction) {
   const items = getVisibleGamepadItems();
@@ -1103,43 +1242,46 @@ function getClosestIndexInDirection(direction) {
 
 function moveSelection(direction, source) {
   const items = getVisibleGamepadItems();
-  if (!items.length) return;
 
-  const nextIndex = getClosestIndexInDirection(direction);
+  if (items.length) {
+    const nextIndex = getClosestIndexInDirection(direction);
 
-  if (nextIndex !== selectedIndex) {
-    setSelectedIndex(nextIndex);
-    stopNonSelectedVideos();
+    if (nextIndex !== selectedIndex) {
+      setSelectedIndex(nextIndex);
+      stopNonSelectedVideos();
 
-    if (source === "gamepad") {
-      scrollSelectedIntoView();
+      if (source === "gamepad") {
+        scrollSelectedIntoView();
+      }
+      return;
     }
-    return;
   }
 
-  /* Page switching */
-  if (direction === "right" && currentPage < gridPages.length - 1) {
-    setPage(currentPage + 1);
-    selectedIndex = 0;
-    setSelectedIndex(selectedIndex);
-    stopNonSelectedVideos();
+  if (direction === "right" && currentPage < virtualPages.length - 1) {
+    setPage(currentPage + 1, { selection: "first", playSound: true });
     return;
   }
 
   if (direction === "left" && currentPage > 0) {
-    setPage(currentPage - 1);
-
-    const items = getVisibleGamepadItems();
-    selectedIndex = items.length - 1;
-
-    setSelectedIndex(selectedIndex);
-    stopNonSelectedVideos();
+    setPage(currentPage - 1, { selection: "last", playSound: true });
     return;
   }
 }
 
-/* ===== MOUSE SYNC ===== */
+/* Nav buttons */
+navLeft.addEventListener("click", () => {
+  hoverSound.currentTime = 0;
+  hoverSound.play().catch(() => {});
+  setPage(currentPage - 1, { selection: "last", playSound: false });
+});
 
+navRight.addEventListener("click", () => {
+  hoverSound.currentTime = 0;
+  hoverSound.play().catch(() => {});
+  setPage(currentPage + 1, { selection: "first", playSound: false });
+});
+
+/* Mouse sync */
 document.querySelectorAll(".arcade-link").forEach(item => {
   item.addEventListener("mouseenter", () => {
     const items = getVisibleGamepadItems();
@@ -1153,9 +1295,10 @@ document.querySelectorAll(".arcade-link").forEach(item => {
   });
 });
 
-/* ===== INPUT HOOK ===== */
-
+/* Input hook */
 ArcadeInput.onAction((action, source) => {
+  if (!startScreenVisible) return;
+
   if (!startScreenDismissed) {
     if (action === "select") {
       startArcade();
@@ -1174,36 +1317,15 @@ ArcadeInput.onAction((action, source) => {
   }
 });
 
-/* ===== INIT ===== */
+/* Init */
+rebuildPagedView({ preserveSelection: false });
 
-updatePagePosition();
-
-/* Resize safety */
 window.addEventListener("resize", () => {
-  pageItems = getPageItems();
-
-  const items = getVisibleGamepadItems();
-  if (!items.length) return;
-
-  if (selectedIndex >= items.length) {
-    selectedIndex = items.length - 1;
-  }
-
-  setSelectedIndex(selectedIndex, false);
-  stopNonSelectedVideos();
+  rebuildPagedView({ preserveSelection: true });
 });
 
-/* Keep selection valid on resize */
-window.addEventListener("resize", () => {
-  const items = getVisibleGamepadItems();
-  if (!items.length) return;
-
-  if (selectedIndex >= items.length) {
-    selectedIndex = items.length - 1;
-  }
-
-  setSelectedIndex(selectedIndex, false);
-  stopNonSelectedVideos();
+window.addEventListener("orientationchange", () => {
+  rebuildPagedView({ preserveSelection: true });
 });
 
 </script>

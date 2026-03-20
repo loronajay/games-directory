@@ -349,6 +349,16 @@ body{
   box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
 }
 
+.game-grid.empty-page-selected{
+  background:rgba(0,0,0,.22);
+  border:2px dashed rgba(0,255,255,.7);
+  box-shadow:0 0 28px rgba(255,0,255,.28), inset 0 0 18px rgba(0,255,255,.18);
+}
+
+.game-grid.empty-page-selected .future-card{
+  box-shadow:0 0 28px rgba(255,0,255,.22), 0 0 14px rgba(0,255,255,.18) inset;
+}
+
 .game-card video{
   width:100%;
   height:180px;
@@ -405,6 +415,10 @@ body{
     );
 }
 
+.mobile-only-card{
+  display:none !important;
+}
+
 /* CRT Power On */
 .crt-boot {
   animation: crtBoot 0.6s forwards;
@@ -428,6 +442,10 @@ body{
 @media (max-width:900px){
   .desktop-only{
     display:none !important;
+  }
+
+  .mobile-only-card{
+    display:flex !important;
   }
 
   .grid-shell{
@@ -597,6 +615,12 @@ body{
               </div>
             </a>
 
+            <div class="game-card future-card mobile-only-card mobile-replacement-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
             <a class="game-card arcade-link" href="games/paddle-battle/index.html">
               <video muted loop preload="metadata">
                 <source src="previews/paddle-battle.mp4" type="video/mp4">
@@ -616,6 +640,12 @@ body{
                 PLAYS: <span class="playCount">000000</span>
               </div>
             </a>
+
+            <div class="game-card future-card mobile-only-card mobile-replacement-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
 
             <div class="game-card future-card" aria-hidden="true">
               <div class="future-card-media">COMING SOON</div>
@@ -944,6 +974,9 @@ const navRight = document.getElementById("gridNavRight");
 let currentPage = 0;
 let selectedIndex = 0;
 let virtualPages = [];
+let inputMode = "mouse";
+let lastPointerX = null;
+let lastPointerY = null;
 
 function isVisibleElement(el) {
   const style = window.getComputedStyle(el);
@@ -956,12 +989,20 @@ function isMobilePortraitMode() {
   ).matches;
 }
 
+function isDomSelectableTarget(target) {
+  return target instanceof Element;
+}
+
+function isEmptyPageTarget(target) {
+  return !!target && target.type === "empty-page";
+}
+
 function getAllCardsForBasePage(page) {
-  return Array.from(page.querySelectorAll(".game-card"));
+  return Array.from(page.querySelectorAll(".game-card")).filter(isVisibleElement);
 }
 
 function getLinkCardsForBasePage(page) {
-  return Array.from(page.querySelectorAll(".arcade-link"));
+  return Array.from(page.querySelectorAll(".arcade-link")).filter(isVisibleElement);
 }
 
 function buildVirtualPages() {
@@ -971,10 +1012,12 @@ function buildVirtualPages() {
   gridPages.forEach((page, basePageIndex) => {
     const allCards = getAllCardsForBasePage(page);
     const linkCards = getLinkCardsForBasePage(page);
+    const gridElement = page.querySelector(".game-grid");
 
     if (!mobilePortrait) {
       pages.push({
         basePageIndex,
+        gridElement,
         visibleCards: allCards,
         selectableItems: linkCards
       });
@@ -991,6 +1034,7 @@ function buildVirtualPages() {
 
       pages.push({
         basePageIndex,
+        gridElement,
         visibleCards,
         selectableItems
       });
@@ -1026,13 +1070,56 @@ function applyVirtualPageVisibility() {
   });
 }
 
-function getVisibleGamepadItems() {
-  return virtualPages[currentPage]?.selectableItems || [];
+function getPopularSelectable() {
+  const popularBoxVisible = isVisibleElement(popularBox);
+  const popularLinkVisible = isVisibleElement(popularLink);
+
+  if (!popularBoxVisible || !popularLinkVisible) return [];
+  return [popularLink];
+}
+
+function getEmptyPageTarget(pageIndex = currentPage) {
+  const page = virtualPages[pageIndex];
+  if (!page) return null;
+
+  return {
+    type: "empty-page",
+    pageIndex,
+    gridElement: page.gridElement
+  };
+}
+
+function getPageSelectionTargets(pageIndex = currentPage) {
+  const page = virtualPages[pageIndex];
+  if (!page) return [];
+
+  if (page.selectableItems.length) {
+    return page.selectableItems;
+  }
+
+  const emptyTarget = getEmptyPageTarget(pageIndex);
+  return emptyTarget ? [emptyTarget] : [];
+}
+
+function getVisibleGamepadItems(pageIndex = currentPage) {
+  return [...getPopularSelectable(), ...getPageSelectionTargets(pageIndex)];
+}
+
+function isPopularSelectedElement(target) {
+  return isDomSelectableTarget(target) && target.id === "popularLink";
+}
+
+function setInputMode(mode) {
+  inputMode = mode;
 }
 
 function clearGamepadSelection() {
   document.querySelectorAll(".arcade-link").forEach(item => {
     item.classList.remove("gamepad-selected");
+  });
+
+  document.querySelectorAll(".game-grid").forEach(grid => {
+    grid.classList.remove("empty-page-selected");
   });
 }
 
@@ -1068,21 +1155,28 @@ function setSelectedIndex(index, playSound = true) {
   selectedIndex = ((index % items.length) + items.length) % items.length;
 
   const selected = items[selectedIndex];
-  selected.classList.add("gamepad-selected");
+
+  if (isDomSelectableTarget(selected)) {
+    selected.classList.add("gamepad-selected");
+  } else if (isEmptyPageTarget(selected) && selected.gridElement) {
+    selected.gridElement.classList.add("empty-page-selected");
+  }
 
   if (playSound) {
     hoverSound.currentTime = 0;
     hoverSound.play().catch(() => {});
   }
 
-  const vid = selected.querySelector("video");
-  if (vid) vid.play().catch(() => {});
+  if (isDomSelectableTarget(selected)) {
+    const vid = selected.querySelector("video");
+    if (vid) vid.play().catch(() => {});
+  }
 }
 
 function scrollSelectedIntoView() {
   const items = getVisibleGamepadItems();
   const selected = items[selectedIndex];
-  if (!selected) return;
+  if (!isDomSelectableTarget(selected)) return;
 
   selected.scrollIntoView({
     block: "center",
@@ -1102,10 +1196,82 @@ function updatePagePosition() {
   navRight.style.display = currentPage < virtualPages.length - 1 ? "block" : "none";
 }
 
+function getRowPreservedIndex(items, previousElement, direction) {
+  if (!items.length) return 0;
+  if (!previousElement || !isDomSelectableTarget(previousElement)) return 0;
+
+  const domItems = items.filter(isDomSelectableTarget);
+  if (!domItems.length) return 0;
+
+  const previousRect = previousElement.getBoundingClientRect();
+  const previousCenterY = previousRect.top + previousRect.height / 2;
+
+  let bestIndex = 0;
+  let bestRowDiff = Infinity;
+  let bestXScore = direction === "left" ? -Infinity : Infinity;
+
+  domItems.forEach((item, index) => {
+    const rect = item.getBoundingClientRect();
+    const centerY = rect.top + rect.height / 2;
+    const centerX = rect.left + rect.width / 2;
+    const rowDiff = Math.abs(centerY - previousCenterY);
+
+    if (rowDiff < bestRowDiff) {
+      bestRowDiff = rowDiff;
+      bestIndex = index;
+      bestXScore = centerX;
+      return;
+    }
+
+    if (Math.abs(rowDiff - bestRowDiff) <= 6) {
+      if (direction === "left" && centerX > bestXScore) {
+        bestIndex = index;
+        bestXScore = centerX;
+      }
+
+      if (direction === "right" && centerX < bestXScore) {
+        bestIndex = index;
+        bestXScore = centerX;
+      }
+    }
+  });
+
+  return bestIndex;
+}
+
+function getPageTargetSelectedIndex(pageIndex, selection = "clamp", previousElement = null) {
+  const popularCount = getPopularSelectable().length;
+  const pageTargets = getPageSelectionTargets(pageIndex);
+
+  if (!pageTargets.length) {
+    return popularCount ? 0 : 0;
+  }
+
+  if (selection === "first") {
+    return popularCount;
+  }
+
+  if (selection === "last") {
+    return popularCount + pageTargets.length - 1;
+  }
+
+  if (selection === "preserve-row-right") {
+    return popularCount + getRowPreservedIndex(pageTargets, previousElement, "right");
+  }
+
+  if (selection === "preserve-row-left") {
+    return popularCount + getRowPreservedIndex(pageTargets, previousElement, "left");
+  }
+
+  const maxIndex = getVisibleGamepadItems(pageIndex).length - 1;
+  return Math.max(0, Math.min(selectedIndex, maxIndex));
+}
+
 function setPage(index, options = {}) {
   const {
     selection = "clamp",
-    playSound = false
+    playSound = false,
+    previousElement = null
   } = options;
 
   if (!virtualPages.length) return;
@@ -1115,7 +1281,7 @@ function setPage(index, options = {}) {
 
   updatePagePosition();
 
-  const items = getVisibleGamepadItems();
+  const items = getVisibleGamepadItems(currentPage);
 
   if (!items.length) {
     clearGamepadSelection();
@@ -1123,13 +1289,7 @@ function setPage(index, options = {}) {
     return;
   }
 
-  if (selection === "first") {
-    selectedIndex = 0;
-  } else if (selection === "last") {
-    selectedIndex = items.length - 1;
-  } else {
-    selectedIndex = Math.min(selectedIndex, items.length - 1);
-  }
+  selectedIndex = getPageTargetSelectedIndex(currentPage, selection, previousElement);
 
   setSelectedIndex(selectedIndex, playSound);
   stopNonSelectedVideos();
@@ -1145,6 +1305,7 @@ function rebuildPagedView(options = {}) {
   if (!virtualPages.length) {
     virtualPages = [{
       basePageIndex: 0,
+      gridElement: null,
       visibleCards: [],
       selectableItems: []
     }];
@@ -1153,7 +1314,7 @@ function rebuildPagedView(options = {}) {
   currentPage = Math.max(0, Math.min(currentPage, virtualPages.length - 1));
 
   if (!preserveSelection) {
-    selectedIndex = 0;
+    selectedIndex = getPopularSelectable().length;
   }
 
   updatePagePosition();
@@ -1176,7 +1337,7 @@ function rebuildPagedView(options = {}) {
 function activateSelectedItem() {
   const items = getVisibleGamepadItems();
   const selected = items[selectedIndex];
-  if (!selected) return;
+  if (!selected || !isDomSelectableTarget(selected)) return;
 
   selected.click();
 }
@@ -1184,7 +1345,7 @@ function activateSelectedItem() {
 function getClosestIndexInDirection(direction) {
   const items = getVisibleGamepadItems();
   const current = items[selectedIndex];
-  if (!current) return selectedIndex;
+  if (!isDomSelectableTarget(current)) return selectedIndex;
 
   const currentRect = current.getBoundingClientRect();
   const currentCenterX = currentRect.left + currentRect.width / 2;
@@ -1194,7 +1355,7 @@ function getClosestIndexInDirection(direction) {
   let bestScore = Infinity;
 
   items.forEach((item, index) => {
-    if (index === selectedIndex) return;
+    if (index === selectedIndex || !isDomSelectableTarget(item)) return;
 
     const rect = item.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -1246,48 +1407,123 @@ function getClosestIndexInDirection(direction) {
 
 function moveSelection(direction, source) {
   const items = getVisibleGamepadItems();
+  const current = items[selectedIndex] || null;
+  const popularCount = getPopularSelectable().length;
 
-  if (items.length) {
-    const nextIndex = getClosestIndexInDirection(direction);
-
-    if (nextIndex !== selectedIndex) {
-      setSelectedIndex(nextIndex);
+  if (isEmptyPageTarget(current)) {
+    if (direction === "up" && popularCount) {
+      setSelectedIndex(0);
       stopNonSelectedVideos();
-
-      if (source === "gamepad") {
-        scrollSelectedIntoView();
-      }
       return;
     }
+
+    if (direction === "right" && currentPage < virtualPages.length - 1) {
+      setPage(currentPage + 1, {
+        selection: "first",
+        playSound: true
+      });
+      return;
+    }
+
+    if (direction === "left" && currentPage > 0) {
+      setPage(currentPage - 1, {
+        selection: "last",
+        playSound: true
+      });
+      return;
+    }
+
+    return;
+  }
+
+  const nextIndex = getClosestIndexInDirection(direction);
+
+  if (nextIndex !== selectedIndex) {
+    setSelectedIndex(nextIndex);
+    stopNonSelectedVideos();
+
+    if (source === "gamepad") {
+      scrollSelectedIntoView();
+    }
+    return;
+  }
+
+  if (isPopularSelectedElement(current)) {
+    if (direction === "down") {
+      const pageTargets = getPageSelectionTargets();
+      if (pageTargets.length) {
+        setSelectedIndex(popularCount);
+        stopNonSelectedVideos();
+      }
+    }
+    return;
   }
 
   if (direction === "right" && currentPage < virtualPages.length - 1) {
-    setPage(currentPage + 1, { selection: "first", playSound: true });
+    setPage(currentPage + 1, {
+      selection: "preserve-row-right",
+      playSound: true,
+      previousElement: current
+    });
     return;
   }
 
   if (direction === "left" && currentPage > 0) {
-    setPage(currentPage - 1, { selection: "last", playSound: true });
+    setPage(currentPage - 1, {
+      selection: "preserve-row-left",
+      playSound: true,
+      previousElement: current
+    });
     return;
   }
 }
 
 /* Nav buttons */
 navLeft.addEventListener("click", () => {
+  const current = getVisibleGamepadItems()[selectedIndex] || null;
+  const previousElement = isDomSelectableTarget(current) && !isPopularSelectedElement(current) ? current : null;
   hoverSound.currentTime = 0;
   hoverSound.play().catch(() => {});
-  setPage(currentPage - 1, { selection: "last", playSound: false });
+  setPage(currentPage - 1, {
+    selection: previousElement ? "preserve-row-left" : "last",
+    playSound: false,
+    previousElement
+  });
 });
 
 navRight.addEventListener("click", () => {
+  const current = getVisibleGamepadItems()[selectedIndex] || null;
+  const previousElement = isDomSelectableTarget(current) && !isPopularSelectedElement(current) ? current : null;
   hoverSound.currentTime = 0;
   hoverSound.play().catch(() => {});
-  setPage(currentPage + 1, { selection: "first", playSound: false });
+  setPage(currentPage + 1, {
+    selection: previousElement ? "preserve-row-right" : "first",
+    playSound: false,
+    previousElement
+  });
 });
 
 /* Mouse sync */
+document.addEventListener("mousemove", event => {
+  if (lastPointerX === null || lastPointerY === null) {
+    lastPointerX = event.clientX;
+    lastPointerY = event.clientY;
+    return;
+  }
+
+  const moved = Math.abs(event.clientX - lastPointerX) > 2 || Math.abs(event.clientY - lastPointerY) > 2;
+  lastPointerX = event.clientX;
+  lastPointerY = event.clientY;
+
+  if (moved) {
+    setInputMode("mouse");
+  }
+});
+
 document.querySelectorAll(".arcade-link").forEach(item => {
   item.addEventListener("mouseenter", () => {
+    if (inputMode !== "mouse") return;
+
     const items = getVisibleGamepadItems();
     const index = items.indexOf(item);
 
@@ -1300,7 +1536,14 @@ document.querySelectorAll(".arcade-link").forEach(item => {
 });
 
 /* Input hook */
+/* Input hook */
 ArcadeInput.onAction((action, source) => {
+  if (source === "gamepad") {
+    setInputMode("gamepad");
+  } else if (source === "keyboard") {
+    setInputMode("keyboard");
+  }
+
   if (!startScreenVisible) return;
 
   if (!startScreenDismissed) {

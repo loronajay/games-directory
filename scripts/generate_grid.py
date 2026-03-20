@@ -110,12 +110,20 @@ def build_card_html(game: dict) -> str:
             </a>"""
 
 
-def build_future_card_html() -> str:
-    return """            <div class="game-card future-card" aria-hidden="true">
+def build_future_card_html(extra_classes: str = "") -> str:
+    class_attr = "game-card future-card"
+    if extra_classes.strip():
+        class_attr += f" {extra_classes.strip()}"
+
+    return f"""            <div class="{escape_html(class_attr)}" aria-hidden="true">
               <div class="future-card-media">COMING SOON</div>
               <div class="game-title">Future Title</div>
               <div class="game-play-count">JAY ARCADE EXPANDING</div>
             </div>"""
+
+
+def build_mobile_replacement_card_html() -> str:
+    return build_future_card_html("mobile-only-card mobile-replacement-card")
 
 
 def chunk_games(games: list[dict], chunk_size: int) -> list[list[dict]]:
@@ -128,8 +136,15 @@ def build_page_html(page_games: list[dict]) -> str:
     for game in page_games:
         cards.append(build_card_html(game))
 
-    while len(cards) < CARDS_PER_PAGE:
+        card_classes = game.get("card_classes") or []
+        if "desktop-only" in card_classes:
+            cards.append(build_mobile_replacement_card_html())
+
+    visible_card_count = len(page_games)
+
+    while visible_card_count < CARDS_PER_PAGE:
         cards.append(build_future_card_html())
+        visible_card_count += 1
 
     cards_html = "\n\n".join(cards)
 

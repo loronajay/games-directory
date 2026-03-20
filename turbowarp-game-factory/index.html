@@ -205,6 +205,88 @@ body{
   box-shadow:inset 0 0 10px rgba(0,255,255,.08);
 }
 
+
+/* ===== MODULE PREVIEWS ===== */
+.modules-sub{
+  max-width:800px;
+  margin:0 auto 24px;
+}
+
+.module-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  margin-top:28px;
+}
+
+.module-card{
+  position:relative;
+  background:rgba(0,0,0,.85);
+  border:3px solid #ff00ff;
+  padding:12px;
+  text-align:left;
+  transition:transform .25s ease, box-shadow .25s ease;
+  box-shadow:0 0 18px rgba(255,0,255,.18);
+}
+
+.module-card:hover{
+  transform:perspective(800px) rotateX(4deg) scale(1.03);
+  box-shadow:0 0 34px #ff00ff, 0 0 16px #00ffff inset;
+}
+
+.module-preview-wrap{
+  position:relative;
+  background:#050505;
+  border:2px solid #00ffff;
+  box-shadow:0 0 18px rgba(0,255,255,.2);
+  overflow:hidden;
+}
+
+.module-preview-wrap::after{
+  content:"LIVE MODULE PREVIEW";
+  position:absolute;
+  top:8px;
+  left:8px;
+  z-index:2;
+  padding:6px 8px;
+  font-size:.38rem;
+  line-height:1.4;
+  color:#00ffff;
+  border:1px solid rgba(0,255,255,.6);
+  background:rgba(0,0,0,.72);
+  text-shadow:0 0 6px rgba(0,255,255,.55);
+  pointer-events:none;
+}
+
+.module-card video{
+  display:block;
+  width:100%;
+  height:230px;
+  object-fit:contain;
+  object-position:center;
+  background:#050505;
+  filter:brightness(1.08) contrast(1.08);
+}
+
+.module-card-copy{
+  padding:12px 2px 4px;
+}
+
+.module-title{
+  font-size:.58rem;
+  line-height:1.7;
+  color:#ffffff;
+  text-shadow:0 0 8px rgba(255,255,255,.35), 0 0 12px rgba(255,0,255,.22);
+}
+
+.module-note{
+  margin-top:8px;
+  font-size:.5rem;
+  line-height:1.8;
+  color:#00ffff;
+  text-shadow:0 0 8px rgba(0,255,255,.32);
+}
+
 /* ===== DEMO SECTION ===== */
 .demo{
   margin:30px auto 0;
@@ -374,6 +456,10 @@ body{
     padding:24px 16px;
   }
 }
+@media (max-width:700px){
+  .module-grid{grid-template-columns:1fr;}
+  .module-card video{height:210px;}
+}
 </style>
 </head>
 
@@ -404,7 +490,7 @@ body{
     <div class="page-title">TURBOWARP GAME FACTORY</div>
 
     <div class="sub">
-      A complete system for building TurboWarp games without rebuilding the same systems every single time.
+      A modular system for building TurboWarp games without rebuilding the same core systems every time.
     </div>
 
     <div class="highlight">
@@ -415,7 +501,7 @@ body{
 
     <div class="badge">
       POWERED BY TURBOWARP<br>
-      BUILT FOR SERIOUS TURBOWARP DEVELOPERS
+      BUILT FOR DEVELOPERS WHO BUILD MORE THAN ONE GAME
     </div>
   </div>
 
@@ -424,17 +510,17 @@ body{
     <div class="section-title">WHAT IT IS</div>
 
     <div class="sub">
-      Every TurboWarp game tends to require the same setup work:
-      controls, UI systems, text rendering, and input handling.
+      Every TurboWarp game ends up rebuilding the same core systems:
+      controls, UI logic, text rendering, and input handling.
       <br><br>
-      TurboWarp Game Factory is designed to remove that repeated setup and replace it with a reusable foundation.
+      TurboWarp Game Factory replaces that repeated work with reusable modules that plug directly into your projects and carry forward between games.
     </div>
 
     <div class="features">
-      <div class="feature">→ Pre-built control systems for keyboard and gamepad support</div>
-      <div class="feature">→ Reusable modules that can carry from game to game</div>
-      <div class="feature">→ A consistent development structure instead of rebuilding from scratch</div>
-      <div class="feature">→ A workflow where the game itself becomes the main focus</div>
+      <div class="feature">→ Pre-built control systems for keyboard and gamepad</div>
+      <div class="feature">→ Drop-in modules that persist across multiple projects</div>
+      <div class="feature">→ A consistent structure that reduces setup time and complexity</div>
+      <div class="feature">→ A workflow where you focus on game design instead of rebuilding systems</div>
     </div>
   </div>
 
@@ -443,15 +529,93 @@ body{
     <div class="section-title">CURRENT SYSTEM</div>
 
     <div class="sub">
-      TurboWarp Game Factory is already being built as a real modular system, not just an idea.
+      This is not a concept — the system is already working and actively being used in real projects.
     </div>
 
     <div class="features">
-      <div class="feature">✔ Factory Controls with keyboard and gamepad support</div>
-      <div class="feature">✔ Gamepad detection integrated into the control pipeline</div>
-      <div class="feature">✔ Shared input behavior for UI navigation and gameplay structure</div>
-      <div class="feature">✔ Text renderer development in progress as part of the core system vision</div>
-      <div class="feature">✔ Modular architecture intended to eliminate repeated setup across future games</div>
+      <div class="feature">✔ Factory Controls with unified keyboard and gamepad input</div>
+      <div class="feature">✔ Built-in gamepad detection integrated into the control pipeline</div>
+      <div class="feature">✔ Shared input behavior across menus and gameplay systems</div>
+      <div class="feature">✔ Factory Text renderer in active development for UI and data display</div>
+      <div class="feature">✔ Modular architecture designed for reuse across multiple games</div>
+    </div>
+  </div>
+
+  <!-- MODULES IN ACTION -->
+  <div class="section">
+    <div class="section-title">MODULES IN ACTION</div>
+
+    <div class="sub modules-sub">
+      Real TurboWarp Game Factory modules running inside actual game environments — designed to be reused, not rebuilt.
+    </div>
+
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-preview-wrap">
+          <video muted loop preload="metadata" playsinline>
+            <source src="../previews/game-factory-previews/factory-gravity.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="module-card-copy">
+          <div class="module-title">Factory Gravity</div>
+          <div class="module-note">Plug-and-play gravity and collision handling</div>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-preview-wrap">
+          <video muted loop preload="metadata" playsinline>
+            <source src="../previews/game-factory-previews/factory-animation.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="module-card-copy">
+          <div class="module-title">Factory Animation</div>
+          <div class="module-note">Reusable animation logic for cleaner game behavior</div>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-preview-wrap">
+          <video muted loop preload="metadata" playsinline>
+            <source src="../previews/game-factory-previews/factory-text.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="module-card-copy">
+          <div class="module-title">Factory Text</div>
+          <div class="module-note">Dynamic text rendering for UI, scores, and labels</div>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <div class="module-preview-wrap">
+          <video muted loop preload="metadata" playsinline>
+            <source src="../previews/game-factory-previews/factory-leaderboards.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="module-card-copy">
+          <div class="module-title">Factory Leaderboards</div>
+          <div class="module-note">Built-in leaderboard system, working in conjunction with Factory Text</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MORE MODULES IN DEVELOPMENT -->
+  <div class="section">
+    <div class="section-title">MORE MODULES IN DEVELOPMENT</div>
+
+    <div class="sub">
+      The system is actively expanding with new modules that continue reducing repeated development work.
+    </div>
+
+    <div class="features">
+      <div class="feature">→ Factory GameState for structured game flow and state control</div>
+      <div class="feature">→ Factory Highlight Button for fast and consistent menu navigation</div>
+      <div class="feature">→ Textify-TurboWarp for readable script export and system-level debugging</div>
+    </div>
+
+    <div class="badge">
+      EXPANDING INTO A COMPLETE DEVELOPMENT SYSTEM
     </div>
   </div>
 
@@ -482,13 +646,13 @@ body{
         </div>
 
         <div class="game-card-note">
-          A real playable JayArcade title built within the same ecosystem this page represents.
+          A real playable JayArcade title built using the same system shown above.
         </div>
       </a>
     </div>
 
     <div class="badge">
-      MADE WITH TURBOWARP GAME FACTORY
+      BUILT USING THE SAME SYSTEM SHOWN ABOVE
     </div>
   </div>
 
@@ -501,7 +665,7 @@ body{
       <br><br>
       the game should be the only part that needs to be built from scratch.
       <br><br>
-      Repeated systems should already be solved, standardized, and ready to reuse.
+      Everything else — input systems, UI behavior, text rendering, and structure — should already be solved, standardized, and ready to reuse.
     </div>
   </div>
 
@@ -510,8 +674,8 @@ body{
     <div class="section-title">POWERING JAYARCADE</div>
 
     <div class="sub">
-      TurboWarp Game Factory is not only a tool.
-      It also strengthens the JayArcade ecosystem by creating a recognizable development identity across games.
+      TurboWarp Game Factory is not just a tool.
+      It is the system behind how JayArcade games are built — creating consistency, speed, and a recognizable development identity.
       <br><br>
       Powered by TurboWarp. Standardized by Game Factory. Published through JayArcade.
     </div>
@@ -522,12 +686,14 @@ body{
     <div class="section-title">COMING SOON</div>
 
     <div class="sub">
-      TurboWarp Game Factory is being developed as a complete reusable system for TurboWarp creators.
+      TurboWarp Game Factory is being developed into a complete reusable system for TurboWarp creators.
     </div>
-
+    <!-- temporarily disabling this button
     <a class="cta" href="#">
       GET EARLY ACCESS
     </a>
+    -->
+    
   </div>
 
 </div>
@@ -606,6 +772,22 @@ document.querySelectorAll(".arcade-link").forEach(link => {
     }, 650);
   });
 });
+
+/* Module preview cards */
+document.querySelectorAll(".module-card").forEach(card => {
+  const vid = card.querySelector("video");
+  if (!vid) return;
+
+  card.addEventListener("mouseenter", () => {
+    vid.play().catch(() => {});
+  });
+
+  card.addEventListener("mouseleave", () => {
+    vid.pause();
+    vid.currentTime = 0;
+  });
+});
+
 </script>
 
 </body>

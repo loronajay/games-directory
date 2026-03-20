@@ -184,7 +184,7 @@ body{
 
 .popular-box{
   margin:22px auto 0;
-  max-width:720px;
+  max-width:520px;
   padding:18px 20px;
   background:rgba(0,0,0,.78);
   border:2px solid #ff00ff;
@@ -237,7 +237,7 @@ body{
 
 .factory-box{
   margin:28px auto 0;
-  max-width:720px;
+  max-width:520px;
   padding:16px 18px;
   background:rgba(0,0,0,.72);
   border:2px solid #00ffff;
@@ -269,6 +269,67 @@ body{
   text-shadow:0 0 6px #00ffff;
 }
 
+.factory-promo-box{
+  margin:0 auto 18px;
+  max-width:520px;
+  padding:16px 18px;
+  text-align:center;
+  background:rgba(0,0,0,.78);
+  border:2px solid #ff00ff;
+  box-shadow:
+    0 0 18px rgba(255,0,255,.28),
+    inset 0 0 10px rgba(255,0,255,.08);
+}
+
+.factory-promo-title{
+  font-size:.62rem;
+  line-height:1.7;
+  color:#ffccff;
+  text-shadow:0 0 8px rgba(255,0,255,.45);
+}
+
+.factory-button{
+  display:inline-block;
+  margin-top:18px; /* this fixes the “too close” issue */
+
+  padding:10px 16px;
+
+  font-size:.55rem;
+  line-height:1.6;
+
+  color:#00ffff;
+  text-decoration:none;
+
+  border:2px solid #00ffff;
+  background:rgba(0,0,0,.72);
+
+  box-shadow:
+    0 0 14px rgba(0,255,255,.3),
+    inset 0 0 8px rgba(0,255,255,.12);
+
+  text-shadow:0 0 8px rgba(0,255,255,.55);
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    color .2s ease,
+    border-color .2s ease;
+}
+
+.factory-button:hover,
+.factory-button.gamepad-selected{
+  transform:perspective(800px) rotateX(6deg) scale(1.05);
+
+  color:#ff00ff;
+  border-color:#ff00ff;
+
+  box-shadow:
+    0 0 22px #ff00ff,
+    0 0 14px #00ffff inset;
+
+  text-shadow:0 0 10px #ff00ff;
+}
+
 /* ===== PAGED GRID ===== */
 .grid-shell{
   position:relative;
@@ -285,6 +346,36 @@ body{
   display:flex;
   transition:transform .45s ease;
   will-change:transform;
+}
+
+.game-grid.portrait-slice-swipe-left{
+  animation:portraitSliceSwipeLeft .28s ease;
+}
+
+.game-grid.portrait-slice-swipe-right{
+  animation:portraitSliceSwipeRight .28s ease;
+}
+
+@keyframes portraitSliceSwipeLeft{
+  0%{
+    opacity:.7;
+    transform:translateX(28px);
+  }
+  100%{
+    opacity:1;
+    transform:translateX(0);
+  }
+}
+
+@keyframes portraitSliceSwipeRight{
+  0%{
+    opacity:.7;
+    transform:translateX(-28px);
+  }
+  100%{
+    opacity:1;
+    transform:translateX(0);
+  }
 }
 
 .grid-page{
@@ -555,19 +646,23 @@ body{
     </div>
   </div>
 
+  <div class="factory-box">
+  <div class="factory-title">POWERED BY TURBOWARP GAME FACTORY</div>
+
+  <div class="factory-sub">
+    <!-- your original text stays EXACTLY as-is -->
+  </div>
+
+  <a class="factory-button arcade-link" href="./turbowarp-game-factory/index.html">
+    SEE FOR YOURSELF →
+  </a>
+</div>
+
   <div class="popular-box" id="popularBox" style="display:none;">
     <div class="popular-label">MOST POPULAR RIGHT NOW</div>
     <div class="popular-title" id="popularTitle">LOADING...</div>
     <div class="popular-meta" id="popularMeta">CHECKING GOATCOUNTER DATA...</div>
     <a class="popular-link arcade-link" id="popularLink" href="#">LAUNCH TITLE</a>
-  </div>
-
-  <div class="factory-box">
-    <div class="factory-label">BUILT WITH</div>
-    <div class="factory-title">TurboWarp Game Factory</div>
-    <div class="factory-sub">
-      Powering every game on Jay Arcade
-    </div>
   </div>
 
   <div class="grid-shell">
@@ -579,7 +674,7 @@ body{
           <!-- AUTO-GENERATED-GRID-PAGES-START -->
         <div class="grid-page">
           <div class="game-grid">
-            <a class="game-card arcade-link" href="games/apple-catcher/index.html" data-mobile-replacement="false">
+            <a class="game-card arcade-link" href="games/apple-catcher/index.html">
               <video muted loop preload="metadata">
                 <source src="previews/apple-catcher.mp4" type="video/mp4">
               </video>
@@ -587,14 +682,9 @@ body{
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
               </div>
-              <div class="mobile-card-replacement" aria-hidden="true">
-                <div class="future-card-media">COMING SOON</div>
-                <div class="game-title">Future Title</div>
-                <div class="game-play-count">JAY ARCADE EXPANDING</div>
-              </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/art-of-war/index.html" data-mobile-replacement="false">
+            <a class="game-card arcade-link" href="games/art-of-war/index.html">
               <video muted loop preload="metadata">
                 <source src="previews/art-of-war.mp4" type="video/mp4">
               </video>
@@ -602,14 +692,9 @@ body{
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
               </div>
-              <div class="mobile-card-replacement" aria-hidden="true">
-                <div class="future-card-media">COMING SOON</div>
-                <div class="game-title">Future Title</div>
-                <div class="game-play-count">JAY ARCADE EXPANDING</div>
-              </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/bird-duty/index.html" data-mobile-replacement="false">
+            <a class="game-card arcade-link" href="games/bird-duty/index.html">
               <video muted loop preload="metadata">
                 <source src="previews/bird-duty.mp4" type="video/mp4">
               </video>
@@ -617,25 +702,15 @@ body{
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
               </div>
-              <div class="mobile-card-replacement" aria-hidden="true">
-                <div class="future-card-media">COMING SOON</div>
-                <div class="game-title">Future Title</div>
-                <div class="game-play-count">JAY ARCADE EXPANDING</div>
-              </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/blade-and-sphere/index.html" data-mobile-replacement="false">
+            <a class="game-card arcade-link" href="games/blade-and-sphere/index.html">
               <video muted loop preload="metadata">
                 <source src="previews/blade-and-sphere.mp4" type="video/mp4">
               </video>
               <div class="game-title">Blade &amp; Sphere</div>
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
-              </div>
-              <div class="mobile-card-replacement" aria-hidden="true">
-                <div class="future-card-media">COMING SOON</div>
-                <div class="game-title">Future Title</div>
-                <div class="game-play-count">JAY ARCADE EXPANDING</div>
               </div>
             </a>
 
@@ -654,18 +729,13 @@ body{
               </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/paddle-battle/index.html" data-mobile-replacement="false">
+            <a class="game-card arcade-link" href="games/paddle-battle/index.html">
               <video muted loop preload="metadata">
                 <source src="previews/paddle-battle.mp4" type="video/mp4">
               </video>
               <div class="game-title">Paddle Battle</div>
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
-              </div>
-              <div class="mobile-card-replacement" aria-hidden="true">
-                <div class="future-card-media">COMING SOON</div>
-                <div class="game-title">Future Title</div>
-                <div class="game-play-count">JAY ARCADE EXPANDING</div>
               </div>
             </a>
 
@@ -1010,6 +1080,7 @@ const navLeft = document.getElementById("gridNavLeft");
 const navRight = document.getElementById("gridNavRight");
 
 let currentPage = 0;
+let currentPageBeforeUpdate = 0;
 let selectedIndex = 0;
 let virtualPages = [];
 let inputMode = "mouse";
@@ -1267,12 +1338,39 @@ function rememberGridSelection(target = null) {
   lastGridSelectionByBasePage.set(page.basePageIndex, resolvedTarget);
 }
 
+function playPortraitSliceSwipe(fromPage, toPage, fromIndex, toIndex) {
+  if (!isMobilePortraitMode()) return;
+  if (!fromPage || !toPage) return;
+  if (fromPage.basePageIndex !== toPage.basePageIndex) return;
+  if (!toPage.gridElement) return;
+  if (fromIndex === toIndex) return;
+
+  const grid = toPage.gridElement;
+  const className = toIndex > fromIndex
+    ? "portrait-slice-swipe-left"
+    : "portrait-slice-swipe-right";
+
+  grid.classList.remove("portrait-slice-swipe-left", "portrait-slice-swipe-right");
+  void grid.offsetWidth;
+  grid.classList.add(className);
+
+  window.clearTimeout(grid._portraitSwipeTimer);
+  grid._portraitSwipeTimer = window.setTimeout(() => {
+    grid.classList.remove("portrait-slice-swipe-left", "portrait-slice-swipe-right");
+  }, 300);
+}
+
 function updatePagePosition() {
+  const previousPage = virtualPages[currentPageBeforeUpdate] || null;
   const activePage = virtualPages[currentPage];
   const basePageIndex = activePage ? activePage.basePageIndex : 0;
 
   applyVirtualPageVisibility();
   gridTrack.style.transform = `translateX(-${basePageIndex * 100}%)`;
+
+  if (previousPage && activePage) {
+    playPortraitSliceSwipe(previousPage, activePage, currentPageBeforeUpdate, currentPage);
+  }
 
   navLeft.style.display = currentPage > 0 ? "block" : "none";
   navRight.style.display = currentPage < virtualPages.length - 1 ? "block" : "none";
@@ -1377,6 +1475,7 @@ function setPage(index, options = {}) {
   }
 
   const clamped = Math.max(0, Math.min(index, virtualPages.length - 1));
+  currentPageBeforeUpdate = currentPage;
   currentPage = clamped;
 
   updatePagePosition();

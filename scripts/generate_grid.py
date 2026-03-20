@@ -9,8 +9,10 @@ ROOT = Path(__file__).resolve().parent.parent
 GAMES_DIR = ROOT / "games"
 GRID_HTML = ROOT / "grid.html"
 
-START_MARKER = "<!-- AUTO-GENERATED-GAME-CARDS-START -->"
-END_MARKER = "<!-- AUTO-GENERATED-GAME-CARDS-END -->"
+START_MARKER = "<!-- AUTO-GENERATED-GRID-PAGES-START -->"
+END_MARKER = "<!-- AUTO-GENERATED-GRID-PAGES-END -->"
+
+CARDS_PER_PAGE = 9
 
 
 def slug_to_title(slug: str) -> str:
@@ -97,24 +99,61 @@ def build_card_html(game: dict) -> str:
 
     preview_src = f"previews/{game['preview_filename']}"
 
-    return f"""  <a class="{escape_html(class_attr)}" href="games/{escape_html(game['slug'])}/index.html">
-    <video muted loop preload="metadata">
-      <source src="{escape_html(preview_src)}" type="video/mp4">
-    </video>
-    <div class="game-title">{escape_html(game['title'])}</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
-    </div>
-  </a>"""
+    return f"""            <a class="{escape_html(class_attr)}" href="games/{escape_html(game['slug'])}/index.html">
+              <video muted loop preload="metadata">
+                <source src="{escape_html(preview_src)}" type="video/mp4">
+              </video>
+              <div class="game-title">{escape_html(game['title'])}</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>"""
 
 
-def render_cards(games: list[dict]) -> str:
-    if not games:
-        return "  <!-- No games found -->"
-    return "\n\n".join(build_card_html(game) for game in games)
+def build_future_card_html() -> str:
+    return """            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>"""
 
 
-def inject_into_grid(cards_html: str) -> None:
+def chunk_games(games: list[dict], chunk_size: int) -> list[list[dict]]:
+    return [games[i:i + chunk_size] for i in range(0, len(games), chunk_size)]
+
+
+def build_page_html(page_games: list[dict]) -> str:
+    cards: list[str] = []
+
+    for game in page_games:
+        cards.append(build_card_html(game))
+
+    while len(cards) < CARDS_PER_PAGE:
+        cards.append(build_future_card_html())
+
+    cards_html = "\n\n".join(cards)
+
+    return f"""        <div class="grid-page">
+          <div class="game-grid">
+{cards_html}
+          </div>
+        </div>"""
+
+
+def render_grid_pages(games: list[dict]) -> str:
+    pages = chunk_games(games, CARDS_PER_PAGE)
+
+    if not pages:
+        pages = [[]]
+
+    while len(pages) < 2:
+        pages.append([])
+
+    rendered_pages = [build_page_html(page_games) for page_games in pages]
+    return "\n\n".join(rendered_pages)
+
+
+def inject_into_grid(pages_html: str) -> None:
     if not GRID_HTML.exists():
         raise FileNotFoundError(f"grid.html not found: {GRID_HTML}")
 
@@ -125,7 +164,7 @@ def inject_into_grid(cards_html: str) -> None:
         re.DOTALL,
     )
 
-    replacement = f"{START_MARKER}\n{cards_html}\n  {END_MARKER}"
+    replacement = f"{START_MARKER}\n{pages_html}\n    {END_MARKER}"
 
     new_html, count = pattern.subn(replacement, html, count=1)
 
@@ -140,10 +179,13 @@ def inject_into_grid(cards_html: str) -> None:
 
 def main() -> None:
     games = discover_games()
-    cards_html = render_cards(games)
-    inject_into_grid(cards_html)
+    pages_html = render_grid_pages(games)
+    inject_into_grid(pages_html)
 
-    print(f"[generate_grid] Generated {len(games)} game card(s).")
+    print(f"[generate_grid] Generated {len(games)} game card(s) across paged grid.")
+    print(f"[generate_grid] Cards per page: {CARDS_PER_PAGE}")
+    print(f"[generate_grid] Total pages: {max(1, (len(games) + CARDS_PER_PAGE - 1) // CARDS_PER_PAGE)}")
+
     for game in games:
         print(f"  - {game['slug']} -> {game['title']}")
 

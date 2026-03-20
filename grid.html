@@ -175,7 +175,6 @@ body{
   text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
 }
 
-
 .visitor-box{
   margin-top:20px;
   font-size:.8rem;
@@ -236,31 +235,102 @@ body{
   color:#ffccff;
 }
 
-/* ===== GRID ===== */
-.game-grid{
+.factory-box{
+  margin:28px auto 0;
+  max-width:720px;
+  padding:16px 18px;
+  background:rgba(0,0,0,.72);
+  border:2px solid #00ffff;
+  box-shadow:
+    0 0 18px rgba(0,255,255,.25),
+    0 0 10px rgba(255,0,255,.12) inset;
+  text-align:center;
+}
+
+.factory-label{
+  font-size:.55rem;
+  color:#ffccff;
+  text-shadow:0 0 6px #ff00ff;
+  margin-bottom:6px;
+  letter-spacing:1px;
+}
+
+.factory-title{
+  font-size:.9rem;
+  color:#00ffff;
+  text-shadow:0 0 12px #00ffff;
+}
+
+.factory-sub{
+  margin-top:6px;
+  font-size:.6rem;
+  color:#00ffff;
+  opacity:.8;
+  text-shadow:0 0 6px #00ffff;
+}
+
+/* ===== PAGED GRID ===== */
+.grid-shell{
+  position:relative;
+  max-width:1240px;
   margin:80px auto;
-  max-width:1100px;
+  padding:0 70px;
+}
+
+.grid-viewport{
+  overflow:hidden;
+}
+
+.grid-track{
+  display:flex;
+  transition:transform .45s ease;
+  will-change:transform;
+}
+
+.grid-page{
+  min-width:100%;
+  flex:0 0 100%;
+}
+
+.game-grid{
+  width:100%;
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:40px;
   padding:20px;
 }
 
-@media(max-width:900px){
-  .game-grid{grid-template-columns:repeat(2,1fr);}
+.grid-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:52px;
+  height:52px;
+  border:2px solid #00ffff;
+  background:rgba(0,0,0,.82);
+  color:#00ffff;
+  font-size:1.2rem;
+  cursor:pointer;
+  z-index:20;
+  box-shadow:0 0 18px rgba(0,255,255,.28);
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease, color .2s ease;
 }
 
-@media(max-width:600px){
-  .game-grid{grid-template-columns:1fr;}
+.grid-nav:hover,
+.grid-nav.gamepad-selected{
+  transform:translateY(-50%) scale(1.06);
+  box-shadow:0 0 26px #ff00ff, 0 0 14px #00ffff inset;
+  border-color:#ff00ff;
+  color:#ffccff;
 }
 
- 
-@media (max-width:900px){
-  .desktop-only{
-    display:none !important;
-  }
+.grid-nav-left{
+  left:0;
 }
 
+.grid-nav-right{
+  right:0;
+}
 
 /* ===== CARDS ===== */
 .game-card{
@@ -301,6 +371,40 @@ body{
   text-shadow:0 0 8px #00ffff;
 }
 
+.future-card{
+  background:
+    linear-gradient(180deg, rgba(0,255,255,.05), rgba(255,0,255,.04)),
+    rgba(0,0,0,.78);
+  border:3px dashed rgba(0,255,255,.7);
+  box-shadow:0 0 18px rgba(0,255,255,.14), inset 0 0 12px rgba(255,0,255,.08);
+  cursor:default;
+}
+
+.future-card:hover{
+  transform:none;
+  box-shadow:0 0 18px rgba(0,255,255,.14), inset 0 0 12px rgba(255,0,255,.08);
+}
+
+.future-card-media{
+  width:100%;
+  height:180px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px dashed rgba(255,0,255,.75);
+  color:#ffccff;
+  font-size:.8rem;
+  text-shadow:0 0 10px #ff00ff;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.03) 0px,
+      rgba(255,255,255,.03) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+}
+
 /* CRT Power On */
 .crt-boot {
   animation: crtBoot 0.6s forwards;
@@ -321,6 +425,50 @@ body{
   }
 }
 
+@media (max-width:900px){
+  .desktop-only{
+    display:none !important;
+  }
+
+  .grid-shell{
+    padding:0 58px;
+  }
+
+  .game-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width:600px){
+  .grid-shell{
+    padding:0 16px;
+  }
+
+  .grid-nav{
+    top:auto;
+    bottom:-18px;
+    transform:none;
+    width:48px;
+    height:48px;
+  }
+
+  .grid-nav:hover,
+  .grid-nav.gamepad-selected{
+    transform:scale(1.06);
+  }
+
+  .grid-nav-left{
+    left:calc(50% - 58px);
+  }
+
+  .grid-nav-right{
+    right:calc(50% - 58px);
+  }
+
+  .game-grid{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 </head>
 <body>
@@ -359,87 +507,175 @@ body{
   </div>
 
   <div class="popular-box" id="popularBox" style="display:none;">
-  <div class="popular-label">MOST POPULAR RIGHT NOW</div>
-  <div class="popular-title" id="popularTitle">LOADING...</div>
-  <div class="popular-meta" id="popularMeta">CHECKING GOATCOUNTER DATA...</div>
-  <a class="popular-link arcade-link" id="popularLink" href="#">LAUNCH TITLE</a>
+    <div class="popular-label">MOST POPULAR RIGHT NOW</div>
+    <div class="popular-title" id="popularTitle">LOADING...</div>
+    <div class="popular-meta" id="popularMeta">CHECKING GOATCOUNTER DATA...</div>
+    <a class="popular-link arcade-link" id="popularLink" href="#">LAUNCH TITLE</a>
   </div>
 
-  <div class="game-grid">
-
-  <!-- AUTO-GENERATED-GAME-CARDS-START -->
-  <a class="game-card arcade-link" href="games/apple-catcher/index.html">
-    <video muted loop preload="metadata">
-      <source src="previews/apple-catcher.mp4" type="video/mp4">
-    </video>
-    <div class="game-title">Apple Catcher</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
+  <div class="factory-box">
+    <div class="factory-label">BUILT WITH</div>
+    <div class="factory-title">TurboWarp Game Factory</div>
+    <div class="factory-sub">
+      Powering every game on Jay Arcade
     </div>
-  </a>
-
-  <a class="game-card arcade-link" href="games/art-of-war/index.html">
-    <video muted loop preload="metadata">
-      <source src="previews/art-of-war.mp4" type="video/mp4">
-    </video>
-    <div class="game-title">Art Of War</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
-    </div>
-  </a>
-
-  <a class="game-card arcade-link" href="games/bird-duty/index.html">
-    <video muted loop preload="metadata">
-      <source src="previews/bird-duty.mp4" type="video/mp4">
-    </video>
-    <div class="game-title">Bird Duty</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
-    </div>
-  </a>
-
-  <a class="game-card arcade-link" href="games/blade-and-sphere/index.html">
-    <video muted loop preload="metadata">
-      <source src="previews/blade-and-sphere.mp4" type="video/mp4">
-    </video>
-    <div class="game-title">Blade &amp; Sphere</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
-    </div>
-  </a>
-
-  <a class="game-card arcade-link desktop-only" href="games/dodgeballs/index.html">
-    <video muted loop preload="metadata">
-      <source src="previews/dodgeballs.mp4" type="video/mp4">
-    </video>
-    <div class="game-title">Dodgeballs!</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
-    </div>
-  </a>
-
-  <a class="game-card arcade-link" href="games/paddle-battle/index.html">
-    <video muted loop preload="metadata">
-      <source src="previews/paddle-battle.mp4" type="video/mp4">
-    </video>
-    <div class="game-title">Paddle Battle</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
-    </div>
-  </a>
-
-  <a class="game-card arcade-link desktop-only" href="games/sumorai/index.html">
-    <video muted loop preload="metadata">
-      <source src="previews/sumorai.mp4" type="video/mp4">
-    </video>
-    <div class="game-title">Sumorai</div>
-    <div class="game-play-count">
-      PLAYS: <span class="playCount">000000</span>
-    </div>
-  </a>
-  <!-- AUTO-GENERATED-GAME-CARDS-END -->
-
   </div>
+
+  <div class="grid-shell">
+    <button class="grid-nav grid-nav-left" id="gridNavLeft" aria-label="Previous grid page" style="display:none;">◀</button>
+    <button class="grid-nav grid-nav-right" id="gridNavRight" aria-label="Next grid page">▶</button>
+
+    <div class="grid-viewport" id="gridViewport">
+      <div class="grid-track" id="gridTrack">
+          <!-- AUTO-GENERATED-GRID-PAGES-START -->
+        <div class="grid-page">
+          <div class="game-grid">
+            <a class="game-card arcade-link" href="games/apple-catcher/index.html">
+              <video muted loop preload="metadata">
+                <source src="previews/apple-catcher.mp4" type="video/mp4">
+              </video>
+              <div class="game-title">Apple Catcher</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>
+
+            <a class="game-card arcade-link" href="games/art-of-war/index.html">
+              <video muted loop preload="metadata">
+                <source src="previews/art-of-war.mp4" type="video/mp4">
+              </video>
+              <div class="game-title">Art Of War</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>
+
+            <a class="game-card arcade-link" href="games/bird-duty/index.html">
+              <video muted loop preload="metadata">
+                <source src="previews/bird-duty.mp4" type="video/mp4">
+              </video>
+              <div class="game-title">Bird Duty</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>
+
+            <a class="game-card arcade-link" href="games/blade-and-sphere/index.html">
+              <video muted loop preload="metadata">
+                <source src="previews/blade-and-sphere.mp4" type="video/mp4">
+              </video>
+              <div class="game-title">Blade &amp; Sphere</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>
+
+            <a class="game-card arcade-link desktop-only" href="games/dodgeballs/index.html">
+              <video muted loop preload="metadata">
+                <source src="previews/dodgeballs.mp4" type="video/mp4">
+              </video>
+              <div class="game-title">Dodgeballs!</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>
+
+            <a class="game-card arcade-link" href="games/paddle-battle/index.html">
+              <video muted loop preload="metadata">
+                <source src="previews/paddle-battle.mp4" type="video/mp4">
+              </video>
+              <div class="game-title">Paddle Battle</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>
+
+            <a class="game-card arcade-link desktop-only" href="games/sumorai/index.html">
+              <video muted loop preload="metadata">
+                <source src="previews/sumorai.mp4" type="video/mp4">
+              </video>
+              <div class="game-title">Sumorai</div>
+              <div class="game-play-count">
+                PLAYS: <span class="playCount">000000</span>
+              </div>
+            </a>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-page">
+          <div class="game-grid">
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+
+            <div class="game-card future-card" aria-hidden="true">
+              <div class="future-card-media">COMING SOON</div>
+              <div class="game-title">Future Title</div>
+              <div class="game-play-count">JAY ARCADE EXPANDING</div>
+            </div>
+          </div>
+        </div>
+    <!-- AUTO-GENERATED-GRID-PAGES-END -->
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/arcade-input.js"></script>
@@ -478,14 +714,13 @@ window.addEventListener("load",()=>{
       // If it's a newline, pause slightly longer
       if(bootText[i] === "\n"){
         i++;
-        setTimeout(typeCharacter, 350); // pause between lines
+        setTimeout(typeCharacter, 350);
         return;
       }
 
       i++;
-      setTimeout(typeCharacter, 18); // normal typing speed
+      setTimeout(typeCharacter, 18);
     } else {
-      // Finished typing
       setTimeout(()=>{
         loader.style.display="none";
         document.getElementById("startScreen").style.display="flex";
@@ -542,24 +777,21 @@ document.querySelectorAll(".arcade-link").forEach(link=>{
   });
 
   link.addEventListener("click", e => {
-  e.preventDefault();
+    e.preventDefault();
 
-  shutdownSound.currentTime = 0;
-  shutdownSound.play().catch(() => {});
+    shutdownSound.currentTime = 0;
+    shutdownSound.play().catch(() => {});
 
-  // Start collapse
-  document.body.classList.add("crt-collapse");
-  document.getElementById("crtFlash").classList.add("flash-active");
+    document.body.classList.add("crt-collapse");
+    document.getElementById("crtFlash").classList.add("flash-active");
 
-  // Fade overlay to black immediately
-  overlay.style.transition = "opacity 0.3s ease";
-  overlay.style.opacity = "1";
+    overlay.style.transition = "opacity 0.3s ease";
+    overlay.style.opacity = "1";
 
-  // Redirect after animation completes
-  setTimeout(() => {
-    window.location.href = link.href;
-  }, 650);
-});
+    setTimeout(() => {
+      window.location.href = link.href;
+    }, 650);
+  });
 });
 
 /* Counters */
@@ -602,7 +834,9 @@ async function fetchGoatCount(path) {
   }
 }
 
-const gameCards = Array.from(document.querySelectorAll(".game-card"));
+const gameCards = Array.from(
+  document.querySelectorAll(".game-grid .arcade-link")
+).filter(card => card.querySelector(".playCount"));
 
 const popularBox = document.getElementById("popularBox");
 const popularTitle = document.getElementById("popularTitle");
@@ -662,11 +896,9 @@ window.addEventListener("pageshow", function(event) {
 
   if (event.persisted || navType === "back_forward") {
 
-    // Force fresh state
     document.body.style.transform = "scaleY(0)";
     document.body.style.filter = "brightness(3)";
 
-    // Small delay so style applies
     setTimeout(() => {
       document.body.classList.add("crt-boot");
     }, 50);
@@ -675,19 +907,76 @@ window.addEventListener("pageshow", function(event) {
 
 /* GRID NAVIGATION USING SHARED INPUT */
 
-const gamepadItems = Array.from(document.querySelectorAll(".arcade-link"));
+/* ===== PAGED GRID NAVIGATION (REPLACEMENT) ===== */
 
+const gridTrack = document.getElementById("gridTrack");
+const gridPages = Array.from(document.querySelectorAll(".grid-page"));
+const navLeft = document.getElementById("gridNavLeft");
+const navRight = document.getElementById("gridNavRight");
+
+let currentPage = 0;
 let selectedIndex = 0;
 
-function getVisibleGamepadItems() {
-  return gamepadItems.filter(item => {
-    const style = window.getComputedStyle(item);
-    return style.display !== "none" && style.visibility !== "hidden";
+/* Build page → items map */
+function getPageItems() {
+  return gridPages.map(page => {
+    return Array.from(page.querySelectorAll(".arcade-link")).filter(item => {
+      const style = window.getComputedStyle(item);
+      return style.display !== "none" && style.visibility !== "hidden";
+    });
   });
 }
 
+let pageItems = getPageItems();
+
+/* ===== PAGE CONTROL ===== */
+
+function updatePagePosition() {
+  gridTrack.style.transform = `translateX(-${currentPage * 100}%)`;
+
+  navLeft.style.display = currentPage > 0 ? "block" : "none";
+  navRight.style.display = currentPage < gridPages.length - 1 ? "block" : "none";
+}
+
+function setPage(index) {
+  const clamped = Math.max(0, Math.min(index, gridPages.length - 1));
+  if (clamped === currentPage) return;
+
+  currentPage = clamped;
+  updatePagePosition();
+
+  const items = getVisibleGamepadItems();
+  if (!items.length) return;
+
+  selectedIndex = Math.min(selectedIndex, items.length - 1);
+
+  setSelectedIndex(selectedIndex, false);
+  stopNonSelectedVideos();
+}
+
+/* Nav buttons */
+navLeft.addEventListener("click", () => {
+  hoverSound.currentTime = 0;
+  hoverSound.play().catch(() => {});
+  setPage(currentPage - 1);
+});
+
+navRight.addEventListener("click", () => {
+  hoverSound.currentTime = 0;
+  hoverSound.play().catch(() => {});
+  setPage(currentPage + 1);
+});
+
+/* ===== SELECTION SYSTEM ===== */
+
+function getVisibleGamepadItems() {
+  return pageItems[currentPage] || [];
+}
+
 function clearGamepadSelection() {
-  gamepadItems.forEach(item => item.classList.remove("gamepad-selected"));
+  document.querySelectorAll(".arcade-link").forEach(item => {
+    item.classList.remove("gamepad-selected");
+  });
 }
 
 function setSelectedIndex(index, playSound = true) {
@@ -746,6 +1035,8 @@ function activateSelectedItem() {
 
   selected.click();
 }
+
+/* ===== MOVEMENT ===== */
 
 function getClosestIndexInDirection(direction) {
   const items = getVisibleGamepadItems();
@@ -823,14 +1114,36 @@ function moveSelection(direction, source) {
     if (source === "gamepad") {
       scrollSelectedIntoView();
     }
+    return;
+  }
+
+  /* Page switching */
+  if (direction === "right" && currentPage < gridPages.length - 1) {
+    setPage(currentPage + 1);
+    selectedIndex = 0;
+    setSelectedIndex(selectedIndex);
+    stopNonSelectedVideos();
+    return;
+  }
+
+  if (direction === "left" && currentPage > 0) {
+    setPage(currentPage - 1);
+
+    const items = getVisibleGamepadItems();
+    selectedIndex = items.length - 1;
+
+    setSelectedIndex(selectedIndex);
+    stopNonSelectedVideos();
+    return;
   }
 }
 
-/* Mouse hover updates selection but does NOT scroll */
-gamepadItems.forEach(item => {
+/* ===== MOUSE SYNC ===== */
+
+document.querySelectorAll(".arcade-link").forEach(item => {
   item.addEventListener("mouseenter", () => {
-    const visibleItems = getVisibleGamepadItems();
-    const index = visibleItems.indexOf(item);
+    const items = getVisibleGamepadItems();
+    const index = items.indexOf(item);
 
     if (index !== -1) {
       selectedIndex = index;
@@ -840,7 +1153,8 @@ gamepadItems.forEach(item => {
   });
 });
 
-/* Shared input hook */
+/* ===== INPUT HOOK ===== */
+
 ArcadeInput.onAction((action, source) => {
   if (!startScreenDismissed) {
     if (action === "select") {
@@ -851,13 +1165,32 @@ ArcadeInput.onAction((action, source) => {
 
   if (!gamepadEnabled) return;
 
-  if (action === "left" || action === "right" || action === "up" || action === "down") {
+  if (["left", "right", "up", "down"].includes(action)) {
     moveSelection(action, source);
   }
 
   if (action === "select") {
     activateSelectedItem();
   }
+});
+
+/* ===== INIT ===== */
+
+updatePagePosition();
+
+/* Resize safety */
+window.addEventListener("resize", () => {
+  pageItems = getPageItems();
+
+  const items = getVisibleGamepadItems();
+  if (!items.length) return;
+
+  if (selectedIndex >= items.length) {
+    selectedIndex = items.length - 1;
+  }
+
+  setSelectedIndex(selectedIndex, false);
+  stopNonSelectedVideos();
 });
 
 /* Keep selection valid on resize */

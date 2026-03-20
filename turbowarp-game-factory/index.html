@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TurboWarp Game Factory</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Press Start 2P',cursive;
+  background:url('../images/background.png') center center fixed;
+  background-size:cover;
+  color:white;
+  text-align:center;
+  overflow-x:hidden;
+  animation:crtFlicker 6s infinite;
+}
+
+/* ===== OVERLAY ===== */
+#arcadeOverlay{
+  position:fixed;
+  inset:0;
+  background:black;
+  opacity:1;
+  z-index:9999;
+  pointer-events:none;
+  transition:opacity .45s ease;
+}
+
+/* ===== CRT COLLAPSE ===== */
+.crt-collapse{
+  animation:crtCollapse 0.6s forwards;
+}
+
+@keyframes crtCollapse{
+  0%{
+    transform:scaleY(1);
+    filter:brightness(1);
+  }
+  60%{
+    transform:scaleY(0.02);
+    filter:brightness(1.5);
+  }
+  100%{
+    transform:scaleY(0);
+    filter:brightness(0);
+    background:black;
+  }
+}
+
+/* ===== CRT FLASH LINE ===== */
+#crtFlash{
+  position:fixed;
+  left:0;
+  width:100%;
+  height:4px;
+  background:white;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:0;
+  z-index:10000;
+  pointer-events:none;
+}
+
+.flash-active{
+  animation:flashLine .15s ease-out forwards;
+}
+
+@keyframes flashLine{
+  0%{opacity:1;height:6px;}
+  100%{opacity:0;height:2px;}
+}
+
+@keyframes crtFlicker{
+  0%,100%{opacity:1;}
+  50%{opacity:.985;}
+}
+
+/* ===== CRT FEEL ===== */
+.scanlines{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1000;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,.25) 0px,
+    rgba(0,0,0,.25) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.crt-overlay{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999;
+  background:radial-gradient(circle at center,
+    rgba(0,0,0,0) 60%,
+    rgba(0,0,0,.45) 100%);
+}
+
+/* ===== LAYOUT ===== */
+.page-wrap{
+  position:relative;
+  z-index:1;
+  padding:50px 20px 100px;
+}
+
+.section{
+  margin:40px auto;
+  max-width:960px;
+  padding:34px 26px;
+  background:rgba(0,0,0,.82);
+  border:3px solid #00ffff;
+  box-shadow:0 0 28px rgba(0,255,255,.45);
+}
+
+.hero{
+  margin-top:30px;
+}
+
+/* ===== TITLES ===== */
+.page-title{
+  font-size:1.5rem;
+  line-height:1.4;
+  color:#ff00ff;
+  text-shadow:
+    0 0 10px #ff00ff,
+    0 0 22px rgba(255,0,255,.5);
+  margin-bottom:24px;
+}
+
+.section-title{
+  display:inline-block;
+  margin-bottom:22px;
+  padding:12px 18px;
+  font-size:.72rem;
+  line-height:1.5;
+  color:#ffffff;
+  background:rgba(255,0,255,.16);
+  border:2px solid #ff00ff;
+  box-shadow:
+    0 0 16px rgba(255,0,255,.35),
+    inset 0 0 10px rgba(255,0,255,.12);
+  text-shadow:
+    0 0 6px rgba(255,255,255,.45);
+}
+
+.sub{
+  max-width:760px;
+  margin:0 auto;
+  font-size:.62rem;
+  line-height:2;
+  color:#00ffff;
+  text-shadow:0 0 8px rgba(0,255,255,.5);
+}
+
+.highlight{
+  margin-top:24px;
+  font-size:.58rem;
+  line-height:1.9;
+  color:#ffccff;
+  text-shadow:0 0 8px rgba(255,0,255,.32);
+}
+
+.badge{
+  display:inline-block;
+  margin-top:24px;
+  padding:12px 16px;
+  border:2px solid #ff00ff;
+  color:#ffccff;
+  background:rgba(0,0,0,.72);
+  box-shadow:0 0 15px rgba(255,0,255,.45);
+  font-size:.55rem;
+  line-height:1.8;
+}
+
+/* ===== FEATURES ===== */
+.features{
+  max-width:760px;
+  margin:24px auto 0;
+  text-align:left;
+}
+
+.feature{
+  margin-top:14px;
+  padding:14px 16px;
+  font-size:.56rem;
+  line-height:1.8;
+  color:#00ffff;
+  background:rgba(0,0,0,.45);
+  border:1px solid rgba(0,255,255,.35);
+  box-shadow:inset 0 0 10px rgba(0,255,255,.08);
+}
+
+/* ===== DEMO SECTION ===== */
+.demo{
+  margin:30px auto 0;
+  max-width:820px;
+  border:2px solid #ff00ff;
+  padding:18px;
+  background:rgba(0,0,0,.86);
+  box-shadow:0 0 24px rgba(255,0,255,.4);
+}
+
+.play-prompt{
+  margin-bottom:16px;
+  padding:12px 14px;
+  border:2px solid #00ffff;
+  background:rgba(0,0,0,.72);
+  color:#00ffff;
+  font-size:.52rem;
+  line-height:1.8;
+  box-shadow:0 0 15px rgba(0,255,255,.25);
+  text-shadow:0 0 8px rgba(0,255,255,.45);
+}
+
+/* ===== GRID PAGE CARD SYSTEM ===== */
+.game-card{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  background:rgba(0,0,0,.85);
+  border:3px solid #ff00ff;
+  padding:15px;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+
+.game-card:hover,
+.game-card.gamepad-selected{
+  transform:perspective(800px) rotateX(6deg) scale(1.06);
+  box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
+}
+
+.card-video-wrapper{
+  position:relative;
+}
+
+.game-card video{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border:2px solid #00ffff;
+  background:black;
+}
+
+.factory-demo-card .card-video-wrapper{
+  background:black;
+  border:2px solid #00ffff;
+  box-shadow:0 0 16px rgba(0,255,255,.22);
+  padding:10px;
+}
+
+.factory-demo-card video{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:420px;
+  object-fit:contain;
+  border:0;
+  background:black;
+}
+
+.card-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.35);
+  opacity:0;
+  transition:opacity .2s ease;
+  pointer-events:none;
+}
+
+.game-card:hover .card-overlay,
+.game-card.gamepad-selected .card-overlay{
+  opacity:1;
+}
+
+.card-overlay-text{
+  font-size:.6rem;
+  color:#00ffff;
+  text-shadow:0 0 12px #00ffff;
+  border:2px solid #00ffff;
+  padding:10px 14px;
+  background:rgba(0,0,0,.7);
+  box-shadow:0 0 15px rgba(0,255,255,.18);
+}
+
+.game-title{
+  margin-top:15px;
+  font-size:.8rem;
+  color:#00ffff;
+  text-shadow:0 0 12px #00ffff;
+}
+
+.game-play-count{
+  margin-top:10px;
+  font-size:.65rem;
+  color:#00ffff;
+  opacity:.85;
+  text-shadow:0 0 8px #00ffff;
+}
+
+.game-card-note{
+  margin-top:14px;
+  padding:10px 12px;
+  border:1px solid rgba(0,255,255,.35);
+  background:rgba(0,0,0,.45);
+  color:#ffccff;
+  font-size:.5rem;
+  line-height:1.8;
+  box-shadow:inset 0 0 10px rgba(0,255,255,.08);
+}
+
+/* ===== CTA ===== */
+.cta{
+  margin-top:28px;
+  display:inline-block;
+  padding:14px 18px;
+  border:2px solid #00ffff;
+  color:#00ffff;
+  text-decoration:none;
+  font-size:.56rem;
+  line-height:1.7;
+  background:rgba(0,0,0,.7);
+  box-shadow:0 0 15px rgba(0,255,255,.3);
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.cta:hover{
+  transform:perspective(800px) rotateX(6deg) scale(1.03);
+  box-shadow:0 0 24px #ff00ff,0 0 15px #00ffff inset;
+  border-color:#ff00ff;
+  color:#ffccff;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 700px){
+  .page-title{
+    font-size:1rem;
+  }
+
+  .section-title{
+    font-size:.6rem;
+    line-height:1.7;
+    padding:10px 14px;
+  }
+
+  .sub,
+  .feature,
+  .cta,
+  .badge,
+  .highlight,
+  .play-prompt,
+  .game-card-note{
+    font-size:.52rem;
+  }
+
+  .section{
+    padding:24px 16px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="arcadeOverlay"></div>
+<div id="crtFlash"></div>
+
+<div class="scanlines"></div>
+<div class="crt-overlay"></div>
+
+<audio id="bgMusic" loop preload="auto">
+  <source src="../music/background.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="hoverSound" preload="auto">
+  <source src="../music/hovered.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="shutdownSound" preload="auto">
+  <source src="../music/crt-shutdown.mp3" type="audio/mpeg">
+</audio>
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="section hero">
+    <div class="page-title">TURBOWARP GAME FACTORY</div>
+
+    <div class="sub">
+      A complete system for building TurboWarp games without rebuilding the same systems every single time.
+    </div>
+
+    <div class="highlight">
+      BUILD FASTER.<br>
+      BUILD CLEANER.<br>
+      BUILD CONSISTENTLY.
+    </div>
+
+    <div class="badge">
+      POWERED BY TURBOWARP<br>
+      BUILT FOR SERIOUS TURBOWARP DEVELOPERS
+    </div>
+  </div>
+
+  <!-- WHAT IT IS -->
+  <div class="section">
+    <div class="section-title">WHAT IT IS</div>
+
+    <div class="sub">
+      Every TurboWarp game tends to require the same setup work:
+      controls, UI systems, text rendering, and input handling.
+      <br><br>
+      TurboWarp Game Factory is designed to remove that repeated setup and replace it with a reusable foundation.
+    </div>
+
+    <div class="features">
+      <div class="feature">→ Pre-built control systems for keyboard and gamepad support</div>
+      <div class="feature">→ Reusable modules that can carry from game to game</div>
+      <div class="feature">→ A consistent development structure instead of rebuilding from scratch</div>
+      <div class="feature">→ A workflow where the game itself becomes the main focus</div>
+    </div>
+  </div>
+
+  <!-- CURRENT SYSTEM -->
+  <div class="section">
+    <div class="section-title">CURRENT SYSTEM</div>
+
+    <div class="sub">
+      TurboWarp Game Factory is already being built as a real modular system, not just an idea.
+    </div>
+
+    <div class="features">
+      <div class="feature">✔ Factory Controls with keyboard and gamepad support</div>
+      <div class="feature">✔ Gamepad detection integrated into the control pipeline</div>
+      <div class="feature">✔ Shared input behavior for UI navigation and gameplay structure</div>
+      <div class="feature">✔ Text renderer development in progress as part of the core system vision</div>
+      <div class="feature">✔ Modular architecture intended to eliminate repeated setup across future games</div>
+    </div>
+  </div>
+
+  <!-- BUILT WITH THE SYSTEM -->
+  <div class="section">
+    <div class="section-title">BUILT WITH THE SYSTEM</div>
+
+    <div class="demo">
+      <div class="play-prompt">
+        HOVER TO PREVIEW • CLICK TO PLAY
+      </div>
+
+      <a class="game-card arcade-link factory-demo-card" href="../games/bird-duty/index.html">
+        <div class="card-video-wrapper">
+          <video muted loop preload="metadata">
+            <source src="../previews/bird-duty.mp4" type="video/mp4">
+          </video>
+
+          <div class="card-overlay">
+            <div class="card-overlay-text">PLAY NOW</div>
+          </div>
+        </div>
+
+        <div class="game-title">Bird Duty</div>
+
+        <div class="game-play-count">
+          PLAY NOW
+        </div>
+
+        <div class="game-card-note">
+          A real playable JayArcade title built within the same ecosystem this page represents.
+        </div>
+      </a>
+    </div>
+
+    <div class="badge">
+      MADE WITH TURBOWARP GAME FACTORY
+    </div>
+  </div>
+
+  <!-- WHY IT EXISTS -->
+  <div class="section">
+    <div class="section-title">WHY IT EXISTS</div>
+
+    <div class="sub">
+      The goal is simple:
+      <br><br>
+      the game should be the only part that needs to be built from scratch.
+      <br><br>
+      Repeated systems should already be solved, standardized, and ready to reuse.
+    </div>
+  </div>
+
+  <!-- JAYARCADE CONNECTION -->
+  <div class="section">
+    <div class="section-title">POWERING JAYARCADE</div>
+
+    <div class="sub">
+      TurboWarp Game Factory is not only a tool.
+      It also strengthens the JayArcade ecosystem by creating a recognizable development identity across games.
+      <br><br>
+      Powered by TurboWarp. Standardized by Game Factory. Published through JayArcade.
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="section">
+    <div class="section-title">COMING SOON</div>
+
+    <div class="sub">
+      TurboWarp Game Factory is being developed as a complete reusable system for TurboWarp creators.
+    </div>
+
+    <a class="cta" href="#">
+      GET EARLY ACCESS
+    </a>
+  </div>
+
+</div>
+
+<script>
+const overlay = document.getElementById("arcadeOverlay");
+const bgMusic = document.getElementById("bgMusic");
+const hoverSound = document.getElementById("hoverSound");
+const shutdownSound = document.getElementById("shutdownSound");
+
+let bgMusicStarted = false;
+
+function startBackgroundMusic() {
+  if (bgMusicStarted) return;
+  bgMusic.volume = 0.6;
+  bgMusic.play()
+    .then(() => {
+      bgMusicStarted = true;
+    })
+    .catch(() => {});
+}
+
+/* Fade in */
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    overlay.style.opacity = "0";
+  }, 200);
+});
+
+/* Start music on first user interaction */
+["pointerdown", "touchstart", "keydown"].forEach(eventName => {
+  window.addEventListener(eventName, startBackgroundMusic, { once: true });
+});
+
+/* Shared arcade-link behavior */
+document.querySelectorAll(".arcade-link").forEach(link => {
+  const prefetch = document.createElement("link");
+  prefetch.rel = "prefetch";
+  prefetch.href = link.href;
+  document.head.appendChild(prefetch);
+
+  link.addEventListener("mouseenter", () => {
+    startBackgroundMusic();
+
+    hoverSound.currentTime = 0;
+    hoverSound.play().catch(() => {});
+
+    const vid = link.querySelector("video");
+    if (vid) vid.play().catch(() => {});
+  });
+
+  link.addEventListener("mouseleave", () => {
+    const vid = link.querySelector("video");
+    if (vid) {
+      vid.pause();
+      vid.currentTime = 0;
+    }
+  });
+
+  link.addEventListener("click", e => {
+    e.preventDefault();
+
+    startBackgroundMusic();
+
+    shutdownSound.currentTime = 0;
+    shutdownSound.play().catch(() => {});
+
+    document.body.classList.add("crt-collapse");
+    document.getElementById("crtFlash").classList.add("flash-active");
+
+    overlay.style.transition = "opacity 0.3s ease";
+    overlay.style.opacity = "1";
+
+    setTimeout(() => {
+      window.location.href = link.href;
+    }, 650);
+  });
+});
+</script>
+
+</body>
+</html>

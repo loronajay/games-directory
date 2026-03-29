@@ -6,6 +6,9 @@ __pycache__/
 # Planning/notes docs
 txt-files/
 
+# Private pages
+mom-page.html
+
 # Local dev / OS noise
 .DS_Store
 Thumbs.db

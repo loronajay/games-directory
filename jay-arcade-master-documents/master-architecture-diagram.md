@@ -1,0 +1,126 @@
+# Jay Arcade — Master Architecture Diagram
+
+```
+                   JAY ARCADE ECOSYSTEM
+---------------------------------------------------------------------
+
+                     ARCADE OPERATING SYSTEM
+      (Web Platform + Future Embedded / Cabinet OS Layer)
+
+---------------------------------------------------------------------
+
+PLAYER ACCESS LAYERS
+
+    Web Players              Mobile Players           Arcade Hardware
+(Keyboard / Mouse)        (Touch Controller)     (Touch / Physical Controls)
+
+---------------------------------------------------------------------
+
+                  SHARED ARCADE GAME PLATFORM
+
+                   Original Competitive Games
+      (Score Attack • Speedrun • Survival • Skill-Based)
+
+---------------------------------------------------------------------
+
+                    PLATFORM SYSTEMS LAYER
+
+  Game Runtime Engine
+  (TurboWarp-based isolated game environments)
+
+  Unified Input System
+  (Keyboard • Controller • Touch • Embedded Hardware)
+
+  Mobile Controller System (LOCKED)
+  (Touch overlay — D-pad + buttons — theme + glow system)
+
+  Game Pipeline System
+  (TurboWarp exports + automated build + patch system)
+
+  Textify/Blockify System (Tooling Layer)
+  (Block logic ↔ structured IR text ↔ AI-assisted workflows)
+  (Full round-trip: Export + Import both working — March 2026)
+
+---------------------------------------------------------------------
+
+                 MONETIZATION / GROWTH LAYER
+
+  Content Engine
+  (Short-form video → traffic → platform)
+
+  Entry Funnels
+  (jayarcade.com → play → engagement loop)
+
+  Early Revenue Paths
+  (Supporters • audience building • future conversion systems)
+
+---------------------------------------------------------------------
+
+                  COMPETITIVE SYSTEMS (PHASE 2)
+
+  Player Profiles
+  Global Leaderboards
+  Personal Arcades (jayarcade.com/arcade/<player>)
+  Weekly Challenges
+  Tournament Systems
+
+---------------------------------------------------------------------
+
+                    COMMUNITY LAYER
+
+  Discord / Community Hub
+  Streaming / Content
+  Tournament Broadcasts
+  Social Sharing
+
+---------------------------------------------------------------------
+
+                    HARDWARE ECOSYSTEM
+
+  Bird Duty: Lite (Prototype Track)
+  (Touchscreen • battery-powered • handheld arcade system)
+
+  Future Hardware:
+  - Home Arcade Units
+  - Venue Arcade Cabinets
+  - Portable Arcade Systems
+
+---------------------------------------------------------------------
+
+                   PLATFORM ECONOMICS
+
+     Player Engagement
+         ↓
+     Competition
+         ↓
+     Community Growth
+         ↓
+     Hardware Adoption
+         ↓
+     Subscription / Updates Layer
+
+---------------------------------------------------------------------
+
+                   LONG-TERM ECOSYSTEM
+
+  Global Competitive Network
+  Regional Leaderboards
+  Venue Competitions
+  Official Championships
+
+---------------------------------------------------------------------
+```
+
+## Notes
+
+- The system is built as a connected vertical stack:
+  **Tooling (Textify/Blockify) → Platform (Jay Arcade) → Growth (Monetization) → Hardware**
+
+- Bird Duty: Lite serves as:
+  - First hardware prototype
+  - Marketing tool ("playable business card")
+  - Bridge between web and physical ecosystem
+
+- Cabinets retain long-term value:
+  - Active subscription → ongoing updates
+  - Inactive subscription → retains last installed system state

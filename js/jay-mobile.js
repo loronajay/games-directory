@@ -180,9 +180,9 @@ function initController() {
   function refreshThemeStyleTag() {
     style.innerHTML = `
       @keyframes jayArcadePulse {
-        0% { box-shadow: 0 0 10px ${rgba(glowColor, 0.25)}; }
-        50% { box-shadow: 0 0 18px ${rgba(glowColor, 0.45)}; }
-        100% { box-shadow: 0 0 10px ${rgba(glowColor, 0.25)}; }
+        0% { box-shadow: 0 0 18px ${rgba(glowColor, 0.50)}; }
+        50% { box-shadow: 0 0 32px ${rgba(glowColor, 0.80)}; }
+        100% { box-shadow: 0 0 18px ${rgba(glowColor, 0.50)}; }
       }
     `;
   }
@@ -496,10 +496,10 @@ function initController() {
         if (isActive) {
           seg.setAttribute(
             "fill",
-            rgba(glowColor, 0.16 + pressure * 0.16)
+            rgba(glowColor, 0.32 + pressure * 0.28)
           );
           seg.style.filter =
-            `drop-shadow(0 0 ${8 + pressure * 10}px ${rgba(glowColor, 0.22 + pressure * 0.22)})`;
+            `drop-shadow(0 0 ${16 + pressure * 20}px ${rgba(glowColor, 0.50 + pressure * 0.38)})`;
           seg.setAttribute("opacity", `${0.95 + pressure * 0.05}`);
         } else {
           seg.setAttribute("fill", rgba(plateColor, 0.045));
@@ -509,19 +509,19 @@ function initController() {
       }
 
       centerCap.style.boxShadow = activeDirection
-        ? `0 0 ${16 + pressure * 12}px ${rgba(glowColor, 0.28 + pressure * 0.22)}`
-        : `0 0 16px ${rgba(glowColor, 0.26)}`;
+        ? `0 0 ${22 + pressure * 20}px ${rgba(glowColor, 0.55 + pressure * 0.35)}`
+        : `0 0 18px ${rgba(glowColor, 0.48)}`;
 
       el.style.boxShadow = thumbVisible
-        ? `0 0 ${12 + pressure * 22}px ${rgba(glowColor, 0.12 + pressure * 0.22)}`
-        : `0 0 16px ${rgba(glowColor, 0.14)}`;
+        ? `0 0 ${20 + pressure * 34}px ${rgba(glowColor, 0.30 + pressure * 0.45)}`
+        : `0 0 20px ${rgba(glowColor, 0.32)}`;
 
       energyLayer.style.opacity = thumbVisible
-        ? `${0.24 + pressure * 0.30}`
-       : "0.28";
+        ? `${0.44 + pressure * 0.42}`
+       : "0.46";
 
       energyLayer.style.filter = thumbVisible
-        ? `drop-shadow(0 0 ${8 + pressure * 12}px ${rgba(glowColor, 0.10 + pressure * 0.18)})`
+        ? `drop-shadow(0 0 ${14 + pressure * 20}px ${rgba(glowColor, 0.22 + pressure * 0.35)})`
         : "none";
 
       if (!thumbVisible) {
@@ -702,7 +702,7 @@ function initController() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      boxShadow: `0 0 10px ${rgba(glowColor, 0.18)}`,
+      boxShadow: `0 0 18px ${rgba(glowColor, 0.42)}`,
       boxSizing: "border-box"
     });
 
@@ -729,7 +729,7 @@ function initController() {
       borderRadius: "50%",
       background: rgba(glowColor, 0.16),
       border: `2px solid ${rgba(plateColor, 0.88)}`,
-      boxShadow: `0 0 12px ${rgba(glowColor, 0.25)}`,
+      boxShadow: `0 0 20px ${rgba(glowColor, 0.55)}`,
       pointerEvents: "none",
       opacity: "0",
       transform: "translate(-50%, -50%)",
@@ -856,7 +856,7 @@ function initController() {
       fontSize: `${Math.max(20, size * 0.34)}px`,
       boxSizing: "border-box",
       backdropFilter: "blur(2px)",
-      boxShadow: `0 0 10px ${rgba(glowColor, 0.12)}`,
+      boxShadow: `0 0 18px ${rgba(glowColor, 0.38)}, inset 0 0 8px ${rgba(glowColor, 0.12)}`,
       transition: "transform 0.05s ease, box-shadow 0.05s ease, background 0.05s ease"
     });
 
@@ -868,7 +868,7 @@ function initController() {
       btn.style.transform = "scale(0.95)";
       btn.style.background = rgba(plateColor, 0.18);
       btn.style.boxShadow =
-        `0 0 18px ${rgba(glowColor, 0.35)}, inset 0 0 10px ${rgba(glowColor, 0.18)}`;
+        `0 0 32px ${rgba(glowColor, 0.75)}, inset 0 0 16px ${rgba(glowColor, 0.42)}`;
       pressKey(keyMap[name]);
     }
 
@@ -877,7 +877,7 @@ function initController() {
       isPressed = false;
       btn.style.transform = "scale(1)";
       btn.style.background = rgba(plateColor, 0.08);
-      btn.style.boxShadow = `0 0 10px ${rgba(glowColor, 0.12)}`;
+      btn.style.boxShadow = `0 0 18px ${rgba(glowColor, 0.38)}, inset 0 0 8px ${rgba(glowColor, 0.12)}`;
       releaseKey(keyMap[name]);
     }
 

@@ -17,13 +17,11 @@ Built from the ground up as a unified platform, not a collection of games.
 
 Jay Arcade is built as a vertical stack of four connected layers:
 
-### 1. Game Creation (Tooling Layer)
+### 1. Game Creation
 
-**Textify/Blockify System** — `github.com/loronajay/textify-blockify-IR`
+Jay builds each arcade game manually in TurboWarp (a Scratch fork), then exports them as ZIPs for the automated build pipeline.
 
-- Converts game logic into structured IR text and back (full round-trip)
-- Enables AI-assisted development and game mutation
-- Forms the foundation for scalable game production
+**Note:** The **TurboWarp Game Factory** (`github.com/loronajay/textify-blockify-IR`) is a separate project by Jay — a suite of modular TurboWarp extensions including Textify/Blockify (a round-trip IR system for AI-assisted block logic workflows). It has its own showcase page at `jayarcade.com/turbowarp-game-factory/` but is not part of the Jay Arcade game creation pipeline.
 
 ### 2. Game Distribution (Platform Layer)
 

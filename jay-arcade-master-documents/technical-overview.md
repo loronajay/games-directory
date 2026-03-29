@@ -18,7 +18,6 @@ The system is built as a layered, modular architecture separating:
 - Game runtime
 - Input systems
 - Build pipeline
-- Tooling (Textify/Blockify)
 - Competitive systems
 - Hardware integration
 - Monetization layer
@@ -48,7 +47,6 @@ Individual Arcade Games
 - Unified Input System
 - Mobile Controller System (LOCKED)
 - Game Pipeline System
-- Textify/Blockify System (Tooling Layer)
 - Monetization Layer (traffic + funnel)
 - Competitive Systems (future)
 - Deployment Infrastructure
@@ -182,32 +180,11 @@ TurboWarp exports → scripts → games-directory-page/games/
 
 ---
 
-## Textify/Blockify System (Tooling Layer)
+## TurboWarp Game Factory (Separate Project)
 
-Textify/Blockify is part of the game creation pipeline, not the runtime. It is a deterministic, round-trip IR (Intermediate Representation) transformation engine for TurboWarp/Scratch block programs.
+Jay builds each arcade game manually in TurboWarp. The **TurboWarp Game Factory** (`github.com/loronajay/textify-blockify-IR`) is a separate project — not part of the Jay Arcade game creation pipeline.
 
-**Full pipeline:**
-```
-TurboWarp editor → [Textify] → Canon IR → [AI model] → [Blockify] → Scratch blocks
-```
-
-**Purpose:**
-- Convert block logic → structured IR text
-- Enable AI-assisted debugging and game mutation
-- Support full round-trip editing
-
-**Current Status (as of March 2026): Full round-trip working.**
-- Textify exports any stack to clipboard as canonical IR
-- Blockify parses IR and renders it back as visual Scratch blocks
-- AI roundtrip tested: Gemini 8/8 pass, ChatGPT 8/8 pass, Claude partial (testing ongoing)
-- Jest suite: 16 test suites / 201 tests passing
-
-**Known Limits:**
-- No natural-language-to-patch layer yet
-- No project-wide wrapper IR root yet
-- No sprite creation ops yet
-
-**Repo:** `github.com/loronajay/textify-blockify-IR`
+The Game Factory includes Textify/Blockify, a round-trip IR system that converts TurboWarp block logic to structured text and back for AI-assisted workflows. It has its own showcase page at `jayarcade.com/turbowarp-game-factory/`.
 
 ---
 
@@ -315,10 +292,10 @@ The platform currently includes:
 - TurboWarp runtime integration
 - Unified input system
 - Mobile Controller v19.7 (stable)
-- Full Textify/Blockify round-trip system (export + import both working)
+- TurboWarp Game Factory showcase page (separate project)
 
 ---
 
 ## Summary
 
-Jay Arcade is a modular, scalable arcade platform connecting game creation (Textify/Blockify), distribution (platform), engagement (competition), growth (monetization), and hardware (Bird Duty: Lite).
+Jay Arcade is a modular, scalable arcade platform connecting game distribution (platform), player engagement (competition), growth (monetization), and hardware (Bird Duty: Lite). Games are built manually by Jay in TurboWarp.

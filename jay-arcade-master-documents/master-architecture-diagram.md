@@ -37,9 +37,9 @@ PLAYER ACCESS LAYERS
   Game Pipeline System
   (TurboWarp exports + automated build + patch system)
 
-  Textify/Blockify System (Tooling Layer)
-  (Block logic ↔ structured IR text ↔ AI-assisted workflows)
-  (Full round-trip: Export + Import both working — March 2026)
+  TurboWarp Game Factory (Separate Project)
+  (Showcase page at jayarcade.com/turbowarp-game-factory/)
+  (Includes Textify/Blockify — not part of Jay Arcade game pipeline)
 
 ---------------------------------------------------------------------
 
@@ -113,8 +113,9 @@ PLAYER ACCESS LAYERS
 
 ## Notes
 
+- Games are built manually by Jay in TurboWarp — there is no automated tooling layer for game creation.
 - The system is built as a connected vertical stack:
-  **Tooling (Textify/Blockify) → Platform (Jay Arcade) → Growth (Monetization) → Hardware**
+  **Platform (Jay Arcade) → Growth (Monetization) → Hardware**
 
 - Bird Duty: Lite serves as:
   - First hardware prototype

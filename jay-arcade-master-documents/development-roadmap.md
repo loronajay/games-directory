@@ -101,19 +101,7 @@ Handles:
 
 **Purpose:** Scale game integration without manual work.
 
-**Textify/Blockify**
-
-**Current status (as of March 2026): Full round-trip working.**
-- Textify exports block logic as structured IR text
-- Blockify imports IR and renders it back as visual Scratch blocks
-- AI roundtrip testing: Gemini 8/8 pass, ChatGPT 8/8 pass, Claude (partial — testing ongoing)
-
-Known limits:
-- No natural-language-to-patch layer yet
-- No project-wide wrapper IR root yet
-- No sprite creation ops yet
-
-### 6. Early Monetization Layer
+### 5. Early Monetization Layer
 
 Phase 1 is no longer just technical — it must support early income generation.
 

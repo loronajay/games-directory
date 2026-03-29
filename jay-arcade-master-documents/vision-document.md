@@ -63,7 +63,7 @@ Jay Arcade is not a single product — it is a connected system:
 
 | Layer | Role |
 |---|---|
-| Game Creation | Textify/Blockify (tooling layer) |
+| Game Creation | Jay builds games manually in TurboWarp |
 | Game Distribution | JayArcade.com (platform layer) |
 | Player Growth | Monetization systems (content + funnel) |
 | Physical Expansion | Bird Duty: Lite + future hardware |

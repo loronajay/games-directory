@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repo is one layer of a larger connected system called the **Jay Arcade ecosystem** — a full-stack competitive arcade platform being built by a solo developer (Jay Lorona). The ecosystem connects:
 
-- **Game Creation** → Textify/Blockify tooling layer (`github.com/loronajay/textify-blockify-IR`)
+- **Game Creation** → Jay builds each game manually in TurboWarp (a Scratch fork)
 - **Game Distribution** → `jayarcade.com` (this repo — the platform layer)
 - **Player Engagement** → Competitive systems (Phase 2, not yet built)
 - **Physical Hardware** → Bird Duty: Lite + future arcade devices (Phase 3+)
@@ -44,34 +44,11 @@ The long-term platform vision includes:
 | 4 — Pilot Deployments | Planned | Real-world testing at events/venues |
 | 5 — Arcade Ecosystem Expansion | Planned | Global competitive network, venue cabinets |
 
-### Textify/Blockify System (Tooling Layer)
-
-**Repo:** `github.com/loronajay/textify-blockify-IR` (open source, also by Jay)
-
-Textify/Blockify is a deterministic, round-trip IR (Intermediate Representation) transformation engine for TurboWarp/Scratch block programs. It enables AI-assisted game development by converting visual block logic to structured text and back.
-
-**Full pipeline:**
-```
-TurboWarp editor → [Textify extension] → Textify Canon IR → [AI model] → [Blockify extension] → Scratch blocks
-```
-
-**Current status (as of March 2026): Full round-trip is working.**
-- **Textify (export):** Click any block → copies full stack as IR to clipboard. Can export all stacks from a named sprite, with or without grammar rules prepended for AI consumption.
-- **Blockify (import/render):** Parses IR from clipboard and renders it back as visual Scratch blocks using an embedded `scratch-blocks` renderer. Supports `[procedure]`, `[script]`, `[stack:]`, and `[opcode:]` roots.
-- **AI roundtrip testing:** Tested against Google Gemini (8/8 pass), ChatGPT (8/8 pass), and Claude Sonnet 4.6 (partial — 2/4 pass before test credits ran out, testing ongoing).
-- **Jest suite:** 16 test suites / 201 tests passing.
-
-**Known current limits:**
-- No natural-language-to-patch layer yet
-- No project-wide wrapper IR root yet
-- No sprite creation ops yet
-- No logic-review/lint engine yet
-
-The IR format is bracket-delimited and deterministic. Grammar is defined in `IR_GRAMMAR.md` (machine-optimized for AI consumption). The repo includes `factory_extensions/` — TurboWarp Game Factory extensions that were previously separate.
-
 ### TurboWarp Game Factory
 
-The `turbowarp-game-factory/index.html` page on this site showcases the Game Factory system (modular Scratch extension framework). It links to `github.com/loronajay/textify-blockify-IR` since the factory extensions now live there under `factory_extensions/`.
+The `turbowarp-game-factory/index.html` page on this site showcases the **TurboWarp Game Factory** — a separate project by Jay that includes a suite of modular TurboWarp extensions. The Game Factory repo (`github.com/loronajay/textify-blockify-IR`) also houses **Textify/Blockify**, a round-trip IR system for converting TurboWarp block logic to structured text and back for AI-assisted workflows.
+
+**Important distinction:** Textify/Blockify is part of the TurboWarp Game Factory project, not the Jay Arcade game creation pipeline. Jay builds each arcade game himself manually in TurboWarp. The Game Factory is a related but separate body of work that has its own showcase page on the site.
 
 ---
 

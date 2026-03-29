@@ -13,7 +13,7 @@ Each phase unlocks the next layer of the ecosystem. This roadmap represents a fu
 
 | Layer | System |
 |---|---|
-| Game Creation | Textify/Blockify (tooling) |
+| Game Creation | Turbowarp -> exported games |
 | Game Distribution | Jay Arcade platform |
 | Player Engagement | Competition systems |
 | Physical Product | Hardware |
@@ -101,9 +101,7 @@ Handles:
 
 **Purpose:** Scale game integration without manual work.
 
-### 5. Textify/Blockify Integration (Tooling Bridge)
-
-Textify/Blockify is part of the platform foundation, not a side tool.
+**Textify/Blockify**
 
 **Current status (as of March 2026): Full round-trip working.**
 - Textify exports block logic as structured IR text
@@ -180,9 +178,9 @@ A true competitive arcade platform with identity, progression, and replay loops.
 
 ## Phase 3 — Prototype Arcade Hardware
 
-**Objective:** Build the first physical arcade device — Bird Duty: Lite.
+**Objective:** Build the first physical marketing device — Bird Duty: Lite + build the first physical arcade cabinet.
 
-**Core Concept:** A battery-powered touchscreen arcade device running a simplified Arcade OS, curated game set, and optimized input system.
+**Core Concept: Bird Duty - Lite** A battery-powered touchscreen gaming device running a simplified Arcade OS, curated game set, and optimized input system.
 
 **Hardware Direction:**
 - Touchscreen-first (no buttons required for prototype)
@@ -190,6 +188,22 @@ A true competitive arcade platform with identity, progression, and replay loops.
 - Compact form factor
 
 **Input System:** Based on the mobile controller logic, adapted for embedded use.
+
+**Core Concept: JayArcade Backpack**
+A portable JayArcade "cabinet". Runs on battery power, display is built into the backpack. Will run the cabinet version of the OS on a Raspberry Pi. Core purpose is for marketing/tournament prize.
+
+**Hardware Direction**
+-Accepts all major gamepads + Fightsticks
+-Gamepad controlled
+
+
+**Core Concept: JayArcade Cabinets**
+A physical representation of the JayArcade OS, stripped down and built up to feel like a real arcade cabinet. JayArcade cabinets will run on a Raspberry Pi and feature an online mode (subscription based) and an offline mode that retains current version of the OS.
+
+**Hardware Direction** 
+-Joystick + Button controls
+-Plug and Play
+-Customizable Arcade Hardware
 
 **Modes:**
 
@@ -205,6 +219,8 @@ A true competitive arcade platform with identity, progression, and replay loops.
 ### Phase 3 Milestone
 
 A fully playable handheld arcade prototype.
+A fully operational prototype JayArcade cabinet.
+A fully operational backpack unit.
 
 ---
 
@@ -244,7 +260,7 @@ Validated real-world usage and interest.
 **Systems:**
 - Global competition layer
 - Regional leaderboards
-- Official tournaments
+- Official tournaments (Sumorai/Bird Duty)
 - Live events
 
 **Hardware Expansion:**

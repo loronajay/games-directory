@@ -80,7 +80,6 @@ The system is powered by several key technologies:
 - **Unified Input System** — Supports keyboard, controller, touch, and hardware
 - **Mobile Controller System** — Custom touch overlay (D-pad + buttons), fully responsive and themeable
 - **Automated Game Pipeline** — Streamlined process for importing and deploying games
-- **Textify/Blockify** — Full round-trip IR system for AI-assisted game creation
 
 ---
 
@@ -154,7 +153,7 @@ Jay Arcade is not just a website, a game collection, or a single product. It is 
 
 The system is intentionally built to scale:
 
-- Games can be produced efficiently (Textify/Blockify tooling)
+- Games can be produced efficiently
 - Players can engage across devices (web + mobile + hardware)
 - Hardware extends the platform into the real world
 

@@ -1,7 +1,7 @@
 # Jay Arcade — Master Architecture Diagram
 
 ```
-                   JAY ARCADE ECOSYSTEM
+                    JAY ARCADE ECOSYSTEM
 ---------------------------------------------------------------------
 
                      ARCADE OPERATING SYSTEM
@@ -9,7 +9,7 @@
 
 ---------------------------------------------------------------------
 
-PLAYER ACCESS LAYERS
+                    PLAYER ACCESS LAYERS
 
     Web Players              Mobile Players              Arcade Hardware
 (Keyboard / Mouse /       (Touch Controller)     (Joystick + Buttons / Gamepad

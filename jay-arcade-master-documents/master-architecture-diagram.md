@@ -11,8 +11,9 @@
 
 PLAYER ACCESS LAYERS
 
-    Web Players              Mobile Players           Arcade Hardware
-(Keyboard / Mouse)        (Touch Controller)     (Touch / Physical Controls)
+    Web Players              Mobile Players              Arcade Hardware
+(Keyboard / Mouse /       (Touch Controller)     (Joystick + Buttons / Gamepad
+    Gamepad)                                              / Fightstick)
 
 ---------------------------------------------------------------------
 

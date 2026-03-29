@@ -77,13 +77,14 @@ PLAYER ACCESS LAYERS
 
                     HARDWARE ECOSYSTEM
 
-  Bird Duty: Lite (Prototype Track)
-  (Touchscreen • battery-powered • handheld arcade system)
+  Bird Duty: Lite
+  (Touchscreen • battery-powered • handheld • "playable business card")
 
-  Future Hardware:
-  - Home Arcade Units
-  - Venue Arcade Cabinets
-  - Portable Arcade Systems
+  JayArcade Backpack
+  (Portable cabinet • Raspberry Pi • Gamepad/Fightstick • Marketing + Tournament Prize)
+
+  JayArcade Cabinets
+  (Full arcade cabinet • Raspberry Pi • Joystick + Buttons • Offline + Online subscription)
 
 ---------------------------------------------------------------------
 
@@ -117,10 +118,10 @@ PLAYER ACCESS LAYERS
 - The system is built as a connected vertical stack:
   **Platform (Jay Arcade) → Growth (Monetization) → Hardware**
 
-- Bird Duty: Lite serves as:
-  - First hardware prototype
-  - Marketing tool ("playable business card")
-  - Bridge between web and physical ecosystem
+- Three hardware products planned (Phase 3):
+  - **Bird Duty: Lite** — first prototype, "playable business card"
+  - **JayArcade Backpack** — portable cabinet, Raspberry Pi, marketing + tournament prize
+  - **JayArcade Cabinets** — full arcade cabinet, Raspberry Pi, joystick + buttons
 
 - Cabinets retain long-term value:
   - Active subscription → ongoing updates

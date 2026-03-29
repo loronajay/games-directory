@@ -31,7 +31,10 @@ The long-term platform vision includes:
 - **Global leaderboards** and **player profiles** with persistent stats
 - **Personal Arcades** — `jayarcade.com/arcade/<player>` — each player gets their own customizable arcade environment showcasing rankings, trophies, favorite games, and achievements
 - **Weekly challenges** and **tournament systems**
-- **Hardware** — Bird Duty: Lite (battery-powered touchscreen handheld, first prototype) → home units → venue cabinets
+- **Hardware** — Three physical products planned (Phase 3):
+  - **Bird Duty: Lite** — battery-powered touchscreen handheld; first prototype and "playable business card"
+  - **JayArcade Backpack** — portable cabinet with display built into the backpack; runs Arcade OS on Raspberry Pi; gamepad/fightstick controlled; marketing tool and tournament prize
+  - **JayArcade Cabinets** — full arcade cabinet on Raspberry Pi; joystick + buttons; offline mode (retains last OS state) + online subscription mode (leaderboard sync, updates)
 - **Subscription model** — cabinets retain value whether subscription is active (updates) or inactive (last installed state)
 
 ### Phase Roadmap
@@ -40,7 +43,7 @@ The long-term platform vision includes:
 |---|---|---|
 | 1 — Cloud Arcade Platform | **ACTIVE** | Website, game library, pipeline, mobile controller, early monetization |
 | 2 — Competitive Platform Systems | Planned | Player profiles, leaderboards, personal arcades, challenges, tournaments |
-| 3 — Prototype Arcade Hardware | Planned | Bird Duty: Lite (touchscreen handheld) |
+| 3 — Prototype Arcade Hardware | Planned | Bird Duty: Lite, JayArcade Backpack, JayArcade Cabinet prototypes |
 | 4 — Pilot Deployments | Planned | Real-world testing at events/venues |
 | 5 — Arcade Ecosystem Expansion | Planned | Global competitive network, venue cabinets |
 

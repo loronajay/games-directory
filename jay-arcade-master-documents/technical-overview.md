@@ -254,24 +254,28 @@ Planned systems:
 
 ---
 
-## Hardware System (Bird Duty: Lite Track)
+## Hardware System (Phase 3)
 
-The platform is designed to extend into hardware.
+The platform is designed to extend into three physical products.
 
 **Bird Duty: Lite:**
-- Touchscreen-based
-- Battery-powered
-- Handheld arcade device
+- Touchscreen-based, battery-powered handheld
+- First hardware prototype and "playable business card"
+- Bridge between web platform and physical ecosystem
 
-**Role:** Prototype hardware system, marketing tool, bridge between web and physical platform.
+**JayArcade Backpack:**
+- Portable "cabinet" — display built into the backpack
+- Runs the cabinet version of the Arcade OS on a Raspberry Pi
+- Accepts all major gamepads and fightsticks
+- Role: marketing tool and tournament prize
 
-**Offline Arcade System:**
-- Local game library
-- Local gameplay
-- Local leaderboards
-- Optional: updates and leaderboard sync when connected
+**JayArcade Cabinets:**
+- Full arcade cabinet running the Arcade OS on a Raspberry Pi
+- Joystick + button controls, plug and play, customizable hardware
+- Offline Mode: fully playable without internet, retains last installed OS state
+- Online Mode (subscription): leaderboard sync, automatic updates
 
-All inputs map to the same normalized input system.
+All hardware maps to the same normalized input system.
 
 ---
 
@@ -298,4 +302,4 @@ The platform currently includes:
 
 ## Summary
 
-Jay Arcade is a modular, scalable arcade platform connecting game distribution (platform), player engagement (competition), growth (monetization), and hardware (Bird Duty: Lite). Games are built manually by Jay in TurboWarp.
+Jay Arcade is a modular, scalable arcade platform connecting game distribution (platform), player engagement (competition), growth (monetization), and hardware (Bird Duty: Lite, JayArcade Backpack, JayArcade Cabinets). Games are built manually by Jay in TurboWarp.

@@ -21,7 +21,7 @@ Jay Arcade is built as a vertical stack of four connected layers:
 
 Jay builds each arcade game manually in TurboWarp (a Scratch fork), then exports them as ZIPs for the automated build pipeline.
 
-**Note:** The **TurboWarp Game Factory** (`github.com/loronajay/textify-blockify-IR`) is a separate project by Jay — a suite of modular TurboWarp extensions including Textify/Blockify (a round-trip IR system for AI-assisted block logic workflows). It has its own showcase page at `jayarcade.com/turbowarp-game-factory/` but is not part of the Jay Arcade game creation pipeline.
+**Note:** The **TurboWarp Game Factory** (`github.com/loronajay/textify-blockify-IR`) is a separate project by Jay — a suite of modular TurboWarp extensions including Textify/Blockify (a round-trip IR system for AI-assisted block logic workflows). It has its own showcase page at `jayarcade.com/turbowarp-game-factory/`.
 
 ### 2. Game Distribution (Platform Layer)
 
@@ -48,11 +48,22 @@ Long-term monetization:
 
 ### 4. Physical Product (Hardware Layer)
 
-**Bird Duty: Lite → Future Arcade Devices**
-
-- Battery-powered touchscreen arcade device
+**Bird Duty: Lite**
+- Battery-powered touchscreen gaming device
 - Designed as a portable "playable business card"
 - Bridge between web platform and physical ecosystem
+
+**JayArcade Backpack**
+- Portable "cabinet" — display built into the backpack
+- Runs the cabinet version of the Arcade OS on a Raspberry Pi
+- Gamepad/fightstick controlled (accepts all major gamepads)
+- Core purpose: marketing tool and tournament prize
+
+**JayArcade Cabinets**
+- Physical arcade cabinet running the full Arcade OS on a Raspberry Pi
+- Joystick + button controls, plug and play, customizable hardware
+- Offline Mode: fully playable without internet, retains last installed OS state
+- Online Mode (subscription): leaderboard sync, automatic updates
 
 ---
 
@@ -62,7 +73,7 @@ Players can access Jay Arcade through multiple entry points:
 
 | Entry Point | Controls |
 |---|---|
-| Web | Keyboard & mouse |
+| Web | Keyboard & mouse/Gamepad |
 | Mobile | Touch controller system |
 | Hardware | Dedicated arcade devices |
 
@@ -108,7 +119,7 @@ Community drives growth and visibility.
 
 ## Hardware Ecosystem (Future Expansion)
 
-- Portable arcade devices (Bird Duty line)
+- Portable arcade devices (Bird Duty - Lite line, Arcade OS Backpack)
 - Home arcade systems
 - Venue arcade cabinets
 

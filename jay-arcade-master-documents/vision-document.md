@@ -66,7 +66,7 @@ Jay Arcade is not a single product — it is a connected system:
 | Game Creation | Jay builds games manually in TurboWarp |
 | Game Distribution | JayArcade.com (platform layer) |
 | Player Growth | Monetization systems (content + funnel) |
-| Physical Expansion | Bird Duty: Lite + future hardware |
+| Physical Expansion | Bird Duty: Lite, JayArcade Backpack, JayArcade Cabinets |
 
 ---
 
@@ -148,31 +148,23 @@ Jay Arcade is designed to expand into physical systems.
 ### Bird Duty: Lite
 
 - First hardware prototype
-- Touchscreen-based
-- Battery-powered
+- Touchscreen-based, battery-powered
 - Portable arcade device
+- Role: product prototype and "playable business card"
 
-**Role:** Product prototype, marketing tool ("playable business card"), and bridge between web and physical ecosystem.
+### JayArcade Backpack
 
-### Future Hardware
+- Portable "cabinet" — display built into the backpack
+- Runs the cabinet version of the Arcade OS on a Raspberry Pi
+- Accepts all major gamepads and fightsticks
+- Role: marketing tool and tournament prize
 
-- Home arcade units
-- Venue cabinets
-- Portable systems
+### JayArcade Cabinets
 
-### Arcade Cabinet Model
-
-Future systems operate in two modes:
-
-**Offline Mode (Required)**
-- Local game library
-- Local gameplay
-- Local leaderboards
-
-**Connected Mode (Optional)**
-- Global leaderboards
-- Tournaments
-- Automatic updates
+- Full arcade cabinet running the Arcade OS on a Raspberry Pi
+- Joystick + button controls, plug and play, customizable hardware
+- **Offline Mode (Required):** fully playable without internet, retains last installed OS state
+- **Online Mode (subscription):** global leaderboards, tournaments, automatic updates
 
 **Key Principle:** Hardware retains value whether subscription is active (updates) or inactive (system remains usable).
 

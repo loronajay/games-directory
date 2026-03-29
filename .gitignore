@@ -1,0 +1,11 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Planning/notes docs
+txt-files/
+
+# Local dev / OS noise
+.DS_Store
+Thumbs.db

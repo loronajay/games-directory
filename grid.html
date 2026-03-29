@@ -7,609 +7,9 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/grid.css">
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
 
-body{
-  font-family:'Press Start 2P',cursive;
-  background:url('images/background.png') center center fixed;
-  background-size:cover;
-  color:white;
-  text-align:center;
-  overflow-x:hidden;
-  animation:crtFlicker 6s infinite;
-}
-
-/* ===== OVERLAY ===== */
-#arcadeOverlay{
-  position:fixed;
-  inset:0;
-  background:black;
-  opacity:1;
-  z-index:9999;
-  pointer-events:none;
-  transition:opacity .45s ease;
-}
-
-/* ===== CRT COLLAPSE ===== */
-.crt-collapse {
-  animation: crtCollapse 0.6s forwards;
-}
-
-@keyframes crtCollapse {
-  0% {
-    transform: scaleY(1);
-    filter: brightness(1);
-  }
-  60% {
-    transform: scaleY(0.02);
-    filter: brightness(1.5);
-  }
-  100% {
-    transform: scaleY(0);
-    filter: brightness(0);
-    background: black;
-  }
-}
-
-/* ===== CRT FLASH LINE ===== */
-#crtFlash{
-  position:fixed;
-  left:0;
-  width:100%;
-  height:4px;
-  background:white;
-  top:50%;
-  transform:translateY(-50%);
-  opacity:0;
-  z-index:10000;
-  pointer-events:none;
-}
-
-.flash-active{
-  animation:flashLine .15s ease-out forwards;
-}
-
-@keyframes flashLine{
-  0%{opacity:1;height:6px;}
-  100%{opacity:0;height:2px;}
-}
-
-@keyframes crtFlicker{
-  0%,100%{opacity:1;}
-  50%{opacity:.985;}
-}
-
-/* ===== CRT FX ===== */
-.scanlines{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:1000;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(0,0,0,.25) 0px,
-    rgba(0,0,0,.25) 1px,
-    transparent 1px,
-    transparent 4px
-  );
-}
-
-.crt-overlay{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:999;
-  background:radial-gradient(circle at center,
-    rgba(0,0,0,0) 60%,
-    rgba(0,0,0,.45) 100%);
-}
-
-/* ===== BOOT ===== */
-#loadingScreen{
-  position:fixed;
-  inset:0;
-  background:black;
-  color:#00ff66;
-  font-family:'VT323', monospace;
-  padding:40px;
-  font-size:22px;
-  letter-spacing:1px;
-  white-space:pre-line;
-  z-index:3000;
-}
-
-/* ===== BIOS CURSOR ===== */
-.bios-cursor{
-  display:inline;
-  animation:blinkCursor 1s steps(1) infinite;
-}
-
-@keyframes blinkCursor{
-  50%{opacity:0;}
-}
-
-/* ===== START ===== */
-#startScreen{
-  position:fixed;
-  inset:0;
-  background:black;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  cursor:pointer;
-  z-index:2500;
-}
-
-.arcade-title{
-  font-size:1.8rem;
-  color:#ff00ff;
-  text-shadow:0 0 25px #ff00ff;
-}
-
-.press-start{
-  margin-top:60px;
-  color:#00ffff;
-  animation:blink 1s infinite;
-  text-shadow:0 0 20px #00ffff;
-}
-
-@keyframes blink{50%{opacity:0;}}
-
-/* ===== MAIN ===== */
-#mainContent{display:none;}
-
-.title-box{
-  margin-top:80px;
-  padding:30px;
-  background:rgba(0,0,0,.75);
-  display:inline-block;
-  border:3px solid #00ffff;
-  box-shadow:0 0 40px #00ffff;
-}
-
-.title-box h1{
-  color:#ff00ff;
-  text-shadow:-2px 0 red,2px 0 cyan,0 0 20px #ff00ff;
-}
-
-.visitor-box{
-  margin-top:20px;
-  font-size:.8rem;
-  color:#00ffff;
-  text-shadow:0 0 10px #00ffff;
-}
-
-.popular-box{
-  margin:22px auto 0;
-  max-width:520px;
-  padding:18px 20px;
-  background:rgba(0,0,0,.78);
-  border:2px solid #ff00ff;
-  box-shadow:0 0 24px rgba(255,0,255,.35), 0 0 14px rgba(0,255,255,.18) inset;
-  color:#00ffff;
-  text-shadow:0 0 8px #00ffff;
-}
-
-.popular-label{
-  font-size:.6rem;
-  color:#ffccff;
-  text-shadow:0 0 8px #ff00ff;
-  margin-bottom:12px;
-}
-
-.popular-title{
-  font-size:.95rem;
-  line-height:1.6;
-  color:#00ffff;
-  text-shadow:0 0 12px #00ffff;
-}
-
-.popular-meta{
-  margin-top:12px;
-  font-size:.62rem;
-  opacity:.9;
-  line-height:1.7;
-}
-
-.popular-link{
-  display:inline-block;
-  margin-top:14px;
-  text-decoration:none;
-  color:#00ffff;
-  border:2px solid #00ffff;
-  padding:10px 14px;
-  background:rgba(0,0,0,.6);
-  box-shadow:0 0 14px rgba(0,255,255,.25);
-  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-  font-size:.55rem;
-}
-
-.popular-link:hover,
-.popular-link.gamepad-selected{
-  transform:perspective(800px) rotateX(6deg) scale(1.04);
-  box-shadow:0 0 24px #ff00ff, 0 0 14px #00ffff inset;
-  border-color:#ff00ff;
-  color:#ffccff;
-}
-
-.factory-box{
-  margin:28px auto 0;
-  max-width:520px;
-  padding:16px 18px;
-  background:rgba(0,0,0,.72);
-  border:2px solid #00ffff;
-  box-shadow:
-    0 0 18px rgba(0,255,255,.25),
-    0 0 10px rgba(255,0,255,.12) inset;
-  text-align:center;
-}
-
-.factory-label{
-  font-size:.55rem;
-  color:#ffccff;
-  text-shadow:0 0 6px #ff00ff;
-  margin-bottom:6px;
-  letter-spacing:1px;
-}
-
-.factory-title{
-  font-size:.9rem;
-  color:#00ffff;
-  text-shadow:0 0 12px #00ffff;
-}
-
-.factory-sub{
-  margin-top:6px;
-  font-size:.6rem;
-  color:#00ffff;
-  opacity:.8;
-  text-shadow:0 0 6px #00ffff;
-}
-
-.factory-promo-box{
-  margin:0 auto 18px;
-  max-width:520px;
-  padding:16px 18px;
-  text-align:center;
-  background:rgba(0,0,0,.78);
-  border:2px solid #ff00ff;
-  box-shadow:
-    0 0 18px rgba(255,0,255,.28),
-    inset 0 0 10px rgba(255,0,255,.08);
-}
-
-.factory-promo-title{
-  font-size:.62rem;
-  line-height:1.7;
-  color:#ffccff;
-  text-shadow:0 0 8px rgba(255,0,255,.45);
-}
-
-.factory-button{
-  display:inline-block;
-  margin-top:18px; /* this fixes the “too close” issue */
-
-  padding:10px 16px;
-
-  font-size:.55rem;
-  line-height:1.6;
-
-  color:#00ffff;
-  text-decoration:none;
-
-  border:2px solid #00ffff;
-  background:rgba(0,0,0,.72);
-
-  box-shadow:
-    0 0 14px rgba(0,255,255,.3),
-    inset 0 0 8px rgba(0,255,255,.12);
-
-  text-shadow:0 0 8px rgba(0,255,255,.55);
-
-  transition:
-    transform .2s ease,
-    box-shadow .2s ease,
-    color .2s ease,
-    border-color .2s ease;
-}
-
-.factory-button:hover,
-.factory-button.gamepad-selected{
-  transform:perspective(800px) rotateX(6deg) scale(1.05);
-
-  color:#ff00ff;
-  border-color:#ff00ff;
-
-  box-shadow:
-    0 0 22px #ff00ff,
-    0 0 14px #00ffff inset;
-
-  text-shadow:0 0 10px #ff00ff;
-}
-
-/* ===== PAGED GRID ===== */
-.grid-shell{
-  position:relative;
-  max-width:1240px;
-  margin:80px auto;
-  padding:0 70px;
-}
-
-.grid-viewport{
-  overflow:hidden;
-}
-
-.grid-track{
-  display:flex;
-  transition:transform .45s ease;
-  will-change:transform;
-}
-
-.game-grid.portrait-slice-swipe-left{
-  animation:portraitSliceSwipeLeft .28s ease;
-}
-
-.game-grid.portrait-slice-swipe-right{
-  animation:portraitSliceSwipeRight .28s ease;
-}
-
-@keyframes portraitSliceSwipeLeft{
-  0%{
-    opacity:.7;
-    transform:translateX(28px);
-  }
-  100%{
-    opacity:1;
-    transform:translateX(0);
-  }
-}
-
-@keyframes portraitSliceSwipeRight{
-  0%{
-    opacity:.7;
-    transform:translateX(-28px);
-  }
-  100%{
-    opacity:1;
-    transform:translateX(0);
-  }
-}
-
-.grid-page{
-  min-width:100%;
-  flex:0 0 100%;
-}
-
-.game-grid{
-  width:100%;
-  display:grid;
-  grid-template-columns:repeat(3, minmax(0, 1fr));
-  gap:40px;
-  padding:20px;
-}
-
-.grid-nav{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  width:52px;
-  height:52px;
-  border:2px solid #00ffff;
-  background:rgba(0,0,0,.82);
-  color:#00ffff;
-  font-size:1.2rem;
-  cursor:pointer;
-  z-index:20;
-  box-shadow:0 0 18px rgba(0,255,255,.28);
-  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease, color .2s ease;
-}
-
-.grid-nav:hover,
-.grid-nav.gamepad-selected{
-  transform:translateY(-50%) scale(1.06);
-  box-shadow:0 0 26px #ff00ff, 0 0 14px #00ffff inset;
-  border-color:#ff00ff;
-  color:#ffccff;
-}
-
-.grid-nav-left{
-  left:0;
-}
-
-.grid-nav-right{
-  right:0;
-}
-
-/* ===== CARDS ===== */
-.game-card{
-  display:block;
-  text-decoration:none;
-  color:inherit;
-  background:rgba(0,0,0,.85);
-  border:3px solid #ff00ff;
-  padding:15px;
-  transition:transform .25s ease, box-shadow .25s ease;
-}
-
-.game-card:hover,
-.game-card.gamepad-selected{
-  transform:perspective(800px) rotateX(6deg) scale(1.06);
-  box-shadow:0 0 40px #ff00ff, 0 0 20px #00ffff inset;
-}
-
-.game-grid.empty-page-selected{
-  background:rgba(0,0,0,.22);
-  border:2px dashed rgba(0,255,255,.7);
-  box-shadow:0 0 28px rgba(255,0,255,.28), inset 0 0 18px rgba(0,255,255,.18);
-}
-
-.game-grid.empty-page-selected .future-card{
-  box-shadow:0 0 28px rgba(255,0,255,.22), 0 0 14px rgba(0,255,255,.18) inset;
-}
-
-.game-card video{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  border:2px solid #00ffff;
-}
-
-.game-title{
-  margin-top:15px;
-  font-size:.8rem;
-  color:#00ffff;
-  text-shadow:0 0 12px #00ffff;
-}
-
-.game-play-count{
-  margin-top:10px;
-  font-size:.65rem;
-  color:#00ffff;
-  opacity:.85;
-  text-shadow:0 0 8px #00ffff;
-}
-
-.future-card{
-  background:
-    linear-gradient(180deg, rgba(0,255,255,.05), rgba(255,0,255,.04)),
-    rgba(0,0,0,.78);
-  border:3px dashed rgba(0,255,255,.7);
-  box-shadow:0 0 18px rgba(0,255,255,.14), inset 0 0 12px rgba(255,0,255,.08);
-  cursor:default;
-}
-
-.future-card:hover{
-  transform:none;
-  box-shadow:0 0 18px rgba(0,255,255,.14), inset 0 0 12px rgba(255,0,255,.08);
-}
-
-.game-card[data-mobile-replacement="true"] .mobile-card-replacement{
-  display:none;
-}
-
-.future-card-media{
-  width:100%;
-  height:180px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:2px dashed rgba(255,0,255,.75);
-  color:#ffccff;
-  font-size:.8rem;
-  text-shadow:0 0 10px #ff00ff;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,.03) 0px,
-      rgba(255,255,255,.03) 2px,
-      transparent 2px,
-      transparent 6px
-    );
-}
-
-.mobile-card-replacement{
-  display:none;
-}
-
-/* CRT Power On */
-.crt-boot {
-  animation: crtBoot 0.6s forwards;
-}
-
-@keyframes crtBoot {
-  0% {
-    transform: scaleY(0);
-    filter: brightness(3);
-  }
-  40% {
-    transform: scaleY(0.05);
-    filter: brightness(2);
-  }
-  100% {
-    transform: scaleY(1);
-    filter: brightness(1);
-  }
-}
-
-@media (max-width:900px){
-  .game-card[data-mobile-replacement="true"]{
-    border-style:dashed;
-    border-color:rgba(0,255,255,.7);
-    box-shadow:0 0 18px rgba(0,255,255,.14), inset 0 0 12px rgba(255,0,255,.08);
-    cursor:default;
-    pointer-events:none;
-  }
-
-  .game-card[data-mobile-replacement="true"] video,
-  .game-card[data-mobile-replacement="true"] .game-title,
-  .game-card[data-mobile-replacement="true"] .game-play-count{
-    display:none !important;
-  }
-
-  .game-card[data-mobile-replacement="true"] .mobile-card-replacement{
-    display:block;
-  }
-
-  .grid-shell{
-    padding:0 58px;
-  }
-
-  .game-grid{
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width:600px){
-  .grid-shell{
-    margin:56px auto 72px;
-    padding:0 52px;
-  }
-
-  .grid-nav{
-    width:42px;
-    height:42px;
-  }
-
-  .grid-nav:hover,
-  .grid-nav.gamepad-selected{
-    transform:translateY(-50%) scale(1.06);
-  }
-
-  .game-grid{
-    grid-template-columns:1fr;
-    gap:22px;
-    padding:12px;
-  }
-}
-
-@media (max-width:600px) and (orientation:portrait){
-  .grid-shell{
-    padding:0 54px;
-  }
-
-  .grid-nav{
-    top:50%;
-    bottom:auto;
-    transform:translateY(-50%);
-  }
-
-  .grid-nav-left{
-    left:2px;
-  }
-
-  .grid-nav-right{
-    right:2px;
-  }
-
-  .game-card video,
-  .future-card-media{
-    height:160px;
-  }
-}
-</style>
 </head>
 <body>
 
@@ -674,7 +74,7 @@ body{
           <!-- AUTO-GENERATED-GRID-PAGES-START -->
         <div class="grid-page">
           <div class="game-grid">
-            <a class="game-card arcade-link" href="games/apple-catcher/index.html">
+            <a class="game-card arcade-link" href="games/apple-catcher/index.html" data-mobile-replacement="false">
               <video muted loop preload="metadata">
                 <source src="previews/apple-catcher.mp4" type="video/mp4">
               </video>
@@ -682,9 +82,14 @@ body{
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
               </div>
+              <div class="mobile-card-replacement" aria-hidden="true">
+                <div class="future-card-media">COMING SOON</div>
+                <div class="game-title">Future Title</div>
+                <div class="game-play-count">JAY ARCADE EXPANDING</div>
+              </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/art-of-war/index.html">
+            <a class="game-card arcade-link" href="games/art-of-war/index.html" data-mobile-replacement="false">
               <video muted loop preload="metadata">
                 <source src="previews/art-of-war.mp4" type="video/mp4">
               </video>
@@ -692,9 +97,14 @@ body{
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
               </div>
+              <div class="mobile-card-replacement" aria-hidden="true">
+                <div class="future-card-media">COMING SOON</div>
+                <div class="game-title">Future Title</div>
+                <div class="game-play-count">JAY ARCADE EXPANDING</div>
+              </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/bird-duty/index.html">
+            <a class="game-card arcade-link" href="games/bird-duty/index.html" data-mobile-replacement="false">
               <video muted loop preload="metadata">
                 <source src="previews/bird-duty.mp4" type="video/mp4">
               </video>
@@ -702,15 +112,25 @@ body{
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
               </div>
+              <div class="mobile-card-replacement" aria-hidden="true">
+                <div class="future-card-media">COMING SOON</div>
+                <div class="game-title">Future Title</div>
+                <div class="game-play-count">JAY ARCADE EXPANDING</div>
+              </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/blade-and-sphere/index.html">
+            <a class="game-card arcade-link" href="games/blade-and-sphere/index.html" data-mobile-replacement="false">
               <video muted loop preload="metadata">
                 <source src="previews/blade-and-sphere.mp4" type="video/mp4">
               </video>
               <div class="game-title">Blade &amp; Sphere</div>
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
+              </div>
+              <div class="mobile-card-replacement" aria-hidden="true">
+                <div class="future-card-media">COMING SOON</div>
+                <div class="game-title">Future Title</div>
+                <div class="game-play-count">JAY ARCADE EXPANDING</div>
               </div>
             </a>
 
@@ -729,13 +149,18 @@ body{
               </div>
             </a>
 
-            <a class="game-card arcade-link" href="games/paddle-battle/index.html">
+            <a class="game-card arcade-link" href="games/paddle-battle/index.html" data-mobile-replacement="false">
               <video muted loop preload="metadata">
                 <source src="previews/paddle-battle.mp4" type="video/mp4">
               </video>
               <div class="game-title">Paddle Battle</div>
               <div class="game-play-count">
                 PLAYS: <span class="playCount">000000</span>
+              </div>
+              <div class="mobile-card-replacement" aria-hidden="true">
+                <div class="future-card-media">COMING SOON</div>
+                <div class="game-title">Future Title</div>
+                <div class="game-play-count">JAY ARCADE EXPANDING</div>
               </div>
             </a>
 

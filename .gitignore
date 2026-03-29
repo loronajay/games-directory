@@ -9,6 +9,9 @@ txt-files/
 # Private pages
 mom-page.html
 
+# Claude Code config (local only)
+CLAUDE.md
+
 # Local dev / OS noise
 .DS_Store
 Thumbs.db

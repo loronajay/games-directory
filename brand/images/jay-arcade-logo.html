@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jay Arcade — Logo Concepts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee+Shade&family=Monoton&family=Black+Ops+One&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #06030f;
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 9px;
+    color: #444;
+    letter-spacing: 4px;
+    margin-bottom: 70px;
+    text-transform: uppercase;
+  }
+
+  .concepts {
+    display: flex;
+    flex-direction: column;
+    gap: 90px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .concept {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .label {
+    font-size: 7px;
+    color: #444;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  .hint {
+    font-size: 6px;
+    color: #2a2a3a;
+    letter-spacing: 2px;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  .divider {
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+    border: none;
+    border-top: 1px solid #12101e;
+  }
+
+  .logo-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  /* ============================================================
+     VARIANT 1 — Bungee Shade — Bold Inline 3D Marquee
+  ============================================================ */
+  .v1 {
+    padding: 50px 60px 40px;
+    background: radial-gradient(ellipse at 50% 0%, #1a003a 0%, #06020f 70%);
+  }
+  .v1 .sun {
+    width: 140px; height: 70px;
+    border-radius: 140px 140px 0 0;
+    background: linear-gradient(180deg, #ffe066 0%, #ff6a00 40%, #ff2d78 75%, transparent 100%);
+    box-shadow: 0 0 60px #ff6a0060, 0 0 120px #ff2d7840;
+    position: absolute; bottom: 52px; left: 50%;
+    transform: translateX(-50%);
+    overflow: hidden;
+  }
+  .v1 .sun-stripes {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    justify-content: flex-end; gap: 7px; padding-bottom: 5px;
+  }
+  .v1 .sun-stripes span { display: block; height: 4px; background: #06020f; }
+  .v1 .grid {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 55px;
+    background:
+      linear-gradient(90deg, transparent 49.5%, rgba(160,0,255,0.35) 49.5%, rgba(160,0,255,0.35) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49%, rgba(160,0,255,0.2) 49%, rgba(160,0,255,0.2) 51%, transparent 51%);
+    background-size: 44px 22px;
+    mask-image: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+  }
+  .v1 .scanlines {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px);
+    pointer-events: none; z-index: 3;
+  }
+  .v1 .jay {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px; color: #00f5ff;
+    letter-spacing: 22px;
+    text-shadow: 0 0 8px #00f5ff, 0 0 24px #00f5ff80;
+    position: relative; z-index: 2; margin-bottom: 2px;
+  }
+  .v1 .arcade {
+    font-family: 'Bungee Shade', cursive;
+    font-size: 84px; line-height: 0.95;
+    background: linear-gradient(180deg, #00f5ff 0%, #ffffff 20%, #ffffff 65%, #ff2d78 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px #ff2d7870) drop-shadow(0 0 12px #00f5ff50);
+    position: relative; z-index: 2; letter-spacing: 6px;
+  }
+  .v1 .stripe {
+    width: 80%; height: 2px;
+    background: linear-gradient(90deg, transparent, #b400ff, #00f5ff, #ff2d78, transparent);
+    box-shadow: 0 0 12px #b400ff80;
+    margin: 12px 0 8px; position: relative; z-index: 2;
+  }
+  .v1 .tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px; color: #b400ff; letter-spacing: 6px;
+    text-shadow: 0 0 8px #b400ff;
+    position: relative; z-index: 2;
+  }
+
+  /* ============================================================
+     VARIANT 2 — Monoton — Neon Tube Glow
+  ============================================================ */
+  .v2 {
+    padding: 50px 60px 44px;
+    background: #000;
+  }
+  .v2 .glow-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 110%, #1a0040 0%, #000 60%);
+  }
+  .v2 .sun {
+    width: 160px; height: 80px;
+    border-radius: 160px 160px 0 0;
+    background: linear-gradient(180deg, #ff00aa 0%, #7700ff 60%, transparent 100%);
+    box-shadow: 0 0 50px #ff00aa50, 0 0 100px #7700ff30;
+    position: absolute; bottom: 55px; left: 50%;
+    transform: translateX(-50%); overflow: hidden;
+  }
+  .v2 .sun-stripes {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    justify-content: flex-end; gap: 8px; padding-bottom: 6px;
+  }
+  .v2 .sun-stripes span { display: block; height: 4px; background: #000; }
+  .v2 .grid {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 58px;
+    background:
+      linear-gradient(90deg, transparent 49.5%, rgba(0,245,255,0.25) 49.5%, rgba(0,245,255,0.25) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49%, rgba(0,245,255,0.12) 49%, rgba(0,245,255,0.12) 51%, transparent 51%);
+    background-size: 40px 20px;
+    mask-image: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+  }
+  .v2 .jay {
+    font-family: 'Monoton', cursive;
+    font-size: 22px; color: #ff00aa;
+    letter-spacing: 12px;
+    text-shadow: 0 0 8px #ff00aa, 0 0 20px #ff00aa, 0 0 40px #ff00aa60;
+    position: relative; z-index: 2; margin-bottom: 0px;
+    animation: neonPulse 3s ease-in-out infinite;
+  }
+  .v2 .arcade {
+    font-family: 'Monoton', cursive;
+    font-size: 64px; line-height: 1.1; color: #00f5ff;
+    text-shadow: 0 0 6px #00f5ff, 0 0 20px #00f5ff, 0 0 50px #00f5ff80, 0 0 80px #00f5ff40;
+    position: relative; z-index: 2; letter-spacing: 6px;
+    animation: neonPulse2 4s ease-in-out infinite;
+  }
+  .v2 .stripe {
+    width: 70%; height: 1px;
+    background: linear-gradient(90deg, transparent, #ff00aa, #00f5ff, transparent);
+    box-shadow: 0 0 10px #ff00aa60;
+    margin: 14px 0 10px; position: relative; z-index: 2;
+  }
+  .v2 .tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px; color: #7700ff; letter-spacing: 5px;
+    text-shadow: 0 0 8px #7700ff, 0 0 16px #7700ff80;
+    position: relative; z-index: 2;
+  }
+  @keyframes neonPulse {
+    0%, 100% { opacity: 1; text-shadow: 0 0 8px #ff00aa, 0 0 20px #ff00aa, 0 0 40px #ff00aa60; }
+    50% { opacity: 0.8; text-shadow: 0 0 4px #ff00aa, 0 0 10px #ff00aa, 0 0 22px #ff00aa40; }
+  }
+  @keyframes neonPulse2 {
+    0%, 100% { opacity: 1; text-shadow: 0 0 6px #00f5ff, 0 0 20px #00f5ff, 0 0 50px #00f5ff80; }
+    60% { opacity: 0.85; text-shadow: 0 0 3px #00f5ff, 0 0 10px #00f5ff, 0 0 28px #00f5ff50; }
+  }
+
+  /* ============================================================
+     VARIANT 3 — Black Ops One — Gritty Fiery Sunset
+  ============================================================ */
+  .v3 {
+    padding: 50px 60px 44px;
+    background: #020008;
+  }
+  .v3 .noise {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 200px; opacity: 0.4;
+    pointer-events: none; z-index: 0;
+  }
+  .v3 .sun {
+    width: 130px; height: 65px;
+    border-radius: 130px 130px 0 0;
+    background: linear-gradient(180deg, #ff9900 0%, #ff3300 50%, #cc0066 90%, transparent 100%);
+    box-shadow: 0 0 50px #ff330050, 0 0 90px #ff990030;
+    position: absolute; bottom: 52px; left: 50%;
+    transform: translateX(-50%); overflow: hidden;
+  }
+  .v3 .sun-stripes {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    justify-content: flex-end; gap: 6px; padding-bottom: 4px;
+  }
+  .v3 .sun-stripes span { display: block; height: 3px; background: #020008; }
+  .v3 .grid {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 55px;
+    background:
+      linear-gradient(90deg, transparent 49.5%, rgba(255,51,0,0.25) 49.5%, rgba(255,51,0,0.25) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49%, rgba(255,51,0,0.12) 49%, rgba(255,51,0,0.12) 51%, transparent 51%);
+    background-size: 40px 20px;
+    mask-image: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+  }
+  .v3 .jay {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px; color: #ff9900; letter-spacing: 20px;
+    text-shadow: 0 0 6px #ff9900, 0 0 20px #ff990060;
+    position: relative; z-index: 2; margin-bottom: 0px;
+  }
+  .v3 .arcade {
+    font-family: 'Black Ops One', cursive;
+    font-size: 96px; line-height: 0.95;
+    background: linear-gradient(180deg, #ffffff 0%, #ff9900 35%, #ff3300 65%, #cc0066 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px #ff330060) drop-shadow(2px 3px 0px rgba(0,0,0,0.8));
+    position: relative; z-index: 2; letter-spacing: 4px;
+  }
+  .v3 .stripe {
+    width: 75%; height: 2px;
+    background: linear-gradient(90deg, transparent, #ff3300, #ff9900, #cc0066, transparent);
+    box-shadow: 0 0 10px #ff330080;
+    margin: 10px 0 8px; position: relative; z-index: 2;
+  }
+  .v3 .tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px; color: #cc0066; letter-spacing: 6px;
+    text-shadow: 0 0 8px #cc006680;
+    position: relative; z-index: 2;
+  }
+</style>
+</head>
+<body>
+
+<h1>▶ Jay Arcade — Concept C Variations</h1>
+
+<div class="concepts">
+
+  <div class="concept">
+    <div class="label">C1 — Bungee Shade · Warm Marquee</div>
+    <div class="logo-wrap v1">
+      <div class="scanlines"></div>
+      <div class="sun"><div class="sun-stripes"><span></span><span></span><span></span></div></div>
+      <div class="grid"></div>
+      <div class="jay">JAY</div>
+      <div class="arcade">ARCADE</div>
+      <div class="stripe"></div>
+      <div class="tag">PLAY · COMPETE · EARN REWARDS</div>
+    </div>
+    <div class="hint">Bungee Shade · gold → orange → pink gradient · CRT scanlines · purple grid</div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="concept">
+    <div class="label">C2 — Monoton · Neon Tubes</div>
+    <div class="logo-wrap v2">
+      <div class="glow-bg"></div>
+      <div class="sun"><div class="sun-stripes"><span></span><span></span><span></span></div></div>
+      <div class="grid"></div>
+      <div class="jay">JAY</div>
+      <div class="arcade">ARCADE</div>
+      <div class="stripe"></div>
+      <div class="tag">PLAY · COMPETE · EARN REWARDS</div>
+    </div>
+    <div class="hint">Monoton · hot pink + cyan · breathing neon animation · pure black bg</div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="concept">
+    <div class="label">C3 — Black Ops One · Gritty Sunset</div>
+    <div class="logo-wrap v3">
+      <div class="noise"></div>
+      <div class="sun"><div class="sun-stripes"><span></span><span></span><span></span></div></div>
+      <div class="grid"></div>
+      <div class="jay">JAY</div>
+      <div class="arcade">ARCADE</div>
+      <div class="stripe"></div>
+      <div class="tag">PLAY · COMPETE · EARN REWARDS</div>
+    </div>
+    <div class="hint">Black Ops One · orange → red → crimson · gritty texture · fire grid</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jay Arcade — Sticker Concepts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee+Shade&family=Monoton&family=Black+Ops+One&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111;
+    font-family: 'Press Start 2P', monospace;
+    min-height: 100vh;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;
+  }
+
+  h1 {
+    font-size: 9px;
+    color: #444;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  .sticker-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .label {
+    font-size: 7px;
+    color: #444;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* =============================================
+     STICKER 1 — Bungee Shade warm marquee
+  ============================================= */
+  .sticker-1 {
+    position: relative;
+    width: 520px;
+    height: 520px;
+    border-radius: 60px;
+    background: radial-gradient(ellipse at 50% 20%, #200050 0%, #06020f 65%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* white sticker border */
+    box-shadow:
+      0 0 0 10px #fff,
+      0 0 0 14px #e0e0e0,
+      0 0 40px rgba(0,0,0,0.6);
+  }
+
+  .sticker-1 .scanlines {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
+    pointer-events: none; z-index: 3; border-radius: 60px;
+  }
+
+  .sticker-1 .sun {
+    position: absolute;
+    bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    width: 180px; height: 90px;
+    border-radius: 180px 180px 0 0;
+    background: linear-gradient(180deg, #ffe066 0%, #ff6a00 45%, #ff2d78 80%, transparent 100%);
+    box-shadow: 0 0 60px #ff6a0050, 0 0 100px #ff2d7840;
+    overflow: hidden;
+  }
+  .sticker-1 .sun-stripes {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    justify-content: flex-end; gap: 8px; padding-bottom: 6px;
+  }
+  .sticker-1 .sun-stripes span { display: block; height: 5px; background: #06020f; }
+
+  .sticker-1 .grid {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 90px; border-radius: 0 0 60px 60px;
+    background:
+      linear-gradient(90deg, transparent 49.5%, rgba(160,0,255,0.4) 49.5%, rgba(160,0,255,0.4) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49%, rgba(160,0,255,0.2) 49%, rgba(160,0,255,0.2) 51%, transparent 51%);
+    background-size: 50px 25px;
+    mask-image: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+  }
+
+  .sticker-1 .jay {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px; color: #00f5ff;
+    letter-spacing: 22px;
+    text-shadow: 0 0 8px #00f5ff, 0 0 24px #00f5ff80;
+    position: relative; z-index: 2;
+    margin-bottom: 4px;
+  }
+  .sticker-1 .arcade {
+    font-family: 'Bungee Shade', cursive;
+    font-size: 100px; line-height: 0.95;
+    background: linear-gradient(180deg, #00f5ff 0%, #ffffff 18%, #ffffff 62%, #ff2d78 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px #ff2d7870) drop-shadow(0 0 8px #00f5ff50);
+    position: relative; z-index: 2; letter-spacing: 4px;
+  }
+  .sticker-1 .stripe {
+    width: 75%; height: 2px;
+    background: linear-gradient(90deg, transparent, #b400ff, #00f5ff, #ff2d78, transparent);
+    box-shadow: 0 0 10px #b400ff80;
+    margin: 10px 0 8px; position: relative; z-index: 2;
+  }
+  .sticker-1 .tagline {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6.5px; color: #b400ff; letter-spacing: 5px;
+    text-shadow: 0 0 8px #b400ff;
+    position: relative; z-index: 2;
+  }
+  .sticker-1 .url {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: #ffffff;
+    letter-spacing: 3px;
+    text-shadow: 0 0 6px #ffffff80;
+    position: absolute; bottom: 28px;
+    z-index: 4;
+  }
+
+  /* =============================================
+     STICKER 2 — Monoton neon tubes
+  ============================================= */
+  .sticker-2 {
+    position: relative;
+    width: 520px;
+    height: 520px;
+    border-radius: 60px;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 10px #fff,
+      0 0 0 14px #e0e0e0,
+      0 0 40px rgba(0,0,0,0.6);
+  }
+
+  .sticker-2 .glow-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 100%, #1a0040 0%, #000 55%);
+    border-radius: 60px;
+  }
+
+  .sticker-2 .sun {
+    position: absolute;
+    bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    width: 190px; height: 95px;
+    border-radius: 190px 190px 0 0;
+    background: linear-gradient(180deg, #ff00aa 0%, #7700ff 65%, transparent 100%);
+    box-shadow: 0 0 60px #ff00aa40, 0 0 100px #7700ff30;
+    overflow: hidden;
+  }
+  .sticker-2 .sun-stripes {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    justify-content: flex-end; gap: 9px; padding-bottom: 7px;
+  }
+  .sticker-2 .sun-stripes span { display: block; height: 5px; background: #000; }
+
+  .sticker-2 .grid {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 90px; border-radius: 0 0 60px 60px;
+    background:
+      linear-gradient(90deg, transparent 49.5%, rgba(0,245,255,0.3) 49.5%, rgba(0,245,255,0.3) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49%, rgba(0,245,255,0.15) 49%, rgba(0,245,255,0.15) 51%, transparent 51%);
+    background-size: 48px 24px;
+    mask-image: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+  }
+
+  .sticker-2 .jay {
+    font-family: 'Monoton', cursive;
+    font-size: 26px; color: #ff00aa;
+    letter-spacing: 10px;
+    text-shadow: 0 0 8px #ff00aa, 0 0 22px #ff00aa, 0 0 45px #ff00aa60;
+    position: relative; z-index: 2;
+    margin-bottom: 2px;
+    animation: neonJay 3s ease-in-out infinite;
+  }
+  .sticker-2 .arcade {
+    font-family: 'Monoton', cursive;
+    font-size: 76px; line-height: 1.1; color: #00f5ff;
+    text-shadow: 0 0 6px #00f5ff, 0 0 22px #00f5ff, 0 0 55px #00f5ff80;
+    position: relative; z-index: 2; letter-spacing: 4px;
+    animation: neonArcade 4s ease-in-out infinite;
+  }
+  .sticker-2 .stripe {
+    width: 72%; height: 1.5px;
+    background: linear-gradient(90deg, transparent, #ff00aa, #00f5ff, transparent);
+    box-shadow: 0 0 10px #ff00aa60;
+    margin: 12px 0 8px; position: relative; z-index: 2;
+  }
+  .sticker-2 .tagline {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6.5px; color: #7700ff; letter-spacing: 4px;
+    text-shadow: 0 0 8px #7700ff, 0 0 16px #7700ff80;
+    position: relative; z-index: 2;
+  }
+  .sticker-2 .url {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: #00f5ff;
+    letter-spacing: 3px;
+    text-shadow: 0 0 6px #00f5ff80;
+    position: absolute; bottom: 28px;
+    z-index: 4;
+    animation: neonUrl 3.5s ease-in-out infinite;
+  }
+
+  @keyframes neonJay {
+    0%,100% { text-shadow: 0 0 8px #ff00aa, 0 0 22px #ff00aa, 0 0 45px #ff00aa60; opacity:1; }
+    50%      { text-shadow: 0 0 3px #ff00aa, 0 0 10px #ff00aa; opacity: 0.78; }
+  }
+  @keyframes neonArcade {
+    0%,100% { text-shadow: 0 0 6px #00f5ff, 0 0 22px #00f5ff, 0 0 55px #00f5ff80; opacity:1; }
+    60%      { text-shadow: 0 0 3px #00f5ff, 0 0 10px #00f5ff; opacity: 0.82; }
+  }
+  @keyframes neonUrl {
+    0%,100% { opacity:1; }
+    50%      { opacity: 0.6; }
+  }
+
+  /* =============================================
+     STICKER 3 — Black Ops One gritty sunset
+  ============================================= */
+  .sticker-3 {
+    position: relative;
+    width: 520px;
+    height: 520px;
+    border-radius: 60px;
+    background: #020008;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 10px #fff,
+      0 0 0 14px #e0e0e0,
+      0 0 40px rgba(0,0,0,0.6);
+  }
+
+  .sticker-3 .sun {
+    position: absolute;
+    bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    width: 170px; height: 85px;
+    border-radius: 170px 170px 0 0;
+    background: linear-gradient(180deg, #ff9900 0%, #ff3300 55%, #cc0066 90%, transparent 100%);
+    box-shadow: 0 0 50px #ff330050, 0 0 90px #ff990030;
+    overflow: hidden;
+  }
+  .sticker-3 .sun-stripes {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    justify-content: flex-end; gap: 8px; padding-bottom: 5px;
+  }
+  .sticker-3 .sun-stripes span { display: block; height: 4px; background: #020008; }
+
+  .sticker-3 .grid {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 90px; border-radius: 0 0 60px 60px;
+    background:
+      linear-gradient(90deg, transparent 49.5%, rgba(255,51,0,0.3) 49.5%, rgba(255,51,0,0.3) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49%, rgba(255,51,0,0.15) 49%, rgba(255,51,0,0.15) 51%, transparent 51%);
+    background-size: 48px 24px;
+    mask-image: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+  }
+
+  .sticker-3 .jay {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px; color: #ff9900;
+    letter-spacing: 20px;
+    text-shadow: 0 0 6px #ff9900, 0 0 20px #ff990060;
+    position: relative; z-index: 2; margin-bottom: 4px;
+  }
+  .sticker-3 .arcade {
+    font-family: 'Black Ops One', cursive;
+    font-size: 112px; line-height: 0.95;
+    background: linear-gradient(180deg, #ffffff 0%, #ff9900 35%, #ff3300 65%, #cc0066 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 18px #ff330060) drop-shadow(2px 3px 0 rgba(0,0,0,0.8));
+    position: relative; z-index: 2; letter-spacing: 4px;
+  }
+  .sticker-3 .stripe {
+    width: 74%; height: 2px;
+    background: linear-gradient(90deg, transparent, #ff3300, #ff9900, #cc0066, transparent);
+    box-shadow: 0 0 10px #ff330080;
+    margin: 10px 0 8px; position: relative; z-index: 2;
+  }
+  .sticker-3 .tagline {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6.5px; color: #cc0066; letter-spacing: 5px;
+    text-shadow: 0 0 8px #cc006680;
+    position: relative; z-index: 2;
+  }
+  .sticker-3 .url {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px; color: #ff9900;
+    letter-spacing: 3px;
+    text-shadow: 0 0 6px #ff990080;
+    position: absolute; bottom: 28px;
+    z-index: 4;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>▶ Jay Arcade — Sticker Concepts</h1>
+
+<!-- STICKER 1 -->
+<div class="sticker-group">
+  <div class="label">Sticker 1 — Bungee Shade · Warm Marquee</div>
+  <div class="sticker-1">
+    <div class="scanlines"></div>
+    <div class="sun"><div class="sun-stripes"><span></span><span></span><span></span></div></div>
+    <div class="grid"></div>
+    <div class="jay">JAY</div>
+    <div class="arcade">ARCADE</div>
+    <div class="stripe"></div>
+    <div class="tagline">PLAY · COMPETE · EARN REWARDS</div>
+    <div class="url">jayarcade.com</div>
+  </div>
+</div>
+
+<!-- STICKER 2 -->
+<div class="sticker-group">
+  <div class="label">Sticker 2 — Monoton · Neon Tubes</div>
+  <div class="sticker-2">
+    <div class="glow-bg"></div>
+    <div class="sun"><div class="sun-stripes"><span></span><span></span><span></span></div></div>
+    <div class="grid"></div>
+    <div class="jay">JAY</div>
+    <div class="arcade">ARCADE</div>
+    <div class="stripe"></div>
+    <div class="tagline">PLAY · COMPETE · EARN REWARDS</div>
+    <div class="url">jayarcade.com</div>
+  </div>
+</div>
+
+<!-- STICKER 3 -->
+<div class="sticker-group">
+  <div class="label">Sticker 3 — Black Ops One · Gritty Sunset</div>
+  <div class="sticker-3">
+    <div class="sun"><div class="sun-stripes"><span></span><span></span><span></span></div></div>
+    <div class="grid"></div>
+    <div class="jay">JAY</div>
+    <div class="arcade">ARCADE</div>
+    <div class="stripe"></div>
+    <div class="tagline">PLAY · COMPETE · EARN REWARDS</div>
+    <div class="url">jayarcade.com</div>
+  </div>
+</div>
+
+</body>
+</html>

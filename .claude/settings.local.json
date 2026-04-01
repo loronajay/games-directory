@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Read(//c/Users/leoja/Desktop/Dad Games/full-games/**)",
+      "Read(//c/Users/leoja/Desktop/Dad Games/**)",
+      "Bash(gh repo:*)"
+    ]
+  }
+}

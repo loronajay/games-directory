@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=Bungee+Shade&amp;display=swap');
+    </style>
+    <radialGradient id="bg1" cx="50%" cy="20%" r="75%">
+      <stop offset="0%" stop-color="#200050"/>
+      <stop offset="100%" stop-color="#06020f"/>
+    </radialGradient>
+    <linearGradient id="sunG1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="45%" stop-color="#ff6a00"/>
+      <stop offset="80%" stop-color="#ff2d78"/>
+      <stop offset="100%" stop-color="#ff2d7800"/>
+    </linearGradient>
+    <linearGradient id="arcadeG1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="18%" stop-color="#ffffff"/>
+      <stop offset="64%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ff2d78"/>
+    </linearGradient>
+    <linearGradient id="stripeG1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#06020f00"/>
+      <stop offset="20%" stop-color="#b400ff"/>
+      <stop offset="50%" stop-color="#00f5ff"/>
+      <stop offset="80%" stop-color="#ff2d78"/>
+      <stop offset="100%" stop-color="#06020f00"/>
+    </linearGradient>
+    <clipPath id="boardClip1"><rect x="12" y="12" width="776" height="376" rx="44"/></clipPath>
+    <clipPath id="sunClip1"><ellipse cx="400" cy="330" rx="100" ry="100"/></clipPath>
+    <mask id="gridMask1">
+      <linearGradient id="gm1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="black"/>
+        <stop offset="100%" stop-color="white"/>
+      </linearGradient>
+      <rect width="800" height="400" fill="url(#gm1)"/>
+    </mask>
+    <filter id="glowCyan1" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowArcade1" x="-8%" y="-15%" width="116%" height="130%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowPurple1" x="-20%" y="-100%" width="140%" height="300%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sunGlow1" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="16" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- White sticker border -->
+  <rect width="800" height="400" rx="50" fill="#ffffff"/>
+  <!-- Inner background -->
+  <rect x="12" y="12" width="776" height="376" rx="42" fill="#06020f"/>
+  <rect x="12" y="12" width="776" height="376" rx="42" fill="url(#bg1)"/>
+
+  <!-- Grid floor -->
+  <g clip-path="url(#boardClip1)" mask="url(#gridMask1)" opacity="0.55">
+    <line x1="0" y1="320" x2="800" y2="320" stroke="#9000ff" stroke-width="1" opacity="0.4"/>
+    <line x1="0" y1="346" x2="800" y2="346" stroke="#9000ff" stroke-width="1" opacity="0.4"/>
+    <line x1="0" y1="370" x2="800" y2="370" stroke="#9000ff" stroke-width="1" opacity="0.4"/>
+    <line x1="400" y1="312" x2="12"  y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="100" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="188" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="276" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="364" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="400" y2="400" stroke="#9000ff" stroke-width="1"   opacity="0.45"/>
+    <line x1="400" y1="312" x2="436" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="524" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="612" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="700" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+    <line x1="400" y1="312" x2="788" y2="400" stroke="#9000ff" stroke-width="0.8" opacity="0.3"/>
+  </g>
+
+  <!-- Sun -->
+  <g filter="url(#sunGlow1)" clip-path="url(#boardClip1)">
+    <ellipse cx="400" cy="332" rx="100" ry="100" fill="url(#sunG1)" clip-path="url(#sunClip1)"/>
+  </g>
+  <!-- Sun stripes -->
+  <rect x="300" y="314" width="200" height="5" fill="#06020f"/>
+  <rect x="300" y="325" width="200" height="5" fill="#06020f"/>
+  <rect x="300" y="336" width="200" height="5" fill="#06020f"/>
+
+  <!-- Scanlines -->
+  <rect x="12" y="12" width="776" height="376" rx="42"
+    fill="none" opacity="0.12"
+    style="background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.2) 3px, rgba(0,0,0,0.2) 4px)"/>
+
+  <!-- JAY -->
+  <text x="400" y="88" text-anchor="middle"
+    font-family="'Press Start 2P', monospace" font-size="16"
+    fill="#00f5ff" letter-spacing="24" filter="url(#glowCyan1)">JAY</text>
+
+  <!-- ARCADE -->
+  <text x="400" y="218" text-anchor="middle"
+    font-family="'Bungee Shade', cursive" font-size="148"
+    fill="url(#arcadeG1)" letter-spacing="6" filter="url(#glowArcade1)">ARCADE</text>
+
+  <!-- Stripe -->
+  <rect x="100" y="236" width="600" height="2" fill="url(#stripeG1)" filter="url(#glowPurple1)"/>
+
+  <!-- Tagline -->
+  <text x="400" y="260" text-anchor="middle"
+    font-family="'Press Start 2P', monospace" font-size="8"
+    fill="#b400ff" letter-spacing="5" filter="url(#glowPurple1)">PLAY · COMPETE · EARN REWARDS</text>
+
+  <!-- URL -->
+  <text x="400" y="372" text-anchor="middle"
+    font-family="'Press Start 2P', monospace" font-size="10"
+    fill="#ffffff" letter-spacing="3" filter="url(#glowCyan1)">jayarcade.com</text>
+</svg>

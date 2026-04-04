@@ -1,5 +1,11 @@
 # Leaderboard Integration Plan (Tailored)
 
+## Status
+
+**Waiting on Jay's answers** to the three open questions at the bottom of this file before any code work begins. No implementation has been done yet — only this plan has been written and committed.
+
+Once those questions are answered, start at **Step 2** (update `game.json` files). Step 1 (`grid.html` `isMobile()`) can be done independently at any time.
+
 ## Scope
 
 This plan covers only changes to this repo (`games-directory-page`). The Railway server setup

@@ -209,6 +209,25 @@ Run `python scripts/build_arcade.py --commit --push` after the dry run confirms 
 
 ---
 
+## Architecture Note — How Games Call `JayLeaderboard`
+
+Games do not call `window.JayLeaderboard` directly from Scratch blocks. Instead, the
+`factory-leaderboards` TurboWarp extension (in `turbowarp-extensions-js/canon/factory_extensions/`)
+is being extended with cloud sync blocks that call `window.JayLeaderboard` internally.
+
+Flow:
+1. Scratch block → `factory-leaderboards` extension → `window.JayLeaderboard` → Railway server
+
+This means:
+- `window.JayLeaderboard` is the interface this repo is responsible for injecting
+- The extension is responsible for calling it from Scratch
+- Changes to the extension take effect when Jay rebuilds and re-exports games through TurboWarp
+
+See `turbowarp-extensions-js/canon/factory_extensions/leaderboard-cloud-sync-plan.md`
+for the extension implementation plan.
+
+---
+
 ## Open Questions (Your Answers Go Here)
 
 1. **Score ranges** — do you know the rough max achievable score for each game, or should

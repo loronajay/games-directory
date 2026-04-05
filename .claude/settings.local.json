@@ -4,7 +4,9 @@
       "WebFetch(domain:github.com)",
       "Read(//c/Users/leoja/Desktop/Dad Games/full-games/**)",
       "Read(//c/Users/leoja/Desktop/Dad Games/**)",
-      "Bash(gh repo:*)"
+      "Bash(gh repo:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(python scripts/build_physical_arcade.py)"
     ]
   }
 }

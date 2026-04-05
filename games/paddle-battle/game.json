@@ -1,5 +1,8 @@
 {
   "title": "",
   "order": 9999,
-  "card_classes": []
+  "card_classes": [],
+  "leaderboard": {
+    "enabled": false
+  }
 }

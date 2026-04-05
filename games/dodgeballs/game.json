@@ -1,4 +1,7 @@
 {
   "title": "Dodgeballs!",
-  "card_classes": ["desktop-only"]
+  "card_classes": ["desktop-only"],
+  "leaderboard": {
+    "enabled": false
+  }
 }

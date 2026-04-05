@@ -14,6 +14,14 @@ from control_overrides import GAME_CONFIGS
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SCRIPT_DIR.parent
 GAMES_DIR = ROOT_DIR / "games"
+ENV_PATH = ROOT_DIR.parent / ".env"
+
+# -------------------------
+# LEADERBOARD ENV (populated by load_env at startup)
+# -------------------------
+
+LEADERBOARD_URL = None
+LEADERBOARD_KEYS = {}
 
 # -------------------------
 # STANDARD META TAGS
@@ -58,6 +66,9 @@ GOATCOUNTER_SCRIPT = '<script data-goatcounter="https://loronajay.goatcounter.co
 CONFIG_START = "<!-- JAY_GAME_CONFIG_START -->"
 CONFIG_END = "<!-- JAY_GAME_CONFIG_END -->"
 
+LEADERBOARD_HELPER_START = "<!-- JAY_LEADERBOARD_START -->"
+LEADERBOARD_HELPER_END = "<!-- JAY_LEADERBOARD_END -->"
+
 # -------------------------
 # REGEX
 # -------------------------
@@ -82,9 +93,54 @@ CONFIG_BLOCK_REGEX = re.compile(
     re.DOTALL
 )
 
+LEADERBOARD_HELPER_REGEX = re.compile(
+    re.escape(LEADERBOARD_HELPER_START) + r'.*?' + re.escape(LEADERBOARD_HELPER_END),
+    re.DOTALL
+)
+
 # -------------------------
 # HELPERS
 # -------------------------
+
+def load_env():
+    global LEADERBOARD_URL, LEADERBOARD_KEYS
+    if not ENV_PATH.exists():
+        print(f"WARNING: .env not found at {ENV_PATH} — leaderboard injection disabled")
+        return
+    for line in ENV_PATH.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip()
+        if key == "LEADERBOARD_URL":
+            LEADERBOARD_URL = value
+        elif key.startswith("KEY_"):
+            LEADERBOARD_KEYS[key] = value
+
+
+def slug_to_env_key(slug):
+    return "KEY_" + slug.upper().replace("-", "_")
+
+
+def get_leaderboard_config(folder_name, game_json):
+    lb = game_json.get("leaderboard", {})
+    if not lb.get("enabled"):
+        return None
+    if not LEADERBOARD_URL:
+        return None
+    env_key = slug_to_env_key(folder_name)
+    key = LEADERBOARD_KEYS.get(env_key)
+    if not key:
+        print(f"WARNING: no env key found for {folder_name} ({env_key}) — leaderboard disabled for this game")
+        return None
+    return {
+        "url": LEADERBOARD_URL,
+        "gameId": folder_name,
+        "key": key
+    }
+
 
 def build_config_block(config):
     json_block = json.dumps(config, indent=2)
@@ -93,6 +149,35 @@ def build_config_block(config):
 window.JAY_GAME_CONFIG = {json_block};
 </script>
 {CONFIG_END}"""
+
+
+def build_leaderboard_helper_block():
+    return """{start}
+<script>
+window.JayLeaderboard = (function () {{
+  var cfg = window.JAY_GAME_CONFIG && window.JAY_GAME_CONFIG.leaderboard;
+  if (!cfg) return undefined;
+  function deviceType() {{
+    return (navigator.maxTouchPoints > 0 || /Android|iPhone|iPad/i.test(navigator.userAgent))
+      ? 'mobile' : 'desktop';
+  }}
+  function submit(playerName, score) {{
+    return fetch(cfg.url + '/scores', {{
+      method: 'POST',
+      headers: {{ 'Content-Type': 'application/json', 'x-leaderboard-key': cfg.key }},
+      body: JSON.stringify({{ gameId: cfg.gameId, playerName: String(playerName), score: Number(score), deviceType: deviceType() }})
+    }}).then(function (r) {{ if (!r.ok) throw new Error('submit ' + r.status); return r.json(); }});
+  }}
+  function getTop(limit, device) {{
+    var dev = device || deviceType();
+    return fetch(cfg.url + '/scores/' + cfg.gameId + '?device=' + dev + '&limit=' + (limit || 10))
+      .then(function (r) {{ if (!r.ok) throw new Error('getTop ' + r.status); return r.json(); }})
+      .then(function (d) {{ return d.scores; }});
+  }}
+  return {{ submit: submit, getTop: getTop, deviceType: deviceType }};
+}})();
+</script>
+{end}""".format(start=LEADERBOARD_HELPER_START, end=LEADERBOARD_HELPER_END)
 
 
 def run_command(cmd, cwd, capture_output=False):
@@ -290,7 +375,7 @@ def patch_shared_scripts(html, notes):
     return html, (html != original_html)
 
 
-def patch_control_overrides(html, folder_name, notes):
+def patch_control_overrides(html, folder_name, notes, leaderboard_cfg=None):
 
     original_html = html
     has_config_block = CONFIG_START in html and CONFIG_END in html
@@ -299,6 +384,9 @@ def patch_control_overrides(html, folder_name, notes):
     override_status = None
 
     if config:
+        config = dict(config)
+        if leaderboard_cfg:
+            config["leaderboard"] = leaderboard_cfg
         config_block = build_config_block(config)
 
         if has_config_block:
@@ -314,18 +402,20 @@ def patch_control_overrides(html, folder_name, notes):
                 notes.append("ERROR: could not insert game config before jay-mobile.js")
                 override_status = "error"
     else:
-        # Inject a default config only if no block exists yet
         default_config = {
             "keyOverrides": {},
             "mobile": {
                 "layout": "default"
             }
         }
+        if leaderboard_cfg:
+            default_config["leaderboard"] = leaderboard_cfg
         config_block = build_config_block(default_config)
 
         if has_config_block:
-            notes.append("game config already present")
-            override_status = "none"
+            html = CONFIG_BLOCK_REGEX.sub(config_block, html, count=1)
+            notes.append("game config updated")
+            override_status = "updated"
         else:
             if JAY_MOBILE_SCRIPT in html:
                 html = html.replace(JAY_MOBILE_SCRIPT, config_block + "\n" + JAY_MOBILE_SCRIPT, 1)
@@ -338,6 +428,32 @@ def patch_control_overrides(html, folder_name, notes):
     return html, (html != original_html), override_status
 
 
+def patch_leaderboard_helper(html, leaderboard_cfg, notes):
+
+    original_html = html
+    has_block = LEADERBOARD_HELPER_START in html
+
+    if leaderboard_cfg:
+        helper_block = build_leaderboard_helper_block()
+        if has_block:
+            html = LEADERBOARD_HELPER_REGEX.sub(helper_block, html, count=1)
+            notes.append("leaderboard helper updated")
+        else:
+            if CONFIG_END in html:
+                html = html.replace(CONFIG_END, CONFIG_END + "\n" + helper_block, 1)
+                notes.append("leaderboard helper injected")
+            else:
+                notes.append("ERROR: could not inject leaderboard helper (no config block found)")
+    else:
+        if has_block:
+            html = LEADERBOARD_HELPER_REGEX.sub("", html, count=1)
+            notes.append("leaderboard helper removed (not enabled)")
+        else:
+            notes.append("leaderboard not enabled")
+
+    return html, (html != original_html)
+
+
 def patch_html(index_path: Path, dry_run=False):
 
     html = index_path.read_text(encoding="utf-8")
@@ -348,9 +464,21 @@ def patch_html(index_path: Path, dry_run=False):
 
     notes = []
 
+    # Load game.json for leaderboard config
+    game_json_path = index_path.parent / "game.json"
+    game_json = {}
+    if game_json_path.exists():
+        try:
+            game_json = json.loads(game_json_path.read_text(encoding="utf-8"))
+        except Exception:
+            notes.append("WARNING: could not parse game.json")
+
+    leaderboard_cfg = get_leaderboard_config(folder_name, game_json)
+
     html, _ = patch_meta_tags(html, notes)
     html, _ = patch_shared_scripts(html, notes)
-    html, _, override_status = patch_control_overrides(html, folder_name, notes)
+    html, _, override_status = patch_control_overrides(html, folder_name, notes, leaderboard_cfg)
+    html, _ = patch_leaderboard_helper(html, leaderboard_cfg, notes)
 
     changed = html != original_html
 
@@ -369,6 +497,8 @@ def patch_html(index_path: Path, dry_run=False):
 
 
 def main():
+
+    load_env()
 
     parser = argparse.ArgumentParser()
 

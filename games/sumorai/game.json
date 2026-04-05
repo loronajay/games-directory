@@ -1,5 +1,8 @@
 {
   "title": "",
   "order": 9999,
-  "card_classes": ["desktop-only"]
+  "card_classes": ["desktop-only"],
+  "leaderboard": {
+    "enabled": false
+  }
 }

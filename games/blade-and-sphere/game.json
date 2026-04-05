@@ -1,5 +1,10 @@
 {
   "title": "Blade & Sphere",
   "order": 9999,
-  "card_classes": []
+  "card_classes": [],
+  "leaderboard": {
+    "enabled": true,
+    "scoreMin": 0,
+    "scoreMax": 99999
+  }
 }

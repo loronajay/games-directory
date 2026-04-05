@@ -46,6 +46,7 @@
     </div>
   </div>
 
+  <!-- CABINET-STRIP-START -->
   <div class="factory-box">
   <div class="factory-title">POWERED BY TURBOWARP GAME FACTORY</div>
 
@@ -57,13 +58,16 @@
     SEE FOR YOURSELF →
   </a>
 </div>
+  <!-- CABINET-STRIP-END -->
 
+  <!-- CABINET-STRIP-START -->
   <div class="popular-box" id="popularBox" style="display:none;">
     <div class="popular-label">MOST POPULAR RIGHT NOW</div>
     <div class="popular-title" id="popularTitle">LOADING...</div>
     <div class="popular-meta" id="popularMeta">CHECKING GOATCOUNTER DATA...</div>
     <a class="popular-link arcade-link" id="popularLink" href="#">LAUNCH TITLE</a>
   </div>
+  <!-- CABINET-STRIP-END -->
 
   <div class="grid-shell">
     <button class="grid-nav grid-nav-left" id="gridNavLeft" aria-label="Previous grid page" style="display:none;">◀</button>
@@ -438,6 +442,7 @@ async function fetchGoatCount(path) {
   }
 }
 
+/* CABINET-STRIP-START */
 const gameCards = Array.from(
   document.querySelectorAll(".game-grid .arcade-link")
 ).filter(card => card.querySelector(".playCount"));
@@ -486,6 +491,7 @@ Promise.all(
   popularLink.href = winner.href;
   popularBox.style.display = "block";
 });
+/* CABINET-STRIP-END */
 
 /* Force hard reload when returning via back button */
 window.addEventListener("pageshow", function(event) {

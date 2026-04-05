@@ -16,7 +16,7 @@ This repo is the **platform layer** of a larger connected ecosystem — see [Eco
 
 Each game is built manually by Jay in TurboWarp, exported as a ZIP, and integrated via an automated Python build pipeline. The pipeline handles extraction, patching (mobile controller injection, analytics), and grid regeneration automatically.
 
-**Current library:** Apple Catcher, Art of War, Bird Duty, Blade & Sphere, Dodgeballs, Paddle Battle, Sumorai
+**Current library:** Apple Catcher, Art of War, Bird Duty, Blade & Sphere, Dodgeballs, Paddle Battle, Space Molestors, Speed Demon, Sumorai
 
 ---
 
@@ -77,6 +77,8 @@ Jay's Retro Arcade is Phase 1 of a larger platform:
 ### Related Projects
 
 - **[TurboWarp Game Factory](https://github.com/loronajay/textify-blockify-IR)** — A separate project by Jay. A suite of modular TurboWarp extensions including Textify/Blockify, a round-trip IR system for AI-assisted block logic workflows. Showcased at `jayarcade.com/turbowarp-game-factory/`.
+- **[Leaderboard Server](https://github.com/loronajay/leaderboard-server)** — REST API + PostgreSQL backend serving global leaderboards. Scores submitted via `factory-leaderboards.js`.
+- **[Factory Network Server](https://github.com/loronajay/factory-network-server)** — WebSocket server handling rooms, matchmaking, and peer messaging for multiplayer games. Used via `factory-network.js`.
 
 ---
 

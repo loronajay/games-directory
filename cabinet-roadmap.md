@@ -1,5 +1,5 @@
 # JayArcade Cabinet Roadmap
-**Last updated: 2026-04-05**
+**Last updated: 2026-04-05** — build pipeline complete
 
 ---
 
@@ -16,7 +16,12 @@ The cabinet has two modes:
 
 **Offline persistence rule:** The cabinet's local git repo is always the source of truth. When online + subscribed, `git pull` advances it forward. When offline or unsubscribed, the cabinet serves whatever state was last successfully pulled. It never regresses to a base version — if a user's subscription lapses, they keep the last version they received.
 
-**Update flow:** Jay runs `python scripts/build_arcade.py --commit --push` on his dev machine. That commits the fully built and patched files to the repo. The cabinet just runs `git pull origin main` — no build scripts needed on the Pi.
+**Update flow:** Jay runs `python scripts/build_arcade.py --commit --push` on his dev machine. That commits the fully built and patched web files to the repo. On the Pi, the boot sequence is:
+1. `git pull origin main` — gets latest web build (subscribed only)
+2. `python scripts/build_physical_arcade.py` — generates `cabinet/` from web source
+3. Chromium kiosk launches pointing to `http://localhost/cabinet/`
+
+**Cabinet build script:** `scripts/build_physical_arcade.py` reads `index.html` and `grid.html` (web versions, never modified) and writes cabinet-specific versions to `cabinet/`. Strips web-only content via `<!-- CABINET-STRIP-START/END -->` and `/* CABINET-STRIP-START/END */` markers, injects cabinet CSS/JS, outputs `cabinet/network-status.json`. The `cabinet/` directory is gitignored and always generated fresh.
 
 ---
 
@@ -31,13 +36,18 @@ The cabinet has two modes:
 
 ## Phase 1 — Basic Kiosk
 
-Get the Pi running the site in kiosk mode locally. Proves hardware and software work together.
+Get the Pi running the cabinet build in kiosk mode locally. Proves hardware and software work together.
 
+- [x] `scripts/build_physical_arcade.py` written and tested — generates `cabinet/` from web source
+- [x] Cabinet layout: all games fit on one 1080p screen (3×3 grid, no scroll, no pagination arrows)
+- [x] Cabinet CSS: `cursor: none`, `overflow: hidden`, compact title bar, viewport-fitted grid
+- [x] Web-only content stripped via marker system (`factory-box`, `popular-box`, GoatCounter JS)
 - [ ] Set up Raspberry Pi 5 with Raspberry Pi OS
 - [ ] Clone repo to `/opt/jayarcade/`
 - [ ] Configure nginx to serve `/opt/jayarcade/` at `http://localhost`
-- [ ] Configure Chromium to launch in kiosk mode pointing to `http://localhost`
+- [ ] Configure Chromium to launch in kiosk mode pointing to `http://localhost/cabinet/`
 - [ ] Set up systemd service (`arcade-kiosk.service`) to launch Chromium on boot
+- [ ] Set up `arcade-updater.service` to run `git pull` + `build_physical_arcade.py` before kiosk launches
 - [ ] Verify all games run acceptably on Pi 5 hardware
 - [ ] Auto-login and boot directly into the arcade UI (no desktop visible)
 
@@ -92,5 +102,5 @@ Real backend that validates the $5/mo subscription and manages cabinet accounts.
 
 - Adapt the `grid.html` BIOS startup animation for the cabinet boot screen (displayed while the update check runs silently in the background)
 - OTA cabinet setup / remote management
-- Cabinet-specific UI tweaks (no mouse cursor, joystick-navigable menus)
+- Page indicator dots or subtle `▶` hint so the player knows more game pages exist
 - Offline "subscription lapsed" indicator in the UI

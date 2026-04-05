@@ -36,6 +36,58 @@ CABINET_CSS = """\
   html, body { overflow: hidden !important; }
 </style>"""
 
+# ── Cabinet layout CSS injected into grid.html only ───────────────────────
+# Compact header + grid fills remaining viewport. All 9 cards on one screen,
+# no scrolling, no pagination. Cards stretch to fill their grid cells.
+CABINET_GRID_CSS = """\
+<style id="cabinet-grid-layout">
+  /* Compact title bar */
+  .title-box {
+    margin-top: 10px;
+    padding: 10px 24px;
+  }
+  .title-box h1 { font-size: 0.85rem; }
+  .visitor-box  { margin-top: 6px; font-size: 0.55rem; }
+
+  /* Grid fills the rest of the viewport */
+  .grid-shell {
+    height: 83vh;
+    margin: 6px auto 0;
+    padding: 0 60px;
+    overflow: hidden;
+  }
+  .grid-viewport { height: 100%; overflow: hidden; }
+  .grid-track    { height: 100%; }
+  .grid-page     { height: 100%; }
+
+  .game-grid {
+    height: 100%;
+    grid-template-rows: repeat(3, 1fr);
+    row-gap: 8px;
+    column-gap: 32px;
+    padding: 6px;
+  }
+
+  /* Cards stretch to fill their cell */
+  .game-card {
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .game-card video {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+  }
+  .game-title      { font-size: 0.5rem;  margin-top: 5px; }
+  .game-play-count { font-size: 0.45rem; margin-top: 3px; }
+
+  /* No pagination arrows on cabinet */
+  .grid-nav { display: none !important; }
+</style>"""
+
 # ── Cabinet JS injected into grid.html only ────────────────────────────────
 # - Null-safe fallbacks for popularBox/popularLink (stripped from HTML + JS)
 # - Overrides window.scrollTo so centerOnTarget becomes a no-op
@@ -84,7 +136,7 @@ def transform_index(html):
 def transform_grid(html):
     html = strip_cabinet_markers(html)
     html = html.replace('<head>', '<head>\n<base href="../">', 1)
-    html = html.replace('</head>', CABINET_CSS + '\n</head>', 1)
+    html = html.replace('</head>', CABINET_CSS + '\n' + CABINET_GRID_CSS + '\n</head>', 1)
     html = html.replace('</body>', CABINET_GRID_JS + '\n</body>', 1)
     return html
 

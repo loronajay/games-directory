@@ -29,7 +29,6 @@ Each game is built manually by Jay in TurboWarp, exported as a ZIP, and integrat
 | Mini Arcade | `jayarcade.com/games/mini-arcade/` | 2D arcade lobby |
 | Game Factory | `jayarcade.com/turbowarp-game-factory/` | TurboWarp Game Factory showcase |
 | Founder Console | `dev.jayarcade.com` | Private roadmap (BIOS boot sequence) |
-| Investor Overview | `invest.jayarcade.com` | Investor-facing game library + overview |
 
 ---
 

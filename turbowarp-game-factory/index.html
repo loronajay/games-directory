@@ -712,9 +712,23 @@ body{
       Textify-Blockify IR is live. Convert TurboWarp blocks to a readable intermediate representation — and back.
     </div>
 
-    <a class="cta" href="https://github.com/loronajay/textify-blockify-IR" target="_blank" rel="noopener">
-      VIEW ON GITHUB →
-    </a>
+    <div class="demo" style="margin-top:24px;">
+      <div class="play-prompt">HOVER TO PREVIEW</div>
+      <div id="tbDemoWrap" class="module-preview-wrap">
+        <video id="tbDemoVid" muted preload="metadata" playsinline style="width:100%;height:auto;max-height:420px;object-fit:contain;display:block;background:#050505;">
+          <source src="../previews/game-factory-previews/textify-blockify-demo.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:24px;">
+      <a class="cta" href="https://loronajay.github.io/textify-blockify-IR" target="_blank" rel="noopener">
+        PLAY A GAME BUILT WITH THIS SYSTEM →
+      </a>
+      <a class="cta" href="https://github.com/loronajay/textify-blockify-IR" target="_blank" rel="noopener">
+        VIEW ON GITHUB →
+      </a>
+    </div>
   </div>
 
 </div>
@@ -808,6 +822,14 @@ document.querySelectorAll(".module-card").forEach(card => {
     vid.currentTime = 0;
   });
 });
+
+/* Textify/Blockify full demo video */
+const tbWrap = document.getElementById("tbDemoWrap");
+const tbVid = document.getElementById("tbDemoVid");
+if (tbWrap && tbVid) {
+  tbWrap.addEventListener("mouseenter", () => tbVid.play().catch(() => {}));
+  tbWrap.addEventListener("mouseleave", () => { tbVid.pause(); tbVid.currentTime = 0; });
+}
 
 </script>
 

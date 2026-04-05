@@ -328,6 +328,8 @@ Founder roadmap, platform architecture, and development direction for building a
 <div class="status-line"><span>DOMAIN:</span> JAYARCADE.COM ONLINE</div>
 <div class="status-line"><span>INPUT SYSTEM:</span> MOBILE / GAMEPAD / KEYBOARD / MOUSE</div>
 <div class="status-line"><span>PIPELINE:</span> AUTOMATED GAME UPDATE WORKFLOW</div>
+<div class="status-line"><span>LEADERBOARD SERVER:</span> LIVE — RAILWAY / POSTGRESQL</div>
+<div class="status-line"><span>MULTIPLAYER SERVER:</span> LIVE — FACTORY NETWORK / WEBSOCKET</div>
 <div class="status-line"><span>BUILD STATUS:</span> PLATFORM FOUNDATION COMPLETE</div>
 
 </div>
@@ -381,6 +383,21 @@ Jay’s Retro Arcade is designed as a platform rather than a single release. The
 <p>Games operate as isolated modules within the arcade framework.</p>
 </div>
 
+<div class="info-card">
+<h3>LEADERBOARD SERVER</h3>
+<p>Live REST API on Railway with PostgreSQL. Per-game auth, score validation, device-separated boards.</p>
+</div>
+
+<div class="info-card">
+<h3>FACTORY NETWORK SERVER</h3>
+<p>Live WebSocket server handling rooms, matchmaking, and peer messaging for multiplayer games.</p>
+</div>
+
+<div class="info-card">
+<h3>TURBOWARP GAME FACTORY</h3>
+<p>11 modular extensions including Textify/Blockify IR, leaderboards, networking, physics, and UI — drag into any game.</p>
+</div>
+
 </div>
 </section>
 
@@ -420,8 +437,8 @@ Jay’s Retro Arcade is designed as a platform rather than a single release. The
 <div class="timeline">
 
 <div class="timeline-step">
-<h3>PLATFORM POLISH</h3>
-<p>Finalize site routing, presentation cohesion, and arcade navigation.</p>
+<h3>LEADERBOARD PIPELINE INTEGRATION</h3>
+<p>Rebuild apple-catcher in TurboWarp with leaderboard blocks wired up, then full build + E2E test.</p>
 </div>
 
 <div class="timeline-step">
@@ -430,8 +447,13 @@ Jay’s Retro Arcade is designed as a platform rather than a single release. The
 </div>
 
 <div class="timeline-step">
+<h3>PLATFORM POLISH</h3>
+<p>Finalize site routing, presentation cohesion, and arcade navigation.</p>
+</div>
+
+<div class="timeline-step">
 <h3>COMMUNITY STRUCTURE</h3>
-<p>Design the first competition loops and replay challenges.</p>
+<p>Design the first competition loops and replay challenges. Infrastructure already in place.</p>
 </div>
 
 </div>
@@ -475,7 +497,7 @@ The ultimate goal is to build a recognizable arcade platform that can exist both
 
 <div class="footer-note">
 SYSTEM STATUS: ACTIVE DEVELOPMENT<br>
-LAST UPDATED: MARCH 2026
+LAST UPDATED: APRIL 2026
 </div>
 
 </div>

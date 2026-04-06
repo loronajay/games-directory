@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jay Lorona — Resume</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      color: #111;
+      background: #f0f0f0;
+      padding: 40px 20px;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 56px 64px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #111;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .contact {
+      font-family: 'Arial', sans-serif;
+      font-size: 12.5px;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+    }
+
+    .contact a {
+      color: #333;
+      text-decoration: none;
+    }
+
+    .contact a:hover {
+      text-decoration: underline;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #444;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+    }
+
+    /* Summary */
+    .summary p {
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: #222;
+    }
+
+    /* Portfolio entry */
+    .portfolio-entry {
+      margin-bottom: 12px;
+    }
+
+    .portfolio-entry h3 {
+      font-family: 'Arial', sans-serif;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .portfolio-entry .meta {
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+
+    .portfolio-entry p {
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      color: #222;
+    }
+
+    .portfolio-entry ul {
+      padding-left: 18px;
+      margin-bottom: 8px;
+    }
+
+    .portfolio-entry ul li {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #222;
+      margin-bottom: 3px;
+    }
+
+    .tech-line {
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      color: #444;
+      margin-top: 6px;
+    }
+
+    .tech-line strong {
+      color: #111;
+    }
+
+    /* Work entries */
+    .work-entry {
+      margin-bottom: 18px;
+    }
+
+    .work-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 2px;
+    }
+
+    .work-header h3 {
+      font-family: 'Arial', sans-serif;
+      font-size: 13.5px;
+      font-weight: bold;
+    }
+
+    .work-header .dates {
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      color: #555;
+      white-space: nowrap;
+      margin-left: 12px;
+    }
+
+    .work-entry .company {
+      font-family: 'Arial', sans-serif;
+      font-size: 12.5px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .work-entry ul {
+      padding-left: 18px;
+    }
+
+    .work-entry ul li {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #222;
+      margin-bottom: 3px;
+    }
+
+    .work-entry p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #222;
+    }
+
+    /* Skills */
+    .skills-line {
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      color: #222;
+      line-height: 1.8;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .page {
+        max-width: 100%;
+        padding: 36px 48px;
+        box-shadow: none;
+      }
+
+      a {
+        color: #111 !important;
+        text-decoration: none !important;
+      }
+
+      section {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>Jay Lorona</h1>
+      <div class="contact">
+        <span>Sacramento, CA</span>
+        <span>(916) 230-6135</span>
+        <span><a href="mailto:leojaylorona@gmail.com">leojaylorona@gmail.com</a></span>
+        <span><a href="https://jayarcade.com" target="_blank">jayarcade.com</a></span>
+        <span><a href="https://github.com/loronajay" target="_blank">github.com/loronajay</a></span>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <section class="summary">
+      <div class="section-title">Summary</div>
+      <p>
+        Solo developer and builder with a track record of shipping full-stack products using AI-assisted workflows.
+        Designed and deployed a live competitive arcade platform end-to-end — backend servers, automation pipelines,
+        real-time multiplayer, and a custom mobile controller — without a traditional CS background.
+        Product-focused, fast-moving, and fluent in AI-assisted development tools including Claude Code.
+      </p>
+    </section>
+
+    <!-- Software Portfolio -->
+    <section>
+      <div class="section-title">Software Portfolio</div>
+      <div class="portfolio-entry">
+        <h3>Jay Arcade Platform &mdash; <a href="https://jayarcade.com" target="_blank">jayarcade.com</a></h3>
+        <div class="meta">Solo project &nbsp;|&nbsp; Ongoing</div>
+        <p>
+          A full-stack competitive arcade platform hosting 9 original games with a retro CRT aesthetic.
+          Built and maintained entirely solo using AI-assisted development workflows.
+        </p>
+        <ul>
+          <li><strong>Leaderboard backend:</strong> Express + PostgreSQL server deployed live on Railway with per-game secret key authentication</li>
+          <li><strong>Multiplayer:</strong> WebSocket matchmaking server handling real-time game sessions (live)</li>
+          <li><strong>Build pipeline:</strong> Python automation that extracts game exports, patches HTML, injects configs, and deploys — triggered by a single command</li>
+          <li><strong>Mobile controller:</strong> Custom JavaScript on-screen D-pad with 8-zone touch detection, hysteresis, gamepad support, fullscreen lock, and per-game key mapping</li>
+          <li><strong>Cabinet build:</strong> Separate pipeline generating Raspberry Pi kiosk builds (nginx + Chromium) from the same web source, with cabinet-specific CSS/JS injected at build time</li>
+          <li><strong>Deployment:</strong> GitHub Pages with custom domain; backend servers on Railway</li>
+        </ul>
+        <div class="tech-line"><strong>Tech:</strong> Python &middot; JavaScript &middot; Node.js &middot; Express &middot; PostgreSQL &middot; HTML &middot; CSS &middot; Git &middot; GitHub Pages &middot; Railway &middot; nginx &middot; Raspberry Pi</div>
+      </div>
+    </section>
+
+    <!-- Work Experience -->
+    <section>
+      <div class="section-title">Work Experience</div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Piano Teacher</h3>
+          <span class="dates">February 2016 – Present</span>
+        </div>
+        <div class="company">Jay's School of Piano &mdash; Sacramento, CA</div>
+        <ul>
+          <li>Own and operate a private music instruction business with a self-set curriculum</li>
+          <li>Focus on music theory literacy and keyboard comprehension; track and drive measurable student progress</li>
+          <li>Manage all scheduling, client communication, and business operations independently</li>
+        </ul>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Piano Teacher</h3>
+          <span class="dates">March 2019 – July 2020</span>
+        </div>
+        <div class="company">School of Rock &mdash; Elk Grove + Roseville, CA</div>
+        <ul>
+          <li>Part of the opening team for the Roseville location; helped grow the student roster from zero to over 300</li>
+          <li>Directed student bands for live performances at real venues under strict rehearsal deadlines</li>
+          <li>Taught students ages 4–65 across all experience levels, including autistic students and a blind 5-year-old</li>
+          <li>Cross-trained on multiple instruments; onboarded and covered for other staff as needed</li>
+        </ul>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Landscaper</h3>
+          <span class="dates">June 2016 – November 2018</span>
+        </div>
+        <div class="company">Lush Lawncare and Landscaping &mdash; Sacramento, CA</div>
+        <ul>
+          <li>Performed residential and commercial landscape maintenance, sprinkler repair and installation, drip systems, and structure staining</li>
+          <li>Regular clients included Caroline Wenzel Elementary School and Greenhaven Dental Group</li>
+        </ul>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Material Handler</h3>
+          <span class="dates">June 2015 – June 2016</span>
+        </div>
+        <div class="company">Macy's Logistics &mdash; Sacramento, CA</div>
+        <ul>
+          <li>Kept packing department continuously stocked and operational; loaded and unloaded trucks</li>
+          <li>Monitored packer throughput and resolved workflow bottlenecks to maintain unit-per-hour targets</li>
+        </ul>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Material Handler II</h3>
+          <span class="dates">March 2014 – August 2014</span>
+        </div>
+        <div class="company">Volt Workforce Solutions @ Apple Inc. &mdash; Elk Grove, CA</div>
+        <ul>
+          <li>Repaired and refurbished customer iPhones on a production assembly line</li>
+          <li>Self-trained on every assembly step; used that knowledge to train new hires and cover absences</li>
+          <li>Ran software and hardware diagnostic suites to identify and route device faults</li>
+        </ul>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Merchandiser / Customer Service</h3>
+          <span class="dates">December 2013 – January 2014</span>
+        </div>
+        <div class="company">J.C. Penney &mdash; Sacramento, CA</div>
+        <p>Overnight stocking and merchandising; worked Black Friday and winter seasonal sales floor.</p>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Material Handler</h3>
+          <span class="dates">October 2012 – March 2013</span>
+        </div>
+        <div class="company">Toys 'R' Us &mdash; Elk Grove, CA</div>
+        <p>Overnight stocking team; unloaded trucks, merchandised product, transitioned to daytime sales floor.</p>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Pizza Maker / Cashier</h3>
+          <span class="dates">October 2012 – March 2013</span>
+        </div>
+        <div class="company">Papa Murphy's &mdash; Sacramento, CA</div>
+        <p>Made food to order, operated cash register, prepped ingredients and dough daily.</p>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Sandwich Maker / Cashier</h3>
+          <span class="dates">January 2012 – March 2012</span>
+        </div>
+        <div class="company">Subway &mdash; Elk Grove, CA</div>
+        <p>Made sandwiches to order, baked bread daily, maintained stocking and cleanliness standards.</p>
+      </div>
+
+      <div class="work-entry">
+        <div class="work-header">
+          <h3>Pizza Maker / Delivery Driver</h3>
+          <span class="dates">March 2011 – December 2011</span>
+        </div>
+        <div class="company">New York Pizza &mdash; Elk Grove, CA</div>
+        <p>Made and delivered pizza; prepped ingredients daily; operated cash register and handled cash.</p>
+      </div>
+
+    </section>
+
+    <!-- Skills -->
+    <section>
+      <div class="section-title">Skills</div>
+      <div class="skills-line">
+        Python &nbsp;&middot;&nbsp; JavaScript &nbsp;&middot;&nbsp; HTML &nbsp;&middot;&nbsp; CSS &nbsp;&middot;&nbsp; SQL &nbsp;&middot;&nbsp;
+        Node.js &nbsp;&middot;&nbsp; Express &nbsp;&middot;&nbsp; PostgreSQL &nbsp;&middot;&nbsp; Git &nbsp;&middot;&nbsp;
+        GitHub Pages &nbsp;&middot;&nbsp; Railway &nbsp;&middot;&nbsp; nginx &nbsp;&middot;&nbsp; Raspberry Pi &nbsp;&middot;&nbsp;
+        AI-assisted development (Claude Code)
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

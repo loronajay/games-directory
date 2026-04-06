@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jay Lorona — Resume</title>
+  <title>Jackie Lorona — Resume</title>
   <style>
     * {
       margin: 0;
@@ -194,25 +194,49 @@
     }
 
     /* Print styles */
+    @page {
+      size: letter;
+      margin: 0.65in 0.75in;
+    }
+
     @media print {
       body {
         background: #fff;
         padding: 0;
+        font-size: 12.5px;
       }
 
       .page {
         max-width: 100%;
-        padding: 36px 48px;
+        padding: 0;
         box-shadow: none;
+      }
+
+      .header {
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      section {
+        margin-bottom: 16px;
+      }
+
+      .work-entry {
+        margin-bottom: 12px;
+        page-break-inside: avoid;
+      }
+
+      .portfolio-entry {
+        page-break-inside: avoid;
       }
 
       a {
         color: #111 !important;
         text-decoration: none !important;
-      }
-
-      section {
-        page-break-inside: avoid;
       }
     }
   </style>
@@ -222,7 +246,7 @@
 
     <!-- Header -->
     <div class="header">
-      <h1>Jay Lorona</h1>
+      <h1>Jackie Lorona</h1>
       <div class="contact">
         <span>Sacramento, CA</span>
         <span>(916) 230-6135</span>

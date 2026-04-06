@@ -16,6 +16,12 @@ CLAUDE.md
 cabinet/
 network-status.json
 
+# Resume files (local only)
+jay-lorona-resume.html
+jay-lorona-resume.md
+jay-lorona-resume.pdf
+scripts/generate_resume_pdf.py
+
 # Local dev / OS noise
 .DS_Store
 Thumbs.db

@@ -16,10 +16,11 @@ CLAUDE.md
 cabinet/
 network-status.json
 
-# Resume files (local only)
+# Resume/cover letter files (local only)
 jay-lorona-resume.html
 jay-lorona-resume.md
 jay-lorona-resume.pdf
+jay-lorona-cover-letter.txt
 scripts/generate_resume_pdf.py
 
 # Local dev / OS noise

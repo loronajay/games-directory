@@ -30,6 +30,9 @@ if (host.startsWith("invest.")) {
 }
 </script>
 
+<script src="js/jay-analytics.js"></script>
+<script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
 </head>
 
 <body>
@@ -51,7 +54,7 @@ if (host.startsWith("invest.")) {
 
   <div class="mode-wrapper">
 
-  <a href="grid.html" class="mode-card mode-link">
+  <a href="grid.html" class="mode-card mode-link" data-analytics-mode="quick-select" data-analytics-destination="grid">
     <video class="preview-video" autoplay muted loop playsinline>
       <source src="previews/grid-preview.mp4" type="video/mp4">
     </video>
@@ -61,7 +64,7 @@ if (host.startsWith("invest.")) {
     </div>
   </a>
 
-  <a href="games/mini-arcade/index.html" class="mode-card mode-link">
+  <a href="games/mini-arcade/index.html" class="mode-card mode-link" data-analytics-mode="enter-arcade" data-analytics-destination="mini-arcade">
     <video class="preview-video" autoplay muted loop playsinline>
       <source src="previews/arcade-preview.mp4" type="video/mp4">
     </video>
@@ -82,8 +85,10 @@ if (host.startsWith("invest.")) {
 <script>
 const hoverSound = document.getElementById("hoverSound");
 const shutdownSound = document.getElementById("shutdownSound");
+const analytics = window.JayAnalytics;
 
 let audioUnlocked = false;
+let lastInputSource = "mouse";
 
 /* Unlock audio on first real user interaction */
 function unlockAudio(){
@@ -102,9 +107,14 @@ function unlockAudio(){
   document.addEventListener(evt, unlockAudio, { once:true });
 });
 
+document.addEventListener("touchstart", () => {
+  lastInputSource = "touch";
+}, { passive: true });
+
 /* Hover Sound */
 document.querySelectorAll(".mode-card").forEach(card=>{
   card.addEventListener("mouseenter",()=>{
+    lastInputSource = "mouse";
     if(!audioUnlocked) return;
     hoverSound.currentTime = 0;
     hoverSound.play().catch(()=>{});
@@ -115,6 +125,18 @@ document.querySelectorAll(".mode-card").forEach(card=>{
 document.querySelectorAll(".mode-link").forEach(link=>{
   link.addEventListener("click",e=>{
     e.preventDefault();
+
+    if (analytics) {
+      analytics.trackEvent(
+        "mode-select/" + (link.dataset.analyticsMode || "unknown"),
+        "Mode selected",
+        {
+          destination: link.dataset.analyticsDestination || "",
+          input: lastInputSource,
+          page: "landing"
+        }
+      );
+    }
 
     document.querySelectorAll(".preview-video").forEach(v=>v.pause());
 
@@ -184,6 +206,7 @@ function activateSelectedItem(){
 /* Mouse hover sync */
 gamepadItems.forEach((item,index)=>{
   item.addEventListener("mouseenter",()=>{
+    lastInputSource = "mouse";
     selectedIndex = index;
     setSelectedIndex(index,false);
   });
@@ -194,6 +217,9 @@ setSelectedIndex(0,false);
 
 /* Shared input */
 ArcadeInput.onAction((action,source)=>{
+  if (source) {
+    lastInputSource = source;
+  }
 
   if(action==="left"){
     setSelectedIndex(selectedIndex-1);

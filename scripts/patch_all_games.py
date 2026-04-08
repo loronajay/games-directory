@@ -38,6 +38,7 @@ SCREEN_ORIENTATION = '<meta name="screen-orientation" content="landscape">'
 
 # Correct path for games inside /games/
 JAY_MOBILE_SCRIPT = '<script src="../../js/jay-mobile.js"></script>'
+JAY_ANALYTICS_SCRIPT = '<script src="../../js/jay-analytics.js"></script>'
 
 # Legacy path used before the folder migration
 LEGACY_JAY_MOBILE_SCRIPTS = [
@@ -68,6 +69,8 @@ CONFIG_END = "<!-- JAY_GAME_CONFIG_END -->"
 
 LEADERBOARD_HELPER_START = "<!-- JAY_LEADERBOARD_START -->"
 LEADERBOARD_HELPER_END = "<!-- JAY_LEADERBOARD_END -->"
+GAME_ANALYTICS_START = "<!-- JAY_GAME_ANALYTICS_START -->"
+GAME_ANALYTICS_END = "<!-- JAY_GAME_ANALYTICS_END -->"
 
 # -------------------------
 # REGEX
@@ -95,6 +98,11 @@ CONFIG_BLOCK_REGEX = re.compile(
 
 LEADERBOARD_HELPER_REGEX = re.compile(
     re.escape(LEADERBOARD_HELPER_START) + r'.*?' + re.escape(LEADERBOARD_HELPER_END),
+    re.DOTALL
+)
+
+GAME_ANALYTICS_REGEX = re.compile(
+    re.escape(GAME_ANALYTICS_START) + r'.*?' + re.escape(GAME_ANALYTICS_END),
     re.DOTALL
 )
 
@@ -178,6 +186,68 @@ window.JayLeaderboard = (function () {{
 }})();
 </script>
 {end}""".format(start=LEADERBOARD_HELPER_START, end=LEADERBOARD_HELPER_END)
+
+
+def build_game_analytics_block(folder_name):
+    slug = json.dumps(folder_name)
+    return """{start}
+<script>
+(function () {{
+  var analytics = window.JayAnalytics;
+  if (!analytics) return;
+
+  var slug = {slug};
+  var visibleStartedAt = document.visibilityState === 'visible' ? Date.now() : null;
+
+  function bucketForMs(ms) {{
+    if (ms < 10000) return 'lt-10s';
+    if (ms < 30000) return '10-30s';
+    if (ms < 60000) return '30-60s';
+    if (ms < 180000) return '1-3m';
+    if (ms < 600000) return '3-10m';
+    if (ms < 1200000) return '10-20m';
+    return '20m-plus';
+  }}
+
+  function flush(reason) {{
+    if (visibleStartedAt === null) return;
+
+    var elapsedMs = Date.now() - visibleStartedAt;
+    visibleStartedAt = null;
+
+    if (elapsedMs < 1000) return;
+
+    analytics.trackEvent('game-engagement/' + slug + '/' + bucketForMs(elapsedMs), 'Game engagement', {{
+      reason: reason,
+      seconds: Math.round(elapsedMs / 1000)
+    }});
+  }}
+
+  function resume() {{
+    if (document.visibilityState !== 'visible') return;
+    if (visibleStartedAt !== null) return;
+    visibleStartedAt = Date.now();
+  }}
+
+  document.addEventListener('visibilitychange', function () {{
+    if (document.visibilityState === 'hidden') {{
+      flush('hidden');
+      return;
+    }}
+
+    resume();
+  }});
+
+  window.addEventListener('pagehide', function () {{
+    flush('pagehide');
+  }});
+
+  window.addEventListener('pageshow', function () {{
+    resume();
+  }});
+}})();
+</script>
+{end}""".format(start=GAME_ANALYTICS_START, slug=slug, end=GAME_ANALYTICS_END)
 
 
 def run_command(cmd, cwd, capture_output=False):
@@ -340,6 +410,15 @@ def patch_shared_scripts(html, notes):
 
         notes.append("jay-mobile.js already present")
 
+    if JAY_ANALYTICS_SCRIPT not in html:
+
+        missing_blocks.append(JAY_ANALYTICS_SCRIPT)
+        notes.append("added jay-analytics.js")
+
+    else:
+
+        notes.append("jay-analytics.js already present")
+
     old_goatcounter_block_regex = re.compile(
         r'<script>\s*window\.goatcounter\s*=\s*\{.*?\};\s*</script>',
         re.DOTALL
@@ -454,6 +533,25 @@ def patch_leaderboard_helper(html, leaderboard_cfg, notes):
     return html, (html != original_html)
 
 
+def patch_game_analytics(html, folder_name, notes):
+
+    original_html = html
+    helper_block = build_game_analytics_block(folder_name)
+
+    if GAME_ANALYTICS_START in html and GAME_ANALYTICS_END in html:
+        html = GAME_ANALYTICS_REGEX.sub(helper_block, html, count=1)
+        notes.append("game analytics updated")
+        return html, (html != original_html)
+
+    if JAY_ANALYTICS_SCRIPT in html:
+        html = html.replace(JAY_ANALYTICS_SCRIPT, JAY_ANALYTICS_SCRIPT + "\n" + helper_block, 1)
+        notes.append("game analytics injected")
+        return html, (html != original_html)
+
+    notes.append("ERROR: could not inject game analytics (no jay-analytics.js found)")
+    return html, (html != original_html)
+
+
 def patch_html(index_path: Path, dry_run=False):
 
     html = index_path.read_text(encoding="utf-8")
@@ -479,6 +577,7 @@ def patch_html(index_path: Path, dry_run=False):
     html, _ = patch_shared_scripts(html, notes)
     html, _, override_status = patch_control_overrides(html, folder_name, notes, leaderboard_cfg)
     html, _ = patch_leaderboard_helper(html, leaderboard_cfg, notes)
+    html, _ = patch_game_analytics(html, folder_name, notes)
 
     changed = html != original_html
 

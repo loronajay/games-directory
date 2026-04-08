@@ -29,6 +29,7 @@ Each game is built manually by Jay in TurboWarp, exported as a ZIP, and integrat
 | Mini Arcade | `jayarcade.com/games/mini-arcade/` | 2D arcade lobby |
 | Game Factory | `jayarcade.com/turbowarp-game-factory/` | TurboWarp Game Factory showcase |
 | Founder Console | `dev.jayarcade.com` | Private roadmap (BIOS boot sequence) |
+| Analytics Console | `dev.jayarcade.com/analytics.html` | Private near-real-time per-game analytics dashboard |
 
 ---
 
@@ -41,6 +42,27 @@ python scripts/build_arcade.py --dry-run        # preview
 ```
 
 To add a new game: drop the TurboWarp export ZIP into `../exports/` and run the build script.
+
+---
+
+## Analytics Tracking
+
+JayArcade uses GoatCounter for both pageviews and custom event tracking.
+
+- `index.html` tracks landing-page mode selection
+- `grid.html` tracks grid starts, page-depth discovery, and game launch source
+- `turbowarp-game-factory/index.html` tracks Factory demo launches and CTA clicks
+- `scripts/patch_all_games.py` injects shared analytics into every game page
+
+Per-game patching now injects:
+
+- `js/jay-analytics.js` â€” shared GoatCounter helper
+- normalized GoatCounter page paths for `/games/.../`
+- page-level engagement events using visible-time buckets
+
+Those engagement buckets feed the private analytics dashboard at `dev/analytics.html`, which surfaces per-game pageviews, launches, estimated average engaged time, brief-session rate, and 3m+ session rate.
+
+This is page-level engagement, not full in-game telemetry. Deeper gameplay analytics such as game overs, retries, score submissions, or level progression would still need instrumentation inside the TurboWarp packages.
 
 ---
 

@@ -8,6 +8,8 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<script src="../js/jay-analytics.js"></script>
+<script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
 <style>
 *{
@@ -722,10 +724,10 @@ body{
     </div>
 
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:24px;">
-      <a class="cta" href="https://loronajay.github.io/textify-blockify-IR" target="_blank" rel="noopener">
+      <a class="cta" href="https://loronajay.github.io/textify-blockify-IR" target="_blank" rel="noopener" data-analytics-event="factory-cta/live-demo" data-analytics-label="Live demo">
         PLAY A GAME BUILT WITH THIS SYSTEM →
       </a>
-      <a class="cta" href="https://github.com/loronajay/textify-blockify-IR" target="_blank" rel="noopener">
+      <a class="cta" href="https://github.com/loronajay/textify-blockify-IR" target="_blank" rel="noopener" data-analytics-event="factory-cta/github" data-analytics-label="GitHub repo">
         VIEW ON GITHUB →
       </a>
     </div>
@@ -738,8 +740,10 @@ const overlay = document.getElementById("arcadeOverlay");
 const bgMusic = document.getElementById("bgMusic");
 const hoverSound = document.getElementById("hoverSound");
 const shutdownSound = document.getElementById("shutdownSound");
+const analytics = window.JayAnalytics;
 
 let bgMusicStarted = false;
+let lastInteractionType = "mouse";
 
 function startBackgroundMusic() {
   if (bgMusicStarted) return;
@@ -761,6 +765,18 @@ window.addEventListener("load", () => {
 /* Start music on first user interaction */
 ["pointerdown", "touchstart", "keydown"].forEach(eventName => {
   window.addEventListener(eventName, startBackgroundMusic, { once: true });
+});
+
+window.addEventListener("pointerdown", () => {
+  lastInteractionType = "mouse";
+});
+
+window.addEventListener("touchstart", () => {
+  lastInteractionType = "touch";
+}, { passive: true });
+
+window.addEventListener("keydown", () => {
+  lastInteractionType = "keyboard";
 });
 
 /* Shared arcade-link behavior */
@@ -791,6 +807,16 @@ document.querySelectorAll(".arcade-link").forEach(link => {
   link.addEventListener("click", e => {
     e.preventDefault();
 
+    const match = new URL(link.href, window.location.origin).pathname.match(/\/games\/([^/]+)\//);
+    const slug = match ? match[1] : "";
+
+    if (analytics && slug) {
+      analytics.trackEvent("game-launch/factory/" + slug, "Factory demo launch", {
+        input: lastInteractionType,
+        page: "turbowarp-game-factory"
+      });
+    }
+
     startBackgroundMusic();
 
     shutdownSound.currentTime = 0;
@@ -805,6 +831,18 @@ document.querySelectorAll(".arcade-link").forEach(link => {
     setTimeout(() => {
       window.location.href = link.href;
     }, 650);
+  });
+});
+
+document.querySelectorAll("[data-analytics-event]").forEach(link => {
+  link.addEventListener("click", () => {
+    if (!analytics) return;
+
+    analytics.trackEvent(link.dataset.analyticsEvent, link.dataset.analyticsLabel || "Factory CTA", {
+      destination: link.href,
+      input: lastInteractionType,
+      page: "turbowarp-game-factory"
+    });
   });
 });
 

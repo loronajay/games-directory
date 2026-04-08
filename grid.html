@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/grid.css">
+<script src="js/jay-analytics.js"></script>
+<script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
 
 </head>
@@ -46,19 +48,19 @@
     </div>
   </div>
 
-  <!-- CABINET-STRIP-START -->
+  <!-- TURBOWARP GAME FACTORY PROMO TEMPORARILY DISABLED
   <div class="factory-box">
   <div class="factory-title">POWERED BY TURBOWARP GAME FACTORY</div>
 
   <div class="factory-sub">
-    <!-- your original text stays EXACTLY as-is -->
+    your original text stays EXACTLY as-is
   </div>
 
   <a class="factory-button arcade-link" href="./turbowarp-game-factory/index.html">
     SEE FOR YOURSELF →
   </a>
 </div>
-  <!-- CABINET-STRIP-END -->
+  -->
 
   <!-- CABINET-STRIP-START -->
   <div class="popular-box" id="popularBox" style="display:none;">
@@ -285,6 +287,7 @@
 const overlay=document.getElementById("arcadeOverlay");
 const shutdownSound=document.getElementById("shutdownSound");
 const hoverSound=document.getElementById("hoverSound");
+const analytics = window.JayAnalytics;
 
 /* Fade in */
 window.addEventListener("load",()=>{
@@ -340,6 +343,43 @@ const bgMusic = document.getElementById("bgMusic");
 let startScreenVisible = false;
 let startScreenDismissed = false;
 let gamepadEnabled = false;
+const seenGridPages = new Set();
+
+function getGridAnalyticsMode() {
+  return isMobilePortraitMode() ? "mobile-portrait" : "standard";
+}
+
+function extractGameSlug(href) {
+  try {
+    const url = new URL(href, window.location.origin);
+    const match = url.pathname.match(/\/games\/([^/]+)\//);
+    return match ? match[1] : "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function getLaunchSource(link) {
+  if (!link) return "unknown";
+  if (link.id === "popularLink") return "popular";
+  if (link.closest(".game-grid")) return "grid";
+  return "unknown";
+}
+
+function trackGridPageVisit(pageIndex) {
+  if (!analytics || !startScreenDismissed) return;
+
+  const pageNumber = pageIndex + 1;
+
+  if (seenGridPages.has(pageNumber)) return;
+
+  seenGridPages.add(pageNumber);
+  analytics.trackEvent("grid-page/" + pageNumber, "Grid page viewed", {
+    mode: getGridAnalyticsMode(),
+    page: pageNumber,
+    total_pages: virtualPages.length
+  });
+}
 
 function revealStartScreen() {
   startScreen.style.display = "flex";
@@ -351,15 +391,31 @@ function startArcade() {
   if (startScreenDismissed) return;
 
   startScreenDismissed = true;
+  seenGridPages.clear();
   startScreen.style.display = "none";
   mainContent.style.display = "block";
   bgMusic.play().catch(() => {});
 
   gamepadEnabled = true;
 
+  if (analytics) {
+    analytics.trackEvent("arcade-start/grid", "Grid start screen cleared", {
+      input: inputMode,
+      mode: getGridAnalyticsMode()
+    });
+  }
+
   rebuildPagedView({ preserveSelection: false });
   setPage(0, { selection: "first", playSound: false });
 }
+
+startScreen.addEventListener("mousedown", () => {
+  setInputMode("mouse");
+});
+
+startScreen.addEventListener("touchstart", () => {
+  setInputMode("touch");
+}, { passive: true });
 
 startScreen.addEventListener("click", () => {
   startArcade();
@@ -386,6 +442,20 @@ document.querySelectorAll(".arcade-link").forEach(link=>{
 
   link.addEventListener("click", e => {
     e.preventDefault();
+
+    const slug = extractGameSlug(link.href);
+
+    if (analytics && slug) {
+      analytics.trackEvent(
+        "game-launch/" + getLaunchSource(link) + "/" + slug,
+        "Game launched",
+        {
+          input: inputMode,
+          mode: getGridAnalyticsMode(),
+          page: currentPage + 1
+        }
+      );
+    }
 
     shutdownSound.currentTime = 0;
     shutdownSound.play().catch(() => {});
@@ -941,6 +1011,7 @@ function setPage(index, options = {}) {
 
   setSelectedIndex(selectedIndex, playSound, { center });
   stopNonSelectedVideos();
+  trackGridPageVisit(currentPage);
 }
 
 function rebuildPagedView(options = {}) {
@@ -1185,6 +1256,10 @@ document.addEventListener("mousemove", event => {
     setInputMode("mouse");
   }
 });
+
+document.addEventListener("touchstart", () => {
+  setInputMode("touch");
+}, { passive: true });
 
 document.querySelectorAll(".arcade-link").forEach(item => {
   item.addEventListener("mouseenter", () => {

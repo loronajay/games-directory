@@ -337,10 +337,41 @@ window.JAY_GAME_CONFIG = {
   },
   "mobile": {
     "layout": "default"
+  },
+  "leaderboard": {
+    "url": "https://leaderboard-server-production.up.railway.app",
+    "gameId": "blade-and-sphere",
+    "key": "4wsneo1i2lhk1num45uilg8hv92zb4d7"
   }
 };
 </script>
 <!-- JAY_GAME_CONFIG_END -->
+<!-- JAY_LEADERBOARD_START -->
+<script>
+window.JayLeaderboard = (function () {
+  var cfg = window.JAY_GAME_CONFIG && window.JAY_GAME_CONFIG.leaderboard;
+  if (!cfg) return undefined;
+  function deviceType() {
+    return (navigator.maxTouchPoints > 0 || /Android|iPhone|iPad/i.test(navigator.userAgent))
+      ? 'mobile' : 'desktop';
+  }
+  function submit(playerName, score) {
+    return fetch(cfg.url + '/scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-leaderboard-key': cfg.key },
+      body: JSON.stringify({ gameId: cfg.gameId, playerName: String(playerName), score: Number(score), deviceType: deviceType() })
+    }).then(function (r) { if (!r.ok) throw new Error('submit ' + r.status); return r.json(); });
+  }
+  function getTop(limit, device) {
+    var dev = device || deviceType();
+    return fetch(cfg.url + '/scores/' + cfg.gameId + '?device=' + dev + '&limit=' + (limit || 10))
+      .then(function (r) { if (!r.ok) throw new Error('getTop ' + r.status); return r.json(); })
+      .then(function (d) { return d.scores; });
+  }
+  return { submit: submit, getTop: getTop, deviceType: deviceType };
+})();
+</script>
+<!-- JAY_LEADERBOARD_END -->
 <script src="../../js/jay-mobile.js"></script>
 
 <script>
@@ -356,6 +387,66 @@ window.goatcounter = {
 </script>
 
 <script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+<script src="../../js/jay-analytics.js"></script>
+<!-- JAY_GAME_ANALYTICS_START -->
+<script>
+(function () {
+  var analytics = window.JayAnalytics;
+  if (!analytics) return;
+
+  var slug = "blade-and-sphere";
+  var visibleStartedAt = document.visibilityState === 'visible' ? Date.now() : null;
+
+  function bucketForMs(ms) {
+    if (ms < 10000) return 'lt-10s';
+    if (ms < 30000) return '10-30s';
+    if (ms < 60000) return '30-60s';
+    if (ms < 180000) return '1-3m';
+    if (ms < 600000) return '3-10m';
+    if (ms < 1200000) return '10-20m';
+    return '20m-plus';
+  }
+
+  function flush(reason) {
+    if (visibleStartedAt === null) return;
+
+    var elapsedMs = Date.now() - visibleStartedAt;
+    visibleStartedAt = null;
+
+    if (elapsedMs < 1000) return;
+
+    analytics.trackEvent('game-engagement/' + slug + '/' + bucketForMs(elapsedMs), 'Game engagement', {
+      reason: reason,
+      seconds: Math.round(elapsedMs / 1000)
+    });
+  }
+
+  function resume() {
+    if (document.visibilityState !== 'visible') return;
+    if (visibleStartedAt !== null) return;
+    visibleStartedAt = Date.now();
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') {
+      flush('hidden');
+      return;
+    }
+
+    resume();
+  });
+
+  window.addEventListener('pagehide', function () {
+    flush('pagehide');
+  });
+
+  window.addEventListener('pageshow', function () {
+    resume();
+  });
+})();
+</script>
+<!-- JAY_GAME_ANALYTICS_END -->
 
 </body>
 </html>

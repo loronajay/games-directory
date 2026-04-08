@@ -353,5 +353,65 @@ window.goatcounter = {
 
 <script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
+<script src="../../js/jay-analytics.js"></script>
+<!-- JAY_GAME_ANALYTICS_START -->
+<script>
+(function () {
+  var analytics = window.JayAnalytics;
+  if (!analytics) return;
+
+  var slug = "art-of-war";
+  var visibleStartedAt = document.visibilityState === 'visible' ? Date.now() : null;
+
+  function bucketForMs(ms) {
+    if (ms < 10000) return 'lt-10s';
+    if (ms < 30000) return '10-30s';
+    if (ms < 60000) return '30-60s';
+    if (ms < 180000) return '1-3m';
+    if (ms < 600000) return '3-10m';
+    if (ms < 1200000) return '10-20m';
+    return '20m-plus';
+  }
+
+  function flush(reason) {
+    if (visibleStartedAt === null) return;
+
+    var elapsedMs = Date.now() - visibleStartedAt;
+    visibleStartedAt = null;
+
+    if (elapsedMs < 1000) return;
+
+    analytics.trackEvent('game-engagement/' + slug + '/' + bucketForMs(elapsedMs), 'Game engagement', {
+      reason: reason,
+      seconds: Math.round(elapsedMs / 1000)
+    });
+  }
+
+  function resume() {
+    if (document.visibilityState !== 'visible') return;
+    if (visibleStartedAt !== null) return;
+    visibleStartedAt = Date.now();
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') {
+      flush('hidden');
+      return;
+    }
+
+    resume();
+  });
+
+  window.addEventListener('pagehide', function () {
+    flush('pagehide');
+  });
+
+  window.addEventListener('pageshow', function () {
+    resume();
+  });
+})();
+</script>
+<!-- JAY_GAME_ANALYTICS_END -->
+
 </body>
 </html>

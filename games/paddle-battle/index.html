@@ -343,20 +343,6 @@ window.JAY_GAME_CONFIG = {
 <!-- JAY_GAME_CONFIG_END -->
 <script src="../../js/jay-mobile.js"></script>
 
-<script>
-window.goatcounter = {
-  path: function(p) {
-    return (p || location.pathname || "/")
-     .replace(/^\/games-directory/, "")
-     .replace(/index\.html$/, "")
-     .replace(/\/?$/, "/")
-     .split("?")[0];
-  }
-};
-</script>
-
-<script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-
 <script src="../../js/jay-analytics.js"></script>
 <!-- JAY_GAME_ANALYTICS_START -->
 <script>
@@ -416,6 +402,20 @@ window.goatcounter = {
 })();
 </script>
 <!-- JAY_GAME_ANALYTICS_END -->
+
+<script>
+window.goatcounter = {
+  path: function(p) {
+    return (p || location.pathname || "/")
+     .replace(/^\/games-directory/, "")
+     .replace(/index\.html$/, "")
+     .replace(/\/?$/, "/")
+     .split("?")[0];
+  }
+};
+</script>
+
+<script data-goatcounter="https://loronajay.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
 </body>
 </html>

@@ -1,5 +1,5 @@
 # Leaderboard Project Status
-**Last updated: 2026-04-04**
+**Last updated: 2026-04-11**
 
 ---
 
@@ -25,27 +25,16 @@
 - [x] Step 4 — `patch_all_games.py` extended: loads `.env`, reads `game.json`, injects `leaderboard` config into `JAY_GAME_CONFIG` + injects `JayLeaderboard` helper inline
 - [x] Step 5 — Dry run confirmed correct (5 games patched with leaderboard, 4 skipped as expected)
 
----
-
-## What's Left (In Order)
-
-### Step 6 — Rebuild apple-catcher in TurboWarp
-Wire up the leaderboard blocks in the apple-catcher `.sb3` project, then re-export and drop the ZIP in `../exports/`.
+- [x] Step 6 — Rebuilt apple-catcher in TurboWarp with leaderboard blocks wired up, re-exported
+- [x] Step 7 — Full build, commit, push via `build_arcade.py --commit --push`
+- [x] Step 8 — End-to-end test passed (2026-04-11): POST /scores → 201, GET /scores/apple-catcher returns ranked entries
 
 ---
 
-### Step 7 — Full build, commit, push
-```
-python scripts/build_arcade.py --commit --push
-```
+## What's Left
 
----
-
-### Step 8 — End-to-end test
-Pick one game (apple-catcher). Confirm:
-- Score submission reaches the server (POST /scores returns 201)
-- Leaderboard fetches and displays correctly in-game (GET /scores/:gameId)
-- Mobile and desktop boards are separate
+- Wire up leaderboard blocks in remaining enabled games: bird-duty, blade-and-sphere, space-molestors, speed-demon
+- Rebuild and re-export each, then full build + deploy
 
 ---
 

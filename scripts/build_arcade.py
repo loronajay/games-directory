@@ -17,6 +17,23 @@ GAMES_DIR = ROOT_DIR / "games"
 EXPORTS_DIR = PARENT_DIR / "exports"
 PATCHER_PATH = SCRIPT_DIR / "patch_all_games.py"
 GRID_GENERATOR_PATH = SCRIPT_DIR / "generate_grid.py"
+PUBLIC_STAGE_PATHS = [
+    ".gitignore",
+    "CNAME",
+    "README.md",
+    "brand",
+    "css",
+    "games",
+    "grid.html",
+    "images",
+    "index.html",
+    "invest",
+    "js",
+    "music",
+    "previews",
+    "scripts",
+    "turbowarp-game-factory",
+]
 
 # -------------------------
 # HELPERS
@@ -24,6 +41,10 @@ GRID_GENERATOR_PATH = SCRIPT_DIR / "generate_grid.py"
 
 def run_command(cmd, cwd):
     subprocess.run(cmd, cwd=cwd, check=True)
+
+
+def stage_public_repo_paths():
+    run_command(["git", "add", "--all", "--", *PUBLIC_STAGE_PATHS], cwd=ROOT_DIR)
 
 
 def get_export_zips():
@@ -305,7 +326,7 @@ def main():
 
     if args.commit:
         print("\nCommitting changes...")
-        run_command(["git", "add", "."], cwd=ROOT_DIR)
+        stage_public_repo_paths()
         run_command(["git", "commit", "-m", "Build arcade update"], cwd=ROOT_DIR)
 
     if args.push:

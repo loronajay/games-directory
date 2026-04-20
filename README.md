@@ -28,8 +28,6 @@ Each game is built manually by Jay in TurboWarp, exported as a ZIP, and integrat
 | Game Grid | `jayarcade.com/grid.html` | Paged game gallery (9 cards/page) |
 | Mini Arcade | `jayarcade.com/games/mini-arcade/` | 2D arcade lobby |
 | Game Factory | `jayarcade.com/turbowarp-game-factory/` | TurboWarp Game Factory showcase |
-| Founder Console | `dev.jayarcade.com` | Private roadmap (BIOS boot sequence) |
-| Analytics Console | `dev.jayarcade.com/analytics.html` | Private near-real-time per-game analytics dashboard |
 
 ---
 
@@ -60,7 +58,7 @@ Per-game patching now injects:
 - normalized GoatCounter page paths for `/games/.../`
 - page-level engagement events using visible-time buckets
 
-Those engagement buckets feed the private analytics dashboard at `dev/analytics.html`, which surfaces per-game pageviews, launches, estimated average engaged time, brief-session rate, and 3m+ session rate.
+Those engagement buckets feed a private analytics dashboard used during development, surfacing per-game pageviews, launches, estimated average engaged time, brief-session rate, and 3m+ session rate.
 
 This is page-level engagement, not full in-game telemetry. Deeper gameplay analytics such as game overs, retries, score submissions, or level progression would still need instrumentation inside the TurboWarp packages.
 
